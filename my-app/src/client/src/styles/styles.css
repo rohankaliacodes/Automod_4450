@@ -1,0 +1,161 @@
+/* Background and Layout */
+.background {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: url('../assets/backround.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Arial', sans-serif;
+    color: #ffffff; /* Change text color to white */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for readability */
+}
+
+.heading {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Headings */
+.heading-find-cars {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.heading-find-your {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Main Container for Layout */
+.mainContainer {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;    /* Aligns vertically */
+    gap: 50px;              /* Adds space between left and right containers */
+}
+
+/* Left Container */
+.leftContainer {
+    margin: 0; /* Remove any previous margin adjustments */
+}
+
+/* Right Container */
+.rightContainer {
+    margin: 0; /* Remove any previous margin adjustments */
+}
+
+/* Form Container */
+.form {
+    background: rgba(255, 255, 255, 0.25); /* Semi-transparent white */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Dropdown Styles */
+select {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 1rem;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+select:disabled {
+    background-color: rgba(255, 255, 255, 0.5); /* More transparent for disabled state */
+    color: #6c757d;
+    cursor: not-allowed;
+    border: 1px solid #ddd;
+}
+
+select:hover {
+    border-color: #007bff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button Styles */
+.custom-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.custom-button:disabled {
+    background-color: #6c757d;
+    color: #e9ecef;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.custom-button:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.custom-button:active:not(:disabled) {
+    background-color: #004085;
+    transform: translateY(0);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .heading-find-cars {
+        font-size: 1.5rem;
+    }
+
+    .heading-find-your {
+        font-size: 1.2rem;
+    }
+
+    .form {
+        padding: 15px;
+        gap: 10px;
+    }
+
+    select {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .custom-button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    .mainContainer {
+        flex-direction: column; /* Stack the containers on smaller screens */
+        gap: 30px;
+    }
+}
