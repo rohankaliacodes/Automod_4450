@@ -9,46 +9,300 @@ function Homepage() {
     const [model, setModel] = React.useState("");
     const [year, setYear] = React.useState("");
     const [trim, setTrim] = React.useState("");
+    const [engine, setEngine] = React.useState("");
 
-   const loggedIn = false;
-   if (sessionStorage.getItem("email")) {
-       loggedIn = true;
-   }
+   const loggedIn = sessionStorage.getItem("email") ? true : false;
 
-    const makes = ["Toyota", "Honda", "Hyundai", "BMW", "Mercedes-Benz"];
+    const makes = ["Toyota", "Honda"];
     const models = {
-        Toyota: ["Supra", "Corolla", "86", "Tacoma"],
-        Honda: ["Civic", "Accord", "CR-V", "Pilot"],
-        Hyundai: ["Veloster", "Elantra", "Sonata", "Tucson"],
-        BMW: ["M3", "M4", "335i", "329i"],
-        "Mercedes-Benz": ["Benz C63 AMG", "Benz E55 AMG", "Benz G Class (G-Wagon)", "Benz CLA45 AMG"]
+        Toyota: {
+            "GR Supra":{
+                years: {
+                    "2020": {
+                        trims: {
+                            Base: {
+                                engine: ["3.0L 6-Cylinder"]
+                            }
 
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            Base: {
+                                engine: ["L6-2998cc 3.0L FI Turbo B58B30O1", "L4-122cid 2.0L FI Turbo B46B20O1"]
+                            },
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            Base: {
+                                engine: ["L4-122cid 2.0L FI Turbo B46B20O1", "L6-2998cc 3.0L FI Turbo B58B30O1 24V"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            Base: {
+                                engine: ["L6-2998cc 3.0L FI Turbo B58B30O1 24V", "L4-122cid 2.0L FI Turbo B46B20O1"]
+                            }
+                        }
 
-    };
+                    }
+                }
+            },
+            "86": {
+                years: {
+                    "2020": {
+                        trims: {
+                            Base: {
+                                engine: ["H4-122cid 2.0L FI FA20 200HP", "H4-122cid 2.0L FI FA20 205HP"]
+                            },
+                        }
+                    }
+                }
+            },
+            Corolla: {
+                years: {
+                    "2020": {
+                        trims: {
+                           
+                            LE: {
+                                engine: ["L4-110cid 1.8L FI 2ZR-FAE 139HP"]
+                            }
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            LE: {
+                                engine: ["L4-110cid 1.8L FI 2ZR-FAE 139HP"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            LE: {
+                                engine: ["L4-110cid 1.8L FI 2ZR-FAE 139HP"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            LE: {
+                                engine: ["L4-121cid 2.0L FI M20A-FKS 169HP"]
+                            }
+                        }
+                    }
+                }
+            },
+            Tacoma: {
+                years: {
+                    "2020": {
+                        trims: {
+                            SR5: {
+                                engine: ["V6-3456cc 3.5L FI 2GR-FKS 278HP"]
+                            }
+                        },
+                    },
+                    "2021": {
+                        trims: {
+                            SR5: {
+                                engine: ["V6-3456cc 3.5L FI 2GR-FKS 278HP"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            SR5: {
+                                engine: ["V6-3456cc 3.5L FI 2GR-FKS 278HP"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            SR5: {
+                                engine: ["V6-3456cc 3.5L FI 2GR-FKS 278HP"]
+                            }
+                        }
+                    }
+                }
+            },
+        },
+        Honda: {
+            Civic: {
+                years: {
+                    "2020": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15B7 174HP", "L4-122cid 2.0L FI K20C2"]
+                            }
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15B7 174HP", "L4-122cid 2.0L FI K20C2"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            Lx: {
+                                engine: ["L4-122cid 2.0L FI K20C2"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-122cid 2.0L FI K20C2"]
+                            }
+                        }
+                    }
+                }
+            },
+            Accord: {
+                years: {
+                    "2020": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 192HP"]
+                            }
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 192HP"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            SE: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 192HP"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            EX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 192HP"]
+                            }
+                        }
+                    }
+                }
+            },
+            "CR-V": {
+                years: {
+                    "2020": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 190HP"]
+                            }
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 190HP"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 190HP"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            LX: {
+                                engine: ["L4-1497cc 1.5L FI Turbo L15BE 190HP"]
+                            }
+                        }
+                    }
+                }
+            },
+            "Pilot": {
+                years: {
+                    "2020": {
+                        trims: {
+                            LX: {
+                                engine: ["V6-3471cc 3.5L FI J35Y6 280HP"]
+                            }
+                        }
+                    },
+                    "2021": {
+                        trims: {
+                            Touring: {
+                                engine: ["V6-3471cc 3.5L FI J35Y6 280HP"]
+                            }
+                        }
+                    },
+                    "2022": {
+                        trims: {
+                            Sport: {
+                                engine: ["V6-3471cc 3.5L FI J35Y6 280HP"]
+                            }
+                        }
+                    },
+                    "2023": {
+                        trims: {
+                            Sport: {
+                                engine: ["V6-3471cc 3.5L FI J35Y6 285HP"]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    const years = ["2023", "2022", "2021", "2020"];
-    const trims = ["Basic", "Sport", "Luxury"];
 
     const handleMakeChange = (event) => {
         setMake(event.target.value);
         setModel(""); // Reset model selection when Make changes
+        setYear(""); // Reset year selection when Make changes
+        setTrim(""); // Reset trim selection when Make changes
+        setEngine("");
     };
 
     const handleModelChange = (event) => {
         setModel(event.target.value);
+        setYear("");
+        setTrim("");
+        setEngine("");
     };
 
     const handleYearChange = (event) => {
         setYear(event.target.value);
+        setTrim("");
+        setEngine("");
     };
 
     const handleTrimChange = (event) => {
         setTrim(event.target.value);
+        setEngine("");
     };
+
+    const handleEngineChange = (event) => {
+        setEngine(event.target.value);
+    };
+
+    
+
+    const getModels = () => (models[make] ? Object.keys(models[make]) : []);
+    const getYears = () =>
+        model && models[make][model] ? Object.keys(models[make][model].years) : [];
+    const getTrims = () => 
+        model && models[make][model].years[year] ? Object.keys(models[make][model].years[year].trims) : [];
+    const getEngines = () =>
+        trim && year && models[make][model].years[year].trims[trim] ? models[make][model].years[year].trims[trim].engine : [];
 
     const handleButtonClick = () => {
         console.log("Button clicked");
-        console.log("Selections:", { make, model, year, trim });
+        console.log("Selections:", { make, model, year, trim, engine });
     };
 
     return (
@@ -71,7 +325,6 @@ function Homepage() {
                 <br /> At A Time
             </p>
 
-            {/* Main Container to group left and right containers */}
             <div className="mainContainer">
                 <div className="leftContainer">
                     <p className="heading-find-your">Find The Perfect Part For Your Car</p>
@@ -92,7 +345,6 @@ function Homepage() {
                             </select>
                         </div>
 
-                        {/* Model Dropdown */}
                         <div className="container-2">
                             <select
                                 className="combobox-menu-model"
@@ -101,7 +353,7 @@ function Homepage() {
                                 disabled={!make}
                             >
                                 <option value="">Select Model</option>
-                                {(models[make] || []).map((modelOption) => (
+                                {getModels().map((modelOption) => (
                                     <option key={modelOption} value={modelOption}>
                                         {modelOption}
                                     </option>
@@ -109,16 +361,15 @@ function Homepage() {
                             </select>
                         </div>
 
-                        {/* Year Dropdown */}
                         <div className="container-3">
                             <select
                                 className="combobox-menu-year"
                                 value={year}
                                 onChange={handleYearChange}
-                                disabled={!make}
+                                disabled={!model}
                             >
                                 <option value="">Select Year</option>
-                                {years.map((yearOption) => (
+                                {getYears().map((yearOption) => (
                                     <option key={yearOption} value={yearOption}>
                                         {yearOption}
                                     </option>
@@ -131,12 +382,28 @@ function Homepage() {
                                 className="combobox-menu-trim"
                                 value={trim}
                                 onChange={handleTrimChange}
-                                disabled={!make}
+                                disabled={!year}
                             >
                                 <option value="">Select Trim</option>
-                                {trims.map((trimOption) => (
+                                {getTrims().map((trimOption) => (
                                     <option key={trimOption} value={trimOption}>
                                         {trimOption}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="container-5">
+                            <select
+                                className="combobox-menu-engine"
+                                value={engine}
+                                onChange={handleEngineChange}
+                                disabled={!trim}
+                            >
+                                <option value="">Select Engine</option>
+                                {getEngines().map((engineOption) => (
+                                    <option key={engineOption} value={engineOption}>
+                                        {engineOption}
                                     </option>
                                 ))}
                             </select>
@@ -145,7 +412,7 @@ function Homepage() {
                         <button
                             className="custom-button"
                             onClick={handleButtonClick}
-                            disabled={!make || !model || !year || !trim}
+                            disabled={!make || !model || !year || !trim || !engine}
                         >
                             Search Parts
                         </button>
