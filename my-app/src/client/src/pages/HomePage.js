@@ -15,14 +15,18 @@ function Homepage() {
        loggedIn = true;
    }
 
-    const makes = ["Toyota", "Honda", "Ford"];
+    const makes = ["Toyota", "Honda", "Hyundai", "BMW", "Mercedes-Benz"];
     const models = {
-        Toyota: ["Corolla", "Camry", "RAV4"],
-        Honda: ["Civic", "Accord", "CR-V"],
-        Ford: ["F-150", "Escape", "Explorer"],
+        Toyota: ["Supra", "Corolla", "86", "Tacoma"],
+        Honda: ["Civic", "Accord", "CR-V", "Pilot"],
+        Hyundai: ["Veloster", "Elantra", "Sonata", "Tucson"],
+        BMW: ["M3", "M4", "335i", "329i"],
+        "Mercedes-Benz": ["Benz C63 AMG", "Benz E55 AMG", "Benz G Class (G-Wagon)", "Benz CLA45 AMG"]
+
+
     };
 
-    const years = ["2022", "2021", "2020"];
+    const years = ["2023", "2022", "2021", "2020"];
     const trims = ["Basic", "Sport", "Luxury"];
 
     const handleMakeChange = (event) => {
