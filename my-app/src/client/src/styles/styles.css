@@ -79,6 +79,33 @@ select {
     cursor: pointer;
 }
 
+.top-bar {
+    position: absolute;
+    top: 10px; /* Adjust the distance from the top */
+    right: 20px; /* Adjust the distance from the right */
+    display: flex;
+    gap: 10px; /* Space between the buttons */
+}
+
+/* Style for the top buttons */
+.top-button {
+    background-color: grey;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.top-button:hover {
+    background-color: darkgrey;
+}
+
+
 select:disabled {
     background-color: rgba(255, 255, 255, 0.5); /* More transparent for disabled state */
     color: #6c757d;

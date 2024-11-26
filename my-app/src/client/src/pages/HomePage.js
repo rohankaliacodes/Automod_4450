@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 
-function HomePage() {
+function Homepage() {
     const navigate = useNavigate();
 
     const [make, setMake] = React.useState("");
@@ -10,7 +10,10 @@ function HomePage() {
     const [year, setYear] = React.useState("");
     const [trim, setTrim] = React.useState("");
 
-    const loggedIn = false;
+   const loggedIn = false;
+   if (sessionStorage.getItem("email")) {
+       loggedIn = true;
+   }
 
     const makes = ["Toyota", "Honda", "Ford"];
     const models = {
@@ -119,7 +122,6 @@ function HomePage() {
                             </select>
                         </div>
 
-                        {/* Trim Dropdown */}
                         <div className="container-4">
                             <select
                                 className="combobox-menu-trim"
@@ -165,4 +167,4 @@ function HomePage() {
     );
 }
 
-export default HomePage;
+export default Homepage;
