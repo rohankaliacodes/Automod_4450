@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Market from "./pages/Market";
 
 const AppRoutes = () => {
     return (
@@ -20,6 +21,9 @@ const AppRoutes = () => {
 
                 {/* Chat Page */}
                 <Route path="/chat" element={<Chat />} />
+
+                {/* Market Page */}
+                <Route path="/market" element={<Market />} />
 
                 {/* Add more routes as needed */}
                 {/* Example: <Route path="/garage" element={<Garage />} /> */}

@@ -1,17 +1,14 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 
-function Homepage() {
-    const navigate = useNavigate();
-
+function Market () {
     const [make, setMake] = React.useState("");
     const [model, setModel] = React.useState("");
     const [year, setYear] = React.useState("");
     const [trim, setTrim] = React.useState("");
     const [engine, setEngine] = React.useState("");
+    const [message, setMessage] = React.useState("");
 
-   const loggedIn = sessionStorage.getItem("email") ? true : false;
 
     const makes = ["Toyota", "Honda"];
     const models = {
@@ -302,143 +299,80 @@ function Homepage() {
 
     const handleButtonClick = () => {
         console.log("Button clicked");
-        console.log("Selections:", { make, model, year, trim, engine });
+        const selection = make + " " + model + " " + year + " " + trim + " " + engine;
+        setMessage("You have selected: " + selection);    
     };
 
     return (
-        <div className="background">
-            <div className="top-bar">
-                {loggedIn ? (<button className="top-button" onClick={() => navigate("/garage")}>My Garage</button>) : (
-                    <>
-                        <button className="top-button" onClick={() => navigate("/login")}>
-                            Login
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/register")}>
-                            Register
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/market")}>
-                            Browse Parts
-                        </button>
-                    </>
-                )}
+        <div className="container">
+            <h1>Browse Parts By Vehicle</h1>
+            <p>Enter in your car's specifics and view compatible parts</p>
+            <div>
+                <label>Make</label>
+                <select value={make} onChange={handleMakeChange}>
+                    <option value="">Select Make</option>
+                    {makes.map((make) => (
+                        <option key={make} value={make}>
+                            {make}
+                        </option>
+                    ))}
+                </select>
             </div>
-            <h1 className="heading">AutoMod</h1>
-            <p className="heading-find-cars">
-                Transforming Cars One Mod
-                <br /> At A Time
-            </p>
 
-            <div className="mainContainer">
-                <div className="leftContainer">
-                    <p className="heading-find-your">Find The Perfect Part For Your Car</p>
-
-                    <div className="form">
-                        <div className="container">
-                            <select
-                                className="combobox-menu-make"
-                                value={make}
-                                onChange={handleMakeChange}
-                            >
-                                <option value="">Select Make</option>
-                                {makes.map((makeOption) => (
-                                    <option key={makeOption} value={makeOption}>
-                                        {makeOption}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="container-2">
-                            <select
-                                className="combobox-menu-model"
-                                value={model}
-                                onChange={handleModelChange}
-                                disabled={!make}
-                            >
-                                <option value="">Select Model</option>
-                                {getModels().map((modelOption) => (
-                                    <option key={modelOption} value={modelOption}>
-                                        {modelOption}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="container-3">
-                            <select
-                                className="combobox-menu-year"
-                                value={year}
-                                onChange={handleYearChange}
-                                disabled={!model}
-                            >
-                                <option value="">Select Year</option>
-                                {getYears().map((yearOption) => (
-                                    <option key={yearOption} value={yearOption}>
-                                        {yearOption}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="container-4">
-                            <select
-                                className="combobox-menu-trim"
-                                value={trim}
-                                onChange={handleTrimChange}
-                                disabled={!year}
-                            >
-                                <option value="">Select Trim</option>
-                                {getTrims().map((trimOption) => (
-                                    <option key={trimOption} value={trimOption}>
-                                        {trimOption}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="container-5">
-                            <select
-                                className="combobox-menu-engine"
-                                value={engine}
-                                onChange={handleEngineChange}
-                                disabled={!trim}
-                            >
-                                <option value="">Select Engine</option>
-                                {getEngines().map((engineOption) => (
-                                    <option key={engineOption} value={engineOption}>
-                                        {engineOption}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <button
-                            className="custom-button"
-                            onClick={handleButtonClick}
-                            disabled={!make || !model || !year || !trim || !engine}
-                        >
-                            Search Parts
-                        </button>
-                    </div>
-                </div>
-
-                <div className="rightContainer">
-                    <p className="heading-find-your">Talk to your personal AI mechanic</p>
-                    <div className="form">
-                    <p className="subheading">
-                        Our AI mechanic is here to help you find the perfect part for your car. Just
-                        tell us what you need and we'll take care of the rest.
-                    </p>
-                    <button
-                        className="custom-button"
-                        onClick={() => navigate("/chat")}
-                    >Start Chatting</button>
-                </div>
-                    
-                </div>
+            <div>
+                <label>Model</label>
+                <select value={model} onChange={handleModelChange}>
+                    <option value="">Select Model</option>
+                    {getModels().map((model) => (
+                        <option key={model} value={model}>
+                            {model}
+                        </option>
+                    ))}
+                </select>
             </div>
+
+            <div>
+                <label>Year</label>
+                <select value={year} onChange={handleYearChange}>
+                    <option value="">Select Year</option>
+                    {getYears().map((year) => (
+                        <option key={year} value={year}>
+                            {year}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div>
+                <label>Trim</label>
+                <select value={trim} onChange={handleTrimChange}>
+                    <option value="">Select Trim</option>
+                    {getTrims().map((trim) => (
+                        <option key={trim} value={trim}>
+                            {trim}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div>
+                <label>Engine</label>
+                <select value={engine} onChange={handleEngineChange}>
+                    <option value="">Select Engine</option>
+                    {getEngines().map((engine) => (
+                        <option key={engine} value={engine}>
+                            {engine}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <button onClick={handleButtonClick}>Submit</button>
+            <p>{message}</p>
         </div>
-    );
+
+    )
+   
 }
 
-export default Homepage;
+export default Market;
