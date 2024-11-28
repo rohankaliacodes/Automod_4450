@@ -8,7 +8,32 @@ function Market () {
     const [trim, setTrim] = React.useState("");
     const [engine, setEngine] = React.useState("");
     const [message, setMessage] = React.useState("");
+    const [partsArray, setPartsArray] = React.useState([]);
+    const [isSubmitted, setIsSubmitted] = React.useState(false);
 
+
+
+    async function fetchParts(event){
+        event.preventDefault();
+        try{
+            const response = await fetch("http://localhost:5001/api/parts/getParts", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({make, model, year, trim, engine})
+            });
+            const data = await response.json();
+            if(data.status === "ok"){
+                setPartsArray(data.data);
+            }
+            else{
+                console.log(data.message);
+                setMessage("No vehicle specified");
+            }
+        }
+        catch(err){
+            setMessage("Internal Server Error");
+        }
+    }
 
     const makes = ["Toyota", "Honda"];
     const models = {
@@ -297,14 +322,9 @@ function Market () {
     const getEngines = () =>
         trim && year && models[make][model].years[year].trims[trim] ? models[make][model].years[year].trims[trim].engine : [];
 
-    const handleButtonClick = () => {
-        console.log("Button clicked");
-        const selection = make + " " + model + " " + year + " " + trim + " " + engine;
-        setMessage("You have selected: " + selection);    
-    };
 
     return (
-        <div className="container">
+        <div className="marketplace-background">
             <h1>Browse Parts By Vehicle</h1>
             <p>Enter in your car's specifics and view compatible parts</p>
             <div>
@@ -367,8 +387,21 @@ function Market () {
                 </select>
             </div>
 
-            <button onClick={handleButtonClick}>Submit</button>
+            <button className="top-button" onClick={(event) => { fetchParts(event); setIsSubmitted(true); }}>Submit</button>
             <p>{message}</p>
+            <div className="market-grid">
+                {isSubmitted ? (
+                    partsArray.map((part, index) => (
+                        <div key={index} className="part-item">
+                            <p><strong>Part Name: {part["Part Name"]}</strong></p>
+                            <p><strong>Category: {part["Category"]}</strong></p>
+                            <p><strong>Price: {part["Price"]}</strong></p>
+                            <p><strong>{part["SKU Number"]}</strong></p>
+                            <a href={part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
+                        </div>
+                    ))
+                ) : null}
+            </div>
         </div>
 
     )
