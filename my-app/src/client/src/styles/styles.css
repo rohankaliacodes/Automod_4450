@@ -24,7 +24,7 @@ html, body {
     background: url("../assets/marketplaceBackground.jpg") no-repeat center center;
     background-size: cover; /* Ensures the image covers the entire area */
     background-attachment: fixed; /* Keeps the background fixed during scrolling */
-    min-height: 100%; /* Ensures the background container grows with content */
+    min-height: 100vh; /* Ensures the background container grows with content */
     width: 100%; /* Ensures the width of the background container fills the viewport */
     display: flex;
     flex-direction: column;
