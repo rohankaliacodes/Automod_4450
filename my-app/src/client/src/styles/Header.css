@@ -1,0 +1,81 @@
+body, h1, h2, h3, p, a {
+    margin: 0;
+    padding: 0;
+    font-family: "DM Sans", sans-serif;
+    box-sizing: border-box;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Align to the right but within available space */
+    padding: 15px 20px; /* Reduce horizontal padding for more space */
+    background-color: transparent; /* Ensure header is transparent */
+    width: 100%;
+    position: fixed; /* Locks the header at the top of the viewport */
+    top: 0; /* Ensures it sticks to the top */
+    z-index: 1000; /* Keeps the header above all other elements */
+    box-shadow: none; /* Removes shadow for a seamless look */
+    height: 80px; /* Ensures enough height */
+    overflow-x: hidden; /* Prevents horizontal overflow */
+}
+
+
+.nav-item {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    margin-left: 20px; /* Equal spacing between items */
+    transition: color 0.3s ease;
+}
+
+.nav-item:hover {
+    color: #f0f0f0;
+}
+
+.right-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adjust spacing to give "Submit Listing" room */
+    margin-right: 20px; /* Add margin to pull everything to the left */
+}
+
+.sign-in {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sign-in-text {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.sign-in-text:hover {
+    color: #f0f0f0;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+.submit-listing {
+    background-color: #ffffff;
+    color: #050b20;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.submit-listing:hover {
+    background-color: #e9e9e9;
+}

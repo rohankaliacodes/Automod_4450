@@ -1,6 +1,7 @@
 import React from "react";
 import button from "../assets/search-button.png";
 import "../styles/Home.css";
+import Header from "../pages/Header"
 
 export const Home = () => {
   const categories = ["Interior", "Wheel/Rim", "Engine Mod", "Suspension", "Exterior"];
@@ -14,6 +15,7 @@ export const Home = () => {
 
   return (
     <div className="background">
+        <Header/>
 
       <p className="heading-find-your">Find The Perfect Part For Your Car</p>
 

@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Market from "./pages/Market";
 import Home from "./pages/Home";
 
+
 const AppRoutes = () => {
     return (
         <Router>
@@ -27,6 +28,8 @@ const AppRoutes = () => {
                 <Route path="/market" element={<Market />} />
 
                 <Route path="/home" element={<Home/>}/>
+
+            
 
                 {/* Add more routes as needed */}
                 {/* Example: <Route path="/garage" element={<Garage />} /> */}
