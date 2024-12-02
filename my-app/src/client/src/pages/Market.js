@@ -1,14 +1,66 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 
 function Market () {
+    const navigate = useNavigate();
     const [make, setMake] = React.useState("");
     const [model, setModel] = React.useState("");
     const [year, setYear] = React.useState("");
     const [trim, setTrim] = React.useState("");
     const [engine, setEngine] = React.useState("");
+    const [searchInput, setSearchInput] = React.useState("");
     const [message, setMessage] = React.useState("");
+    const [partsArray, setPartsArray] = React.useState([]);
+    const [isSubmitted, setIsSubmitted] = React.useState(false);
+    const [searched, setSearched] = React.useState(false);
 
+
+
+
+    async function fetchParts(event){
+        event.preventDefault();
+        try{
+            const response = await fetch("http://localhost:5001/api/parts/getParts", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({make, model, year, trim, engine})
+            });
+            const data = await response.json();
+            if(data.status === "ok"){
+                setPartsArray(data.data);
+            }
+            else{
+                console.log(data.message);
+                setMessage("No vehicle specified");
+            }
+        }
+        catch(err){
+            setMessage("Internal Server Error");
+        }
+    }
+
+    async function searchParts(event){
+        event.preventDefault();
+        try{
+            const response = await fetch("http://localhost:5001/api/parts/searchPartsByName", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({partName: searchInput})
+            });
+            const data = await response.json();
+            if(data.status === "ok"){
+                setPartsArray(data.data);
+            }
+            else{
+                setMessage("No parts found that match your query");
+            }
+        }
+        catch(err){
+            setMessage("Internal Server Error");
+            console.log(err);        
+        }
+    };
 
     const makes = ["Toyota", "Honda"];
     const models = {
@@ -297,16 +349,31 @@ function Market () {
     const getEngines = () =>
         trim && year && models[make][model].years[year].trims[trim] ? models[make][model].years[year].trims[trim].engine : [];
 
-    const handleButtonClick = () => {
-        console.log("Button clicked");
-        const selection = make + " " + model + " " + year + " " + trim + " " + engine;
-        setMessage("You have selected: " + selection);    
-    };
 
     return (
-        <div className="container">
+        <div className="marketplace-background">
+            <div className="top-bar">
+            
+                        <button className="top-button" onClick={() => navigate("/")}>
+                            Home
+                        </button>
+                        <button className="top-button" onClick={() => navigate("/login")}>
+                            Login
+                        </button>
+                        <button className="top-button" onClick={() => navigate("/register")}>
+                            Register
+                        </button>
+                        <button className="top-button" onClick={() => navigate("/market")}>
+                            Browse Parts
+                        </button>
+
+
+            </div>
             <h1>Browse Parts By Vehicle</h1>
             <p>Enter in your car's specifics and view compatible parts</p>
+            <input type="text" placeholder="Search By Part Name or SKU: " value={searchInput} onChange={(event) => setSearchInput(event.target.value)}></input>
+            <button className="top-button" onClick={(event) => { searchParts(event); setSearched(true); }}>Search</button>
+            <br></br>
             <div>
                 <label>Make</label>
                 <select value={make} onChange={handleMakeChange}>
@@ -367,8 +434,23 @@ function Market () {
                 </select>
             </div>
 
-            <button onClick={handleButtonClick}>Submit</button>
+            <button className="top-button" onClick={(event) => { fetchParts(event); setIsSubmitted(true); }}>Submit</button>
             <p>{message}</p>
+            
+            <div className="market-grid">
+                {isSubmitted || searched  ? (
+                    partsArray.map((part, index) => (
+                        <div key={index} className="part-item">
+                            <p><strong>Part Name: {part["Part Name"]}</strong></p>
+                            <p><strong>Category: {part["Category"]}</strong></p>
+                            <p><strong>Price: {part["Price"]}</strong></p>
+                            <p><strong>{part["SKU Number"]}</strong></p>
+                            <a href={part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
+                        </div>
+                    ))
+                ) : null}
+
+            </div>
         </div>
 
     )

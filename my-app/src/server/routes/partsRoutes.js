@@ -1,10 +1,11 @@
 const express = require('express');
 const { getParts } = require('../controllers/partsController');
-const connectDB = require('../config/db');
-const Parts = require('../models/partsModel');
+const { searchPartsByName } = require('../controllers/partsController');
 
 const router = express.Router();
-connectDB();
-router.get('/getParts', (req, res) => getParts(req, res, Parts));
+
+// Define a POST route to fetch parts
+router.post('/getParts', getParts);
+router.post('/searchPartsByName', searchPartsByName); 
 
 module.exports = router;

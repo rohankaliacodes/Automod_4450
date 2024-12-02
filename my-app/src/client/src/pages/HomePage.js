@@ -11,7 +11,6 @@ function Homepage() {
     const [trim, setTrim] = React.useState("");
     const [engine, setEngine] = React.useState("");
 
-   const loggedIn = sessionStorage.getItem("email") ? true : false;
 
     const makes = ["Toyota", "Honda"];
     const models = {
@@ -308,19 +307,15 @@ function Homepage() {
     return (
         <div className="background">
             <div className="top-bar">
-                {loggedIn ? (<button className="top-button" onClick={() => navigate("/garage")}>My Garage</button>) : (
-                    <>
-                        <button className="top-button" onClick={() => navigate("/login")}>
-                            Login
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/register")}>
-                            Register
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/market")}>
-                            Browse Parts
-                        </button>
-                    </>
-                )}
+                <button className="top-button" onClick={() => navigate("/login")}>
+                    Login
+                </button>
+                <button className="top-button" onClick={() => navigate("/register")}>
+                    Register
+                </button>
+                <button className="top-button" onClick={() => navigate("/market")}>
+                    Browse Parts
+                </button>
             </div>
             <h1 className="heading">AutoMod</h1>
             <p className="heading-find-cars">
