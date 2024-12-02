@@ -12,6 +12,7 @@ function Market () {
     const [searchInput, setSearchInput] = React.useState("");
     const [message, setMessage] = React.useState("");
     const [partsArray, setPartsArray] = React.useState([]);
+    const [completePartsArray, setCompletePartsArray] = React.useState([]);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
     const [searched, setSearched] = React.useState(false);
 
@@ -29,6 +30,7 @@ function Market () {
             const data = await response.json();
             if(data.status === "ok"){
                 setPartsArray(data.data);
+                setCompletePartsArray(data.data);
             }
             else{
                 console.log(data.message);
@@ -51,6 +53,7 @@ function Market () {
             const data = await response.json();
             if(data.status === "ok"){
                 setPartsArray(data.data);
+                setCompletePartsArray(data.data);
             }
             else{
                 setMessage("No parts found that match your query");
@@ -61,6 +64,26 @@ function Market () {
             console.log(err);        
         }
     };
+
+    function sortPartsByCategory(category){
+        if(category === "All"){
+            resetPartsArray();
+        }
+        else{
+            const sortedParts = partsArray.filter(part => part["Category"] === category);
+            setPartsArray(sortedParts);
+            setMessage("");
+            if(sortedParts.length === 0){
+                setMessage("No parts found in this category");
+            }
+        }
+        
+    }
+
+    function resetPartsArray(){
+        setPartsArray(completePartsArray);
+        setMessage("");
+    }
 
     const makes = ["Toyota", "Honda"];
     const models = {
@@ -436,8 +459,22 @@ function Market () {
 
             <button className="top-button" onClick={(event) => { fetchParts(event); setIsSubmitted(true); }}>Submit</button>
             <p>{message}</p>
-            
+            {isSubmitted || searched ? (
+                    <div className="sort-buttons">
+                        <button className="top-button" onClick={() => sortPartsByCategory("All")}>All</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Belts/Hoses/Cooling")}>Belts/Hoses/Cooling</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Body/Cable/Misc")}>Body/Cable/Misc</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Brake/Wheel Bearing")}>Brake/Wheel Bearing</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Electrical")}>Electrical</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Fuel/Emissions")}>Fuel/Emissions</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Heating/AC")}>Heating/AC</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Ignition/Filters")}>Ignition/Filters</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Tires/Accessories")}>Tires/Accessories</button>
+                        <button className="top-button" onClick={() => sortPartsByCategory("Wipers/Lamps/Fuses")}>Wipers/Lamps/Fuses</button>
+                    </div>
+                ) : null}
             <div className="market-grid">
+                
                 {isSubmitted || searched  ? (
                     partsArray.map((part, index) => (
                         <div key={index} className="part-item">

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const addedParts = new Set();
 
 const getParts = async (req, res) => {
     const { make, model, year, trim, engine } = req.body;
@@ -27,12 +26,12 @@ const searchPartsByName = async (req, res) => {
         return res.status(400).json({ status: "error", message: "Please provide a part name" });
     }
 
-    const results = [];
+    const results = []; // Reinitialize results for each request
+    const addedParts = new Set(); // Reinitialize addedParts for each request
 
     const searchFiles = (dir) => {
         console.log("Searching directory:", dir);
         const files = fs.readdirSync(dir);
-
 
         files.forEach(file => {
             const filePath = path.join(dir, file);
@@ -48,35 +47,39 @@ const searchPartsByName = async (req, res) => {
                     if (Array.isArray(jsonData)) {
                         jsonData.forEach(part => {
                             const key = part["Part Name"];
-                            if (part["Part Name"].toLowerCase().includes(partName.toLowerCase()) || part["SKU Number"].includes(partName)) {
-                                if(!addedParts.has(key)) {
+                            if (
+                                typeof part["Part Name"] === "string" &&
+                                part["Part Name"].toLowerCase().includes(partName.toLowerCase()) ||
+                                (typeof part["SKU Number"] === "string" && part["SKU Number"].includes(partName))
+                            ) {
+                                if (!addedParts.has(key)) {
                                     results.push(part);
                                     addedParts.add(key);
                                 }
-                                
                             }
                         });
-                    } 
+                    }
                 } catch (error) {
                     console.log(`Error reading file: ${filePath}`, error);
                 }
-            } 
+            }
         });
     };
 
     try {
         searchFiles(filePath);
 
-        if (results.length === 0) {
-            return res.status(404).json({ status: "error", message: "No matching parts found" });
+        if (results.length > 0) {
+            res.status(200).json({ status: "ok", data: results });
+        } else {
+            res.status(404).json({ status: "error", message: "No parts found" });
         }
-
-        return res.status(200).json({ status: "ok", data: results });
-    } catch (err) {
-        console.error("Error during file search:", err);
-        return res.status(500).json({ status: "error", message: "Internal server error", error: err.message });
+    } catch (error) {
+        console.error("Error during search:", error);
+        res.status(500).json({ status: "error", message: "Internal Server Error" });
     }
 };
+
 
 
 module.exports = { getParts, searchPartsByName};
