@@ -10,6 +10,9 @@ function Homepage() {
     const [year, setYear] = React.useState("");
     const [trim, setTrim] = React.useState("");
     const [engine, setEngine] = React.useState("");
+    const [loggedIn, setLoggedIn] = React.useState(false);
+
+    loggedIn = sessionStorage.getItem("email") ? true : false;
 
 
     const makes = ["Toyota", "Honda"];
@@ -317,6 +320,11 @@ function Homepage() {
                     Browse Parts
                 </button>
             </div>
+            {loggedIn ? (
+                    <div className="display-username">
+                        <p className="username-text">Welcome back, {sessionStorage.getItem("email")}</p>
+                    </div>
+                ) : null}
             <h1 className="heading">AutoMod</h1>
             <p className="heading-find-cars">
                 Transforming Cars One Mod
