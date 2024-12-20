@@ -12,7 +12,7 @@ function Homepage() {
     const [engine, setEngine] = React.useState("");
     const [loggedIn, setLoggedIn] = React.useState(false);
 
-    loggedIn = sessionStorage.getItem("email") ? true : false;
+    setLoggedIn(sessionStorage.getItem("email") !== null);
 
 
     const makes = ["Toyota", "Honda"];
