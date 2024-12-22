@@ -15,6 +15,7 @@ function Market () {
     const [completePartsArray, setCompletePartsArray] = React.useState([]);
     const [isSubmitted, setIsSubmitted] = React.useState(false);
     const [searched, setSearched] = React.useState(false);
+    const [price, setPrice] = React.useState(0);
 
 
 
@@ -78,6 +79,14 @@ function Market () {
             }
         }
         
+    }
+
+    function sortPartsByPrice(price){
+        const sortedParts = partsArray.filter(part => parseFloat(part["Price"].replace("$", "")) <= price);
+        setPartsArray(sortedParts);
+        if(sortedParts.length === 0){
+            setMessage("No parts found in this price range");
+        }
     }
 
     function resetPartsArray(){
@@ -473,6 +482,13 @@ function Market () {
                         <button className="top-button" onClick={() => sortPartsByCategory("Wipers/Lamps/Fuses")}>Wipers/Lamps/Fuses</button>
                     </div>
                 ) : null}
+            {isSubmitted || searched ? (
+                <div className="price-slider">
+                    <label>Filter By Price</label>
+                    <input type="range" min="0" max="1000" step="1" onChange={(event) => setPrice(event.target.value)}></input>
+                    <button className="price-submit" onClick={() => sortPartsByPrice(price)}>Submit</button>
+                </div>
+            ) : null}
             <div className="market-grid">
                 
                 {isSubmitted || searched  ? (
