@@ -485,8 +485,9 @@ function Market () {
             {isSubmitted || searched ? (
                 <div className="price-slider">
                     <label>Filter By Price</label>
-                    <input type="range" min="0" max="1000" step="1" onChange={(event) => setPrice(event.target.value)}></input>
-                    <button className="price-submit" onClick={() => sortPartsByPrice(price)}>Submit</button>
+                    <input type="range" min="0" max="500" step="1" onChange={(event) => setPrice(event.target.value)}></input>
+                    <label>${price}</label>
+                    <button className="top-button" onClick={() => sortPartsByPrice(price)}>Submit</button>
                 </div>
             ) : null}
             <div className="market-grid">
