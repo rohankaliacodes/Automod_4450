@@ -1,0 +1,145 @@
+.background {
+    background-image: url(../assets/backround.png);
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.heading-find-cars {
+    color: #ffffff;
+    font-family: "DM Sans-Bold", Helvetica;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: -50px;
+    text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.heading-find-your {
+    color: #ffffff;
+    font-family: "DM Sans-Bold", Helvetica;
+    font-size: 40px;
+    font-weight: 700;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.text-wrapper {
+    color: #ffffff;
+    font-family: "DM Sans-Regular", Helvetica;
+    font-size: 15px;
+    font-weight: 400;
+    margin: 10px 0;
+}
+
+.categories {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.category-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 10px 20px;
+    color: #fff;
+    font-family: "DM Sans-Medium", Helvetica;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+}
+
+.category-button:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.form {
+    width: 90%; /* Adjusted width to provide more space */
+    max-width: 1000px; /* Increased max-width */
+    margin: 20px auto;
+}
+
+.list {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    color: white;
+    font-family: "DM Sans-Medium", Helvetica;
+    font-size: 16px;
+}
+
+.div-2 {
+    background-color: #ffffff;
+    border-radius: 80px;
+    padding: 20px; /* Added padding for spacing */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Ensure the div stretches across available space */
+    gap: 10px;
+}
+
+.dropdowns {
+    display: flex;
+    gap: 20px; /* Increased gap between dropdowns */
+    justify-content: space-between;
+    flex-grow: 1; /* Allow the dropdown section to grow */
+}
+
+.dropdown {
+    flex: 1; /* Ensure equal width for dropdowns */
+    min-width: 120px;
+    padding: 5px 10px;
+    border: 1px solid #e9e9e9;
+    border-radius: 10px;
+    font-family: "DM Sans-Regular", Helvetica;
+}
+
+.dropdown:hover {
+    border: 1px solid #ccc;
+}
+
+.button {
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    margin-left: 10px; /* Added margin for spacing */
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.horizontal-divider {
+    background-color: #ffffff;
+    height: 2px;
+    width: 100%;
+}
+
+.vertical-border {
+    border-right: 1px solid #e9e9e9;
+    height: 50px;
+}
+
+.text-wrapper-2,
+.text-wrapper-3,
+.text-wrapper-4,
+.text-wrapper-5,
+.text-wrapper-6 {
+    font-family: "DM Sans-Regular", Helvetica;
+    font-size: 15px;
+    color: #050b20;
+}
