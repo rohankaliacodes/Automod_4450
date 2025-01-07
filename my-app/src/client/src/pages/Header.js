@@ -1,26 +1,29 @@
 import React from "react";
 import icon from "../assets/person-icon.png";
 import "../styles/Header.css";
+import { useNavigate } from "react-router-dom";
 
-export const Header = () => {
+function Header(){
+
+  const navigate = useNavigate();
+
   return (
     <div className="header-container">
 
 
       <div className="right-actions">
-      <a href="#about" className="nav-item">About</a>
-      <a href="#mygarage" className="nav-item">My Garage</a>
-      <a href="#mygarage" className="nav-item">ModShop</a>
-      <a href="#contact" className="nav-item">Contact</a>
+      <button className="nav-item" onClick={() => navigate("/login")}>Login</button>
+      <button className="nav-item" onClick={() => navigate("/Garage")}>My Garage</button>
+      <button className="nav-item" onClick={() => navigate("/Market")}>Modshop</button>
+      <button className="nav-item" onClick={() => navigate("/login")}>Contact</button>
 
 
-        <div className="sign-in">
-          <img className="icon" alt="User Icon" src={icon} />
-          <a href="#signin" className="sign-in-text">Sign In</a>
+       
+          <button className="nav-item" onClick={() => navigate("/Register")}>Sign Up<img className="icon" alt="User Icon" src={icon} /></button>
         </div>
         <button className="submit-listing">Submit Listing</button>
       </div>
-    </div>
+  
   );
 };
 
