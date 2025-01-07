@@ -26,8 +26,10 @@ body, h1, h2, h3, p, a {
     text-decoration: none;
     font-size: 16px;
     font-weight: 500;
-    margin-left: 20px; /* Equal spacing between items */
+    margin-left: 10px; /* Equal spacing between items */
     transition: color 0.3s ease;
+    background: none!important;
+    border: none;
 }
 
 .nav-item:hover {
@@ -61,6 +63,8 @@ body, h1, h2, h3, p, a {
 .icon {
     width: 20px;
     height: 20px;
+    margin-left: 8px;
+    vertical-align: middle;
 }
 
 .submit-listing {
