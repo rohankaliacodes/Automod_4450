@@ -3,39 +3,35 @@ import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
 import loginImage from "../assets/login.jpg";
 import googleLogo from "../assets/google-logo.svg";
+import {signInWithEmailAndPassword} from "firebase/auth"
+import { auth } from "../config/firebase";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
 
-  async function logIn(event) {
-    event.preventDefault();
+   const handleSignIn = async (event) => {
+      if(!email || !password){return;}
+      event.preventDefault();
+      try {
+        // Sign In with email and password
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+  
+        console.log("User signed in:", user);
+        alert("User Logged In");
+  
+        // Navigate to login page after successful signup
+        navigate("/");
+      } catch (error) {
+        // Handle errors and display an appropriate message
+        console.error("Error during signup:", error);
+        setError(error.message);
+      }
+    };
 
-        try{
-            const response = await fetch("http://localhost:5001/api/auth/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email, password})
-            });
-            const data = await response.json();
-            if(data.status === "ok"){
-                alert("User logged in");
-                sessionStorage.setItem("email", email);
-                navigate("/homepage");
-            }
-            else{
-                console.log(data.message);
-                setError(data.message);
-            }
-        }
-        catch(err){
-            console.log(err);
-            setError("Internal Server Error");
-        }
-    }
 
   return (
     <div className="login-page">
@@ -44,7 +40,7 @@ function LoginPage() {
       </div>
       <div className="login-form">
         <h1 className="welcome-back">Welcome back</h1>
-        <form onSubmit={logIn} className="login-form-container">
+        <form onSubmit={handleSignIn} className="login-form-container">
           <input
             type="email"
             placeholder="Email"
