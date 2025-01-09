@@ -396,9 +396,6 @@ function Market () {
                         <button className="top-button" onClick={() => navigate("/register")}>
                             Register
                         </button>
-                        <button className="top-button" onClick={() => navigate("/market")}>
-                            Browse Parts
-                        </button>
 
 
             </div>
@@ -486,7 +483,7 @@ function Market () {
             {isSubmitted || searched ? (
                 <div className="price-slider">
                     <label>Filter By Price</label>
-                    <input type="range" min="0" max="500" step="1" onChange={(event) => { setPrice(event.target.value); setIsChanged(true); }}></input>
+                    <input type="range" min="0" max="5000" step="1" onChange={(event) => { setPrice(event.target.value); setIsChanged(true); }}></input>
 
                     {isChanged ? (
                         <label>${price} or less</label>

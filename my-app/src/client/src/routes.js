@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -11,7 +10,10 @@ import Home from "./pages/Home";
 const AppRoutes = () => {
     return (
         <Router>
-            <Routes>    
+            <Routes>
+                {/* Home Page */}
+                <Route path="/" element={<Home />} />
+
                 {/* Login Page */}
                 <Route path="/login" element={<Login />} />
 
@@ -24,7 +26,6 @@ const AppRoutes = () => {
                 {/* Market Page */}
                 <Route path="/market" element={<Market />} />
 
-                <Route path="/" element={<Home/>}/>
 
             
 
