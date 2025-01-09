@@ -16,6 +16,7 @@ function Market () {
     const [isSubmitted, setIsSubmitted] = React.useState(false);
     const [searched, setSearched] = React.useState(false);
     const [price, setPrice] = React.useState(0);
+    const [isChanged, setIsChanged] = React.useState(false);    
 
 
 
@@ -485,8 +486,11 @@ function Market () {
             {isSubmitted || searched ? (
                 <div className="price-slider">
                     <label>Filter By Price</label>
-                    <input type="range" min="0" max="500" step="1" onChange={(event) => setPrice(event.target.value)}></input>
-                    <label>${price}</label>
+                    <input type="range" min="0" max="500" step="1" onChange={(event) => { setPrice(event.target.value); setIsChanged(true); }}></input>
+
+                    {isChanged ? (
+                        <label>${price} or less</label>
+                    ) : null}
                     <button className="top-button" onClick={() => sortPartsByPrice(price)}>Submit</button>
                 </div>
             ) : null}
