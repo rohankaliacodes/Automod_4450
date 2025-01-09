@@ -72,7 +72,7 @@ function Market () {
             resetPartsArray();
         }
         else{
-            const sortedParts = partsArray.filter(part => part["Category"] === category);
+            const sortedParts = completePartsArray.filter(part => part["Category"] === category);
             setPartsArray(sortedParts);
             setMessage("");
             if(sortedParts.length === 0){
@@ -83,7 +83,7 @@ function Market () {
     }
 
     function sortPartsByPrice(price){
-        const sortedParts = partsArray.filter(part => parseFloat(part["Price"].replace("$", "")) <= price);
+        const sortedParts = completePartsArray.filter(part => parseFloat(part["Price"].replace("$", "")) <= price);
         setPartsArray(sortedParts);
         if(sortedParts.length === 0){
             setMessage("No parts found in this price range");
