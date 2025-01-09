@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
 import loginImage from "../assets/login.jpg";
 import googleLogo from "../assets/google-logo.svg";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 function LoginPage() {
@@ -19,25 +19,35 @@ function LoginPage() {
     }
     event.preventDefault();
     try {
-      // Sign In with email and password
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Check if email is verified
       if (!user.emailVerified) {
         setVerificationMessage("Please verify your email before signing in. Check your inbox for the verification link.");
-        // Sign out the user since they haven't verified their email
         await auth.signOut();
         return;
       }
-
+      localStorage.setItem("email", user.email)
       console.log("User signed in:", user);
-      alert("User Logged In Successfully");
-
-      // Navigate to homepage after successful login
       navigate("/");
     } catch (error) {
       console.error("Error during login:", error);
+      setError(error.message);
+    }
+  };
+
+  const handleGoogleSignIn = async (event) => {
+    event.preventDefault();
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      console.log("Google sign in successful:", user);
+      localStorage.setItem("email", user.email)
+      navigate("/");
+    } catch (error) {
+      console.error("Error during Google sign in:", error);
       setError(error.message);
     }
   };
@@ -68,7 +78,7 @@ function LoginPage() {
             Sign-In
           </button>
           <div className="separator"> </div>
-          <button className="google-button">
+          <button onClick={handleGoogleSignIn} className="google-button" type="button">
             <img src={googleLogo} alt="Google Logo" />
             Log in with Google
           </button>
