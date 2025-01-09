@@ -11,10 +11,7 @@ import Home from "./pages/Home";
 const AppRoutes = () => {
     return (
         <Router>
-            <Routes>
-                {/* Home Page */}
-                <Route path="/" element={<HomePage />} />
-
+            <Routes>    
                 {/* Login Page */}
                 <Route path="/login" element={<Login />} />
 
@@ -27,7 +24,7 @@ const AppRoutes = () => {
                 {/* Market Page */}
                 <Route path="/market" element={<Market />} />
 
-                <Route path="/home" element={<Home/>}/>
+                <Route path="/" element={<Home/>}/>
 
             
 
