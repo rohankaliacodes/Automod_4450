@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Market from "./pages/Market";
 import Home from "./pages/Home";
+import Companies from "./pages/Companies";
 
 
 const AppRoutes = () => {
@@ -28,6 +29,11 @@ const AppRoutes = () => {
                 <Route path="/market" element={<Market />} />
 
                 <Route path="/home" element={<Home/>}/>
+
+
+                <Route path="/company" element={<Companies/>}/>
+
+            
 
             
 

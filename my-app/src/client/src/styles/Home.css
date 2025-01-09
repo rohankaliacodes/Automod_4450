@@ -18,6 +18,7 @@
     text-align: center;
     margin-top: -50px;
     text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    margin-top: 10px;
 }
 
 .heading-find-your {
@@ -27,6 +28,7 @@
     font-weight: 700;
     text-align: center;
     margin: 10px 0;
+    margin-bottom: 20px;
 }
 
 .text-wrapper {
@@ -142,3 +144,38 @@
     font-size: 15px;
     color: #050b20;
 }
+
+.ai-chat-section {
+    margin-top: 20px;
+    text-align: center;
+    width: 90%;
+}
+
+.ai-chat-header {
+    color: #ffffff;
+    font-family: "DM Sans-Bold", Helvetica;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.ai-input {
+    width: 70%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+}
+
+.ai-submit-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.ai-submit-button:hover {
+    background-color: #0056b3;
+}
+
