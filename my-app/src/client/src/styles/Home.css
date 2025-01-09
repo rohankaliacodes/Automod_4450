@@ -142,3 +142,33 @@
     font-size: 15px;
     color: #050b20;
 }
+
+
+.ai-mechanic-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .ai-input {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .ai-submit-button {
+    background-color: #4CAF50; /* Match existing button color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ai-submit-button:hover {
+    background-color: #45a049; /* Hover effect */
+  }
+  
