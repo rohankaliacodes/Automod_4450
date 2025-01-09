@@ -3,35 +3,44 @@ import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
 import loginImage from "../assets/login.jpg";
 import googleLogo from "../assets/google-logo.svg";
-import {signInWithEmailAndPassword} from "firebase/auth"
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [verificationMessage, setVerificationMessage] = useState("");
   const navigate = useNavigate();
 
-   const handleSignIn = async (event) => {
-      if(!email || !password){return;}
-      event.preventDefault();
-      try {
-        // Sign In with email and password
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-  
-        console.log("User signed in:", user);
-        alert("User Logged In");
-  
-        // Navigate to login page after successful signup
-        navigate("/");
-      } catch (error) {
-        // Handle errors and display an appropriate message
-        console.error("Error during signup:", error);
-        setError(error.message);
-      }
-    };
+  const handleSignIn = async (event) => {
+    if (!email || !password) {
+      return;
+    }
+    event.preventDefault();
+    try {
+      // Sign In with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
+      // Check if email is verified
+      if (!user.emailVerified) {
+        setVerificationMessage("Please verify your email before signing in. Check your inbox for the verification link.");
+        // Sign out the user since they haven't verified their email
+        await auth.signOut();
+        return;
+      }
+
+      console.log("User signed in:", user);
+      alert("User Logged In Successfully");
+
+      // Navigate to homepage after successful login
+      navigate("/");
+    } catch (error) {
+      console.error("Error during login:", error);
+      setError(error.message);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -58,16 +67,19 @@ function LoginPage() {
           <button type="submit" className="sign-in-button">
             Sign-In
           </button>
-          <div className="separator">   </div>
+          <div className="separator"> </div>
           <button className="google-button">
             <img src={googleLogo} alt="Google Logo" />
             Log in with Google
           </button>
           <div className="signup-link">
             <p>
-              Don't have an account? <a href="#">Sign up for free</a>
+              Don't have an account? <a href="/register">Sign up for free</a>
             </p>
           </div>
+          {verificationMessage && (
+            <p className="verification-message">{verificationMessage}</p>
+          )}
           {error && <p className="error-message">{error}</p>}
         </form>
       </div>

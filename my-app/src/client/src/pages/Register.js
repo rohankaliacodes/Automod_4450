@@ -1,9 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css"; // Reuse the same CSS
 import loginImage from "../assets/registerImage.jpg";
 import googleLogo from "../assets/google-logo.svg";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendEmailVerification,
+} from "firebase/auth";
 import { auth } from "../config/firebase";
 
 function RegisterPage() {
@@ -11,11 +15,15 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
+  const [verificationMessage, setVerificationMessage] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const navigate = useNavigate();
 
   const handleSignup = async (event) => {
-    if(!email || !password){return;}
+    if (!email || !password) {
+      return;
+    }
     event.preventDefault();
     try {
       // Create user with email and password
@@ -25,17 +33,44 @@ function RegisterPage() {
       // Update user profile with displayName (username)
       await updateProfile(user, { displayName: username });
 
+      await sendEmailVerification(auth.currentUser);
+      setVerificationMessage("Verification link has been sent to your email address!");
+
       console.log("User signed up:", user);
       alert("User registered");
 
-      // Navigate to login page after successful signup
-      navigate("/login");
+      // Start cooldown timer
+      setResendCooldown(60);
     } catch (error) {
-      // Handle errors and display an appropriate message
       console.error("Error during signup:", error);
       setError(error.message);
     }
   };
+
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0) return; // Prevent resending if cooldown is active
+
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setVerificationMessage("Verification link has been resent to your email address!");
+
+      // Restart cooldown timer
+      setResendCooldown(60);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   return (
     <div className="login-page">
@@ -79,6 +114,31 @@ function RegisterPage() {
               Already have an account? <a href="/login">Log in</a>
             </p>
           </div>
+          {verificationMessage && (
+            <p className="verification-message">
+              {verificationMessage}{" "}
+              {auth.currentUser && !auth.currentUser.emailVerified && (
+                <>
+                  {resendCooldown > 0 ? (
+                    <span style={{ color: "gray" }}>
+                      Resend available in {resendCooldown}s
+                    </span>
+                  ) : (
+                    <span
+                      onClick={handleResendVerification}
+                      style={{
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        color: "blue",
+                      }}
+                    >
+                      Resend
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+          )}
           {error && <p className="error-message">{error}</p>}
         </form>
       </div>
