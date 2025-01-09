@@ -100,5 +100,11 @@
   .error-message {
     color: red;
     margin-top: 1rem;
+    margin-left: 1.5rem;
+    font-weight: bold;
+  }
+  .verification-message{
+    margin-top: 1rem;
+    margin-left: 1.5rem;
     font-weight: bold;
   }

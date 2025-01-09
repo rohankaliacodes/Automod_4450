@@ -3,39 +3,54 @@ import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
 import loginImage from "../assets/login.jpg";
 import googleLogo from "../assets/google-logo.svg";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../config/firebase";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const [verificationMessage, setVerificationMessage] = useState("");
   const navigate = useNavigate();
 
-  async function logIn(event) {
-    event.preventDefault();
-
-        try{
-            const response = await fetch("http://localhost:5001/api/auth/login", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email, password})
-            });
-            const data = await response.json();
-            if(data.status === "ok"){
-                alert("User logged in");
-                sessionStorage.setItem("email", email);
-                navigate("/homepage");
-            }
-            else{
-                console.log(data.message);
-                setError(data.message);
-            }
-        }
-        catch(err){
-            console.log(err);
-            setError("Internal Server Error");
-        }
+  const handleSignIn = async (event) => {
+    if (!email || !password) {
+      return;
     }
+    event.preventDefault();
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        setVerificationMessage("Please verify your email before signing in. Check your inbox for the verification link.");
+        await auth.signOut();
+        return;
+      }
+      localStorage.setItem("email", user.email)
+      console.log("User signed in:", user);
+      navigate("/");
+    } catch (error) {
+      console.error("Error during login:", error);
+      setError(error.message);
+    }
+  };
+
+  const handleGoogleSignIn = async (event) => {
+    event.preventDefault();
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      console.log("Google sign in successful:", user);
+      localStorage.setItem("email", user.email)
+      navigate("/");
+    } catch (error) {
+      console.error("Error during Google sign in:", error);
+      setError(error.message);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -44,7 +59,7 @@ function LoginPage() {
       </div>
       <div className="login-form">
         <h1 className="welcome-back">Welcome back</h1>
-        <form onSubmit={logIn} className="login-form-container">
+        <form onSubmit={handleSignIn} className="login-form-container">
           <input
             type="email"
             placeholder="Email"
@@ -62,16 +77,19 @@ function LoginPage() {
           <button type="submit" className="sign-in-button">
             Sign-In
           </button>
-          <div className="separator">   </div>
-          <button className="google-button">
+          <div className="separator"> </div>
+          <button onClick={handleGoogleSignIn} className="google-button" type="button">
             <img src={googleLogo} alt="Google Logo" />
             Log in with Google
           </button>
           <div className="signup-link">
             <p>
-              Don't have an account? <a href="#">Sign up for free</a>
+              Don't have an account? <a href="/register">Sign up for free</a>
             </p>
           </div>
+          {verificationMessage && (
+            <p className="verification-message">{verificationMessage}</p>
+          )}
           {error && <p className="error-message">{error}</p>}
         </form>
       </div>
