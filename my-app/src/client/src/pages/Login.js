@@ -27,7 +27,11 @@ function LoginPage() {
         await auth.signOut();
         return;
       }
-      localStorage.setItem("email", user.email)
+
+      // Store user email and display name in localStorage
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("displayName", user.displayName || "User");
+      
       console.log("User signed in:", user);
       navigate("/");
     } catch (error) {
@@ -42,9 +46,12 @@ function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      
+
+      // Store user email and display name in localStorage
+      localStorage.setItem("email", user.email);
+      localStorage.setItem("displayName", user.displayName || "Google User");
+
       console.log("Google sign in successful:", user);
-      localStorage.setItem("email", user.email)
       navigate("/");
     } catch (error) {
       console.error("Error during Google sign in:", error);
