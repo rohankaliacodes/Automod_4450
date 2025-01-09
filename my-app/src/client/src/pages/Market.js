@@ -396,9 +396,6 @@ function Market () {
                         <button className="top-button" onClick={() => navigate("/register")}>
                             Register
                         </button>
-                        <button className="top-button" onClick={() => navigate("/market")}>
-                            Browse Parts
-                        </button>
 
 
             </div>
