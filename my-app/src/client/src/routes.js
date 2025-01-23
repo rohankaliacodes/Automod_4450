@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Market from "./pages/Market";
 import Home from "./pages/Home";
+import Garage from "./pages/Garage";
 
 
 const AppRoutes = () => {
@@ -26,11 +27,10 @@ const AppRoutes = () => {
                 {/* Market Page */}
                 <Route path="/market" element={<Market />} />
 
+                {/* Garage Page */}
+                <Route path="/garage" element={<Garage />} /> 
 
-            
 
-                {/* Add more routes as needed */}
-                {/* Example: <Route path="/garage" element={<Garage />} /> */}
             </Routes>
         </Router>
     );

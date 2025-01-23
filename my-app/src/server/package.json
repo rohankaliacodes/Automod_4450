@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "Backend for AI-powered car modification planner",
   "dependencies": {
+    "@react-three/drei": "^9.121.3",
+    "@react-three/fiber": "^8.17.12",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -20,6 +22,7 @@
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "openai": "^4.77.4",
+    "three": "^0.172.0",
     "xlsx": "^0.18.5"
   }
 }
