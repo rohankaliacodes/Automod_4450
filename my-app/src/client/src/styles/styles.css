@@ -150,6 +150,17 @@ select {
     background-color: darkgrey;
 }
 
+.searchBar {
+    width: 150%;
+    padding: 10px;
+    font-size: 1rem;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
 
 select:disabled {
     background-color: rgba(255, 255, 255, 0.5); /* More transparent for disabled state */

@@ -401,7 +401,7 @@ function Market () {
             </div>
             <h1>Browse Parts By Vehicle</h1>
             <p>Enter in your car's specifics and view compatible parts</p>
-            <input type="text" placeholder="Search By Part Name or SKU: " value={searchInput} onChange={(event) => setSearchInput(event.target.value)}></input>
+            <input className="searchBar" type="text" placeholder="Search By Part Name or SKU: " value={searchInput} onChange={(event) => setSearchInput(event.target.value)}></input>
             <button className="top-button" onClick={(event) => { searchParts(event); setSearched(true); }}>Search</button>
             <br></br>
             <div>
