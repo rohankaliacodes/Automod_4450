@@ -4,23 +4,23 @@ import { OrbitControls } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { useLoader } from "@react-three/fiber";
+import { useState } from "react";
+import "../styles/Garage.css";
 
-function GLBCarModel({ modelPath }) {
+
+function CarModel({ modelPath }) {
   // Load the GLB model
   const gltf = useLoader(GLTFLoader, modelPath);
   return <primitive object={gltf.scene} scale={1.5} />;
 }
 
-function OBJCarModel({ modelPath }) {
-    const obj = useLoader(OBJLoader, modelPath);
-    return <primitive object={obj} scale={1.5} />;
-}
 
 function Garage() {
+  const [carType, setCarType] = useState("");
   return (
-    <div style={{ height: "150vh", width: "100%" }}>
+    <div className="garageBackground">
       <Canvas camera={{ position: [0, 2, 5] }}>
-        <color attach={"background"} args={["#f0f0f0"]} />
+        <color attach={"background"} args={["#000000"]} />
 
 
         {/* Lighting */}
@@ -29,7 +29,7 @@ function Garage() {
 
         {/* Suspense wrapper */}
         <Suspense fallback={"loading..."}>
-          <OBJCarModel modelPath="/3DImages/bugatti.obj" />
+          <CarModel modelPath="/3DImages/lamborghini_urus_car.glb" />
         </Suspense>
 
         {/* Orbit controls for interaction */}
@@ -39,6 +39,18 @@ function Garage() {
             maxPolarAngle={Math.PI / 2}
             />
       </Canvas>
+      <div className="overlay">
+        <h1 className="garageText">My Garage</h1>
+        <p className="garageText">Here you can view your collection of cars</p>
+        <select
+           className="garageButton" onChange={(e) => setCarType(e.target.value)}
+        >
+          Select Car
+          <option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="mercedes">Mercedes</option>
+        </select>
+      </div>
     </div>
   );
 }
