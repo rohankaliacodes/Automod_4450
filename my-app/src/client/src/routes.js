@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Market from "./pages/Market";
 import Home from "./pages/Home";
 import Garage from "./pages/Garage";
+import Settings from "./pages/Settings";
 
 
 const AppRoutes = () => {
@@ -17,6 +18,9 @@ const AppRoutes = () => {
 
                 {/* Login Page */}
                 <Route path="/login" element={<Login />} />
+
+                {/* Settings Page */}
+                <Route path="/settings" element={<Settings />} />
 
                 {/* Register Page */}
                 <Route path="/register" element={<Register />} />

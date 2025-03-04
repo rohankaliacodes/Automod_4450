@@ -46,14 +46,15 @@ function Header() {
           <>
             <span className="user-name">Welcome, {displayName}!</span>
             <button className="nav-item" onClick={handleLogout}>Logout</button>
+            <button className="settings-nav-item" onClick={() => navigate("/settings")}>
+              <img src={settingsIcon} alt="Settings"></img>
+            </button>
           </>
         )}
         <button className="nav-item" onClick={() => navigate("/Garage")}>My Garage</button>
         <button className="nav-item" onClick={() => navigate("/Market")}>Modshop</button>
         <button className="nav-item" onClick={() => navigate("/login")}>Contact</button>
-        <button className="settings-nav-item" onClick={() => navigate("/settings")}>
-          <img src={settingsIcon} alt="Settings"></img>
-        </button>
+        
       </div>
     </div>
   );
