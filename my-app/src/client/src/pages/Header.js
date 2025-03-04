@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Header.css";
 import { useNavigate } from "react-router-dom";
-
+import { settings } from "firebase/analytics";
+import settingsIcon from "../assets/setting.png";
 function Header() {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(null);
@@ -43,13 +44,16 @@ function Header() {
           <button className="nav-item" onClick={() => navigate("/login")}>Login</button>
         ) : (
           <>
-            <span className="nav-item user-name">Welcome, {displayName}</span>
+            <span className="user-name">Welcome, {displayName}!</span>
             <button className="nav-item" onClick={handleLogout}>Logout</button>
           </>
         )}
         <button className="nav-item" onClick={() => navigate("/Garage")}>My Garage</button>
         <button className="nav-item" onClick={() => navigate("/Market")}>Modshop</button>
         <button className="nav-item" onClick={() => navigate("/login")}>Contact</button>
+        <button className="settings-nav-item" onClick={() => navigate("/settings")}>
+          <img src={settingsIcon} alt="Settings"></img>
+        </button>
       </div>
     </div>
   );

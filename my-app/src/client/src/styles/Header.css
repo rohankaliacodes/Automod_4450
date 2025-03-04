@@ -21,6 +21,7 @@ body, h1, h2, h3, p, a {
 }
 
 .nav-item {
+    cursor: pointer;
     color: #ffffff;
     text-decoration: none;
     font-size: 16px;
@@ -31,15 +32,30 @@ body, h1, h2, h3, p, a {
     border: none;
 }
 
+.user-name {
+    position: absolute;
+    left: 35px; /* Adjust position to the left */
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-right: 10px; /* Equal spacing between items */
+}
+
+.settings-nav-item{
+    cursor: pointer;
+    background: none!important; 
+    border: none;
+}
+
 .nav-item:hover {
-    color: #f0f0f0;
+    color: skyblue;
 }
 
 .right-actions {
     display: flex;
     align-items: center;
-    gap: 20px; /* Adjust spacing to give "Submit Listing" room */
-    margin-right: 20px; /* Add margin to pull everything to the left */
+    gap: 20px; 
+    margin-right: 20px; 
 }
 
 .sign-in {
