@@ -3,39 +3,36 @@ import "../styles/Header.css";
 import { useNavigate } from "react-router-dom";
 import { settings } from "firebase/analytics";
 import settingsIcon from "../assets/setting.png";
+import { auth } from "../config/firebase";
+import { signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 function Header() {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(null);
 
   useEffect(() => {
-    // Check authentication status on component mount and when localStorage changes
-    const checkAuth = () => {
-      const email = localStorage.getItem("email");
-      const name = localStorage.getItem("displayName"); // Assuming displayName is stored
-      if (email && name) {
-        setDisplayName(name);
-      } else {
-        setDisplayName(null);
-      }
-    };
-
-    // Initial check
-    checkAuth();
-
-    // Listen for storage changes
-    window.addEventListener('storage', checkAuth);
-
-    return () => {
-      window.removeEventListener('storage', checkAuth);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("email");
-    localStorage.removeItem("displayName");
-    setDisplayName(null);
-    navigate("/login");
+         const unsubscribe = onAuthStateChanged(auth, (user) => {
+             if (user) {
+                 setDisplayName(user.displayName);
+             } else {
+                 setDisplayName(null);
+             }
+         });
+      
+         return () => unsubscribe();
+      }, []);
+  
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setDisplayName(null);
+      navigate("/login");
+    }
+    catch(error){
+      console.log("Error signing out:", error);
+    }
   };
+
 
   return (
     <div className="header-container">
