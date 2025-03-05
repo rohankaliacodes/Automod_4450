@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 import Garage from "./pages/Garage";
 import Settings from "./pages/Settings";
 import Companies from "./pages/Companies";
-import DeleteAccount from "./pages/deleteAccount";
+import DeleteAccount from "./pages/DeleteAccount";
 
 
 const AppRoutes = () => {
