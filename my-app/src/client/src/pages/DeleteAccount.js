@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import settingsImage from "../assets/settingsbg.jpg";
+import homeImage from "../assets/home.svg";
+import "../styles/DeleteAccount.css";    
 import deleteAccountImage from "../assets/comebacksoon.jpeg";
 import { auth } from "../config/firebase"; // Ensure Firebase auth is imported
 import { deleteUser } from "firebase/auth";
@@ -24,11 +25,16 @@ function DeleteAccount() {
     return (
         <div className="delete-account-page">
             <div className="image-container">
-                <img src={deleteAccountImage} alt="Delete Account" className="settings-image" />
+                <img src={deleteAccountImage} alt="Delete Account" className="delete-account-image" />
             </div>
-            <h1>Delete Account</h1>
-            <p>Are you sure you want to delete your account?</p>
-            <button onClick={handleDeleteAccount}>Delete Account</button>
+            <div className="home-icon" onClick={() => navigate("/")}>
+                <img src={homeImage} alt="home"></img>
+            </div>
+            <div className="delete-account-container">
+                <h1 className="delete-account-header">We're sad to see you go!</h1>
+                <p className="delete-account-p">Are you sure you want to delete your account? This cannot be undone.</p>
+                <button className="delete-btn" onClick={handleDeleteAccount}>Delete Account</button>
+            </div>
         </div>
     );
 }

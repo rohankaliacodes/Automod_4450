@@ -167,7 +167,7 @@ function Settings() {
                 )}
                 
 
-                <button className="delete-btn" onClick={() => navigate("/DeleteAccount")}>Delete Account</button>
+                <button className="delete-btn" onClick={() => navigate("/deleteAccount")}>Delete Account</button>
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-.settings-page {
+.delete-account-page {
     display: flex;
     height: 100vh;
     width: 100%;
@@ -13,14 +13,29 @@
     z-index: -1; /* Moves it behind the content */
 }
 
-.settings-image {
+.delete-account-image {
     width: 100%;
     height: 100%;
     object-fit: cover; /* Ensures the image covers the whole area */
 }
 
+.delete-account-header{
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+    align-items: center;
+}
 
-.settings-container {
+.delete-account-p{
+    font-size: 1rem;
+    font-family:'Times New Roman', Times, serif;
+    margin-top: 30px;
+    color: white;
+}
+
+
+.delete-account-container {
     left: 0;
     border-radius: 0 15px 15px 0;
     flex: 0.2;
@@ -30,70 +45,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-}
 
-
-.settings-header {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: white;
-}
-
-.settings-username {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #555;
-}
-
-.settings-btn {
-    background-color: goldenrod;
-    color: white;
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-    max-width: 250px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    margin: 10px 0;
-}
-
-.settings-btn:hover {
-    background-color: darkgoldenrod;
-    transform: translateY(-2px);
-}
-.settings-form-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center items horizontally */
-    justify-content: center; /* Center items vertically */
-    width: 100%;
+    align-items: center; /* Centers content horizontally */
+    justify-content: center; /* Centers content vertically */
+    text-align: center; /* Ensures text inside is centered */
+    
     padding: 20px;
 }
 
-.change-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Center elements horizontally */
-    justify-content: center; /* Align form content centrally */
-    width: 100%;
-    gap: 15px;
-}
-
-.input-field {
-    width: 80%; /* Adjust width for better centering */
-    max-width: 250px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    text-align: center; /* Centers text inside input field */
-}
 
 .home-icon {
     position: absolute;
