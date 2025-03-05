@@ -6,6 +6,7 @@ import "../styles/settings.css";
 function Settings(){
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState(""); 
+    const [email, setEmail] = useState("");
     
      useEffect(() => {
         // Check authentication status on component mount and when localStorage changes
@@ -14,8 +15,10 @@ function Settings(){
           const name = localStorage.getItem("displayName"); 
           if (email && name) {
             setUsername(name);
+            setEmail(email);
           } else {
             setUsername(null);
+            setEmail(null);
           }
         };
     
@@ -37,12 +40,15 @@ return (
             <img src={settingsImage} alt="Background" className="settings-image" />
         </div>
         <div className="settings-container">
-            <h1>Settings</h1>
+            <h1 className="settings-header">Settings</h1>
             <div className="settings-form">
-                <span>Current Username: {username}</span>
+                <span className="text">Current Username: {username}</span>
+                <br />
+                <span className="text">Your Email: {email}</span>
             </div>
-            <button className="change-username-btn">Change Username</button>
-            <button className="change-password-btn">Change Password</button>
+            <button className="settings-btn">Change Username</button>
+            <button className="settings-btn">Change Password</button>
+            <button className="delete-btn">Delete Account</button>
         </div>
     </div>
 )

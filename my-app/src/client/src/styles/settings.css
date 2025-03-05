@@ -5,12 +5,115 @@
 }
 
 .image-container {
-    flex: 1.0;
+    position: fixed; /* Fixes the background in place */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -1; /* Moves it behind the content */
 }
 
 .settings-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Ensures the image covers the whole area */
 }
 
+
+.settings-container {
+    left: 0;
+    border-radius: 0 15px 15px 0;
+    flex: 0.2;
+    background-color: rgba(255, 255, 255, 0.2); /* White with 20% opacity */
+    backdrop-filter: blur(10px); /* Adds a frosted glass effect */
+    border-radius: 15px; /* Optional: Rounded corners for better UI */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Adds subtle shadow for visibility */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.settings-header {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: black;
+}
+
+.settings-username {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.settings-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 250px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+}
+
+.settings-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+
+.delete-btn {
+    background-color: crimson;
+    color: white;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 250px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+}
+
+.delete-btn:hover {
+    background-color: maroon;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .settings-page {
+        flex-direction: column;
+    }
+
+    .image-container {
+        flex: none;
+        height: 50vh;
+    }
+
+    .settings-container {
+        flex: none;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .settings-btn {
+        max-width: 100%;
+    }
+
+    .text {
+        font: white;
+    }
+
+}
