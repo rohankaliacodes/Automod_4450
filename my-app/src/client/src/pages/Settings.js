@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import settingsImage from "../assets/settingsbg.jpg";
+import homeImage from "../assets/home.svg";
 import "../styles/settings.css";    
 import { auth } from "../config/firebase"; // Ensure Firebase auth is imported
 import { updatePassword, updateProfile, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
@@ -72,6 +73,8 @@ function Settings() {
         }
     };
 
+
+
     const handlePasswordChange = async (event) => {
         event.preventDefault();
         const trimmedPassword = newPassword.trim();
@@ -111,6 +114,9 @@ function Settings() {
         <div className="settings-page">
             <div className="image-container">
                 <img src={settingsImage} alt="Background" className="settings-image" />
+            </div>
+            <div className="home-icon" onClick={() => navigate("/")}>
+                <img src={homeImage} alt="home"></img>
             </div>
             <div className="settings-container">
                 <h1 className="settings-header">Settings</h1>
@@ -161,7 +167,7 @@ function Settings() {
                 )}
                 
 
-                <button className="delete-btn">Delete Account</button>
+                <button className="delete-btn" onClick={() => navigate("/DeleteAccount")}>Delete Account</button>
             </div>
         </div>
     );
