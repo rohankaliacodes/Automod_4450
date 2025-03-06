@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-//import '../../styles/CarView.css'
+import '../../styles/CarView.css'
 import Scene from './components/Scene'
 
 
