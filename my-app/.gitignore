@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-public/Models/
+my-app/src/client/public/Models/
 
 # testing
 /coverage
