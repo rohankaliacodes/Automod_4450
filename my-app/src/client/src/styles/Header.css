@@ -5,6 +5,13 @@ body, h1, h2, h3, p, a {
     box-sizing: border-box;
 }
 
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+}
+
 .header-container {
     display: flex;
     align-items: center;
@@ -19,6 +26,13 @@ body, h1, h2, h3, p, a {
     height: 80px; /* Ensures enough height */
     overflow-x: hidden; /* Prevents horizontal overflow */
 }
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 0;
+    }
+}
+
 
 .nav-item {
     cursor: pointer;
@@ -39,6 +53,12 @@ body, h1, h2, h3, p, a {
     font-size: 16px;
     font-weight: 500;
     margin-right: 10px; /* Equal spacing between items */
+}
+
+@media (max-width: 768px) {
+    .user-name {
+        display: none; /* Hides the user name on smaller screens */
+    }
 }
 
 .settings-nav-item{
