@@ -2,7 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import { useEffect, useState, useRef } from "react";
 import { Box3, Vector3 } from "three";
 
-const LoadModelView = ({ selectedModel = "" }) => {
+const LoadModelView = ({ selectedModel = "Supra" }) => {
   const carModels = {
     "Supra": "Models/toyota_gr_supra/scene.gltf",
     "Corrola": "Models/corolla_2020_free_highpoly/scene.gltf",
