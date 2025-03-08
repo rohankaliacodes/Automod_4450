@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Market from "./pages/Market";
 import Home from "./pages/Home";
-import Garage from "./pages/Garage";
 import Settings from "./pages/Settings";
 import Companies from "./pages/Companies";
 import DeleteAccount from "./pages/DeleteAccount";
