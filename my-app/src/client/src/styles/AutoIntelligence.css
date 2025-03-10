@@ -1,0 +1,207 @@
+.chat-box {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 600px;
+    height: 1100px;
+    max-height: 80vh;
+    background-color: rgba(20, 20, 20, 0.8);
+    color: #f0f0f0;
+    border-radius: 10px;
+    overflow: auto;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+    z-index: 1001;
+    border: none;
+    font-family: monospace;
+    font-size: 0.95em;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-box.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.chat-header {
+    padding: 10px 15px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-options {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-option-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.chat-option-icon:hover {
+    opacity: 1;
+}
+
+.messages-area {
+    padding: 10px;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: #444 #222;
+}
+
+.messages-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.messages-area::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.messages-area::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+    border: 2px solid #111;
+}
+
+.messages-area::-webkit-scrollbar-thumb:hover {
+    background-color: #666;
+}
+
+.message {
+    padding: 6px 10px;
+    border-radius: 0;
+    margin-bottom: 4px;
+    max-width: 95%;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+}
+
+.message.received {
+    background-color: transparent;
+    color: #eee;
+    align-self: flex-start;
+    text-indent: 10px;
+}
+
+.message.sent {
+    background-color: transparent;
+    color: #bbb;
+    align-self: flex-end;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.input-area {
+    display: flex;
+    padding-top: 10px;
+    padding-left: 5px;
+    padding-bottom: 3px;
+    background-color: rgba(30, 30, 30, 0.8);
+    border: none;
+    position: relative;
+}
+
+.input-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+     /* Distribute space to push options-bar to bottom */
+    min-height: 50px; /* Ensure input-container has some height */
+}
+
+.message-input {
+    padding: 10px;
+    border-radius: 20px;
+    border: none;
+    background-color: transparent;
+    color: white;
+    font-size: 0.9em;
+    font-family: monospace;
+    outline: none;
+    margin-bottom: 0;
+}
+
+.message-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.send-button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23c81058"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+.send-button:hover {
+    opacity: 1;
+}
+
+.options-bar {
+    display: flex;
+    align-items: center; /* Revert back to center alignment for icons and name on same line */
+    padding: 5px 10px;
+    background-color: transparent;
+    color: #f0f0f0;
+    font-size: 0.8em;
+    border-radius: inherit;
+}
+
+.option-name {
+    color: #f0f0f0;
+    font-size: 1.2em;
+    margin-right: 25px; /* Slightly reduced margin */
+    white-space: nowrap;
+}
+
+.option-icons {
+    display: flex;
+    gap: 8px; /* Slightly reduced gap */
+}
+
+.option-icon {
+    width: 15.5px; /* **Reduced icon size** */
+    height: 15.5px; /* **Reduced icon size** */
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.option-icon:hover {
+    opacity: 1;
+}
+
+.options-and-send {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
