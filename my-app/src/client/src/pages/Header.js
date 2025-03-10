@@ -34,6 +34,7 @@ function Header() {
   };
 
   const pages = [
+    {path: "/", name: "Home"},
     {path: "/Garage", name: "My Garage"},
     {path: "/Market", name: "Modshop"},
     {path: "/settings", name: <img src={settingsIcon} alt="Settings"/>},
