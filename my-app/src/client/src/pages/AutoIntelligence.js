@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AutoIntelligence.css';
+import axios from 'axios'; // Import axios
 
 import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
@@ -10,34 +11,57 @@ const AutoIntelligence = () => {
     const [isChatPinned, setIsChatPinned] = useState(false);
     const [messages, setMessages] = useState([
         { text: 'Hello, how can I help you modify your car?', sender: 'received' },
-        { text: 'I want to make it look more sporty.', sender: 'sent' },
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
-    const [selectedIconType, setSelectedIconType] = useState('autoMechanic'); // Track selected icon type
+    const [selectedIconType, setSelectedIconType] = useState('autoMechanic');
     const chatBoxRef = useRef(null);
+    const [loadingResponse, setLoadingResponse] = useState(false);
 
-    const handleSendMessage = () => {
-        if (inputMessage.trim()) {
-            setMessages([...messages, { text: inputMessage, sender: 'sent' }]);
-            setInputMessage('');
-            // Simulate AI response (replace with actual AI logic)
-            setTimeout(() => {
-                setMessages(prevMessages => [...prevMessages, { text: 'Great choice!', sender: 'received' }]);
-            }, 1000);
+    const handleSendMessage = async () => {
+        if (!inputMessage.trim()) return;
+
+        setMessages([...messages, { text: inputMessage, sender: 'sent' }]);
+        setInputMessage('');
+        setLoadingResponse(true); // Start loading
+
+        let apiUrl = '';
+        if (selectedIconType === 'autoMechanic') {
+            apiUrl = 'http://localhost:5001/api/autoMechanic/chat';
+        } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+            apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
+        }
+
+        if (!apiUrl) {
+            console.error("No API URL defined for selected option.");
+            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received' }]);
+            setLoadingResponse(false); // End loading even on error
+            return;
+        }
+
+        try {
+            const response = await axios.post(apiUrl, { message: inputMessage });
+            const responseText = response.data.response;
+            setMessages(prevMessages => [...prevMessages, { text: responseText, sender: 'received' }]);
+        } catch (error) {
+            console.error('Error sending message to AI:', error);
+            setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI.', sender: 'received' }]);
+        } finally {
+            setLoadingResponse(false); // End loading
         }
     };
+
 
     const handleInputChange = (e) => {
         setInputMessage(e.target.value);
     };
 
-    const handleOptionClick = (option, iconType) => { // Add iconType parameter
+    const handleOptionClick = (option, iconType) => {
         setSelectedOption(option);
-        setSelectedIconType(iconType); // Set the selected icon type
+        setSelectedIconType(iconType);
     };
 
-       const handleMouseMove = (e) => {
+    const handleMouseMove = (e) => {
         if (isChatPinned) return;
         const containerRect = chatBoxRef.current.getBoundingClientRect();
          if (e.clientX < containerRect.width + 20) {
@@ -79,9 +103,10 @@ const AutoIntelligence = () => {
                         {message.text}
                     </div>
                 ))}
+                {loadingResponse && <div className="message received">Loading...</div>}
             </div>
             <div className="input-area">
-                <div className="input-container"> {/* NEW CONTAINER - wraps input and options */}
+                <div className="input-container">
                     <input
                         type="text"
                         placeholder="Type your message here..."
@@ -91,31 +116,31 @@ const AutoIntelligence = () => {
                         className="message-input"
                     />
                     <div className="options-bar">
-                        <button className='reset-chat'><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1 1s1-.45 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a"/></svg></button>
+                        <button className='reset-chat'><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g strokeWidth="0"/><g strokeLinecap="round" strokeLinejoin="round"/><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a"/></svg></button>
                         <span className="option-name">{selectedOption}</span>
                         <div className="option-icons">
                             <img
                                 src={autoMechanic}
                                 alt="Auto Mechanic"
-                                className={`option-icon ${selectedIconType === 'autoMechanic' ? 'selected-icon' : ''}`} // Conditional class
-                                onClick={() => handleOptionClick('Auto Mechanic', 'autoMechanic')} // Pass icon type
+                                className={`option-icon ${selectedIconType === 'autoMechanic' ? 'selected-icon' : ''}`}
+                                onClick={() => handleOptionClick('Auto Mechanic', 'autoMechanic')}
                             />
                             <img
                                 src={performanceTuner}
                                 alt="Performance Tuner"
-                                className={`option-icon ${selectedIconType === 'performanceTuner' ? 'selected-icon' : ''}`} // Conditional class
-                                onClick={() => handleOptionClick('Performance Tuner', 'performanceTuner')} // Pass icon type
+                                className={`option-icon ${selectedIconType === 'performanceTuner' ? 'selected-icon' : ''}`}
+                                onClick={() => handleOptionClick('Performance Tuner', 'performanceTuner')}
                             />
                             <img
                                 src={aesthethics}
                                 alt="Aesthethics"
-                                className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`} // Conditional class
-                                onClick={() => handleOptionClick('Aesthethics', 'aesthethics')} // Pass icon type
+                                className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`}
+                                onClick={() => handleOptionClick('Aesthethics', 'aesthethics')}
                             />
                         </div>
                     </div>
                 </div>
-                <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></button>
+                <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg></button>
             </div>
         </div>
     );
