@@ -13,8 +13,8 @@ const AutoIntelligence = () => {
         { text: 'I want to make it look more sporty.', sender: 'sent' },
     ]);
     const [inputMessage, setInputMessage] = useState('');
-    const [selectedOption, setSelectedOption] = useState('Option Name Here');
-    const [selectedIconType, setSelectedIconType] = useState(null); // Track selected icon type
+    const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
+    const [selectedIconType, setSelectedIconType] = useState('autoMechanic'); // Track selected icon type
     const chatBoxRef = useRef(null);
 
     const handleSendMessage = () => {
@@ -90,7 +90,8 @@ const AutoIntelligence = () => {
                         onKeyPress={(event) => event.key === 'Enter' ? handleSendMessage() : null}
                         className="message-input"
                     />
-                    <div className="options-bar"> {/* Options bar INSIDE input-container */}
+                    <div className="options-bar">
+                        <button className='reset-chat'><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1 1s1-.45 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a"/></svg></button>
                         <span className="option-name">{selectedOption}</span>
                         <div className="option-icons">
                             <img
@@ -114,7 +115,7 @@ const AutoIntelligence = () => {
                         </div>
                     </div>
                 </div>
-                <button onClick={handleSendMessage} className="send-button"></button>
+                <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></button>
             </div>
         </div>
     );
