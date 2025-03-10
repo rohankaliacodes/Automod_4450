@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AutoIntelligence.css';
-import homeIcon from '../assets/home.svg'; // Replace with your SVG
-import settingsIcon from '../assets/setting.png'; // Replace with your SVG
-import svgIcon from '../assets/SVG.svg'; // Replace with your SVG
+
+import autoMechanic from '../assets/SVG/mechanic.svg';
+import performanceTuner from '../assets/SVG/performance.svg';
+import aesthethics from '../assets/SVG/design.svg';
 
 const AutoIntelligence = () => {
     const [isChatVisible, setIsChatVisible] = useState(false);
@@ -13,6 +14,7 @@ const AutoIntelligence = () => {
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Option Name Here');
+    const [selectedIconType, setSelectedIconType] = useState(null); // Track selected icon type
     const chatBoxRef = useRef(null);
 
     const handleSendMessage = () => {
@@ -30,8 +32,9 @@ const AutoIntelligence = () => {
         setInputMessage(e.target.value);
     };
 
-    const handleOptionClick = (option) => {
+    const handleOptionClick = (option, iconType) => { // Add iconType parameter
         setSelectedOption(option);
+        setSelectedIconType(iconType); // Set the selected icon type
     };
 
        const handleMouseMove = (e) => {
@@ -90,9 +93,24 @@ const AutoIntelligence = () => {
                     <div className="options-bar"> {/* Options bar INSIDE input-container */}
                         <span className="option-name">{selectedOption}</span>
                         <div className="option-icons">
-                            <img src={homeIcon} alt="Option 1" className="option-icon" onClick={() => handleOptionClick('Auto Mechanic')} />
-                            <img src={settingsIcon} alt="Option 2" className="option-icon" onClick={() => handleOptionClick('Performance Tuner')} />
-                            <img src={svgIcon} alt="Option 3" className="option-icon" onClick={() => handleOptionClick('Aesthethics')} />
+                            <img
+                                src={autoMechanic}
+                                alt="Auto Mechanic"
+                                className={`option-icon ${selectedIconType === 'autoMechanic' ? 'selected-icon' : ''}`} // Conditional class
+                                onClick={() => handleOptionClick('Auto Mechanic', 'autoMechanic')} // Pass icon type
+                            />
+                            <img
+                                src={performanceTuner}
+                                alt="Performance Tuner"
+                                className={`option-icon ${selectedIconType === 'performanceTuner' ? 'selected-icon' : ''}`} // Conditional class
+                                onClick={() => handleOptionClick('Performance Tuner', 'performanceTuner')} // Pass icon type
+                            />
+                            <img
+                                src={aesthethics}
+                                alt="Aesthethics"
+                                className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`} // Conditional class
+                                onClick={() => handleOptionClick('Aesthethics', 'aesthethics')} // Pass icon type
+                            />
                         </div>
                     </div>
                 </div>
