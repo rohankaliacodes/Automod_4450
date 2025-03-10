@@ -1,7 +1,6 @@
-// module.exports = router;
-const express = require("express");
-const { OpenAI } = require("openai");
-require("dotenv").config();
+import express from "express";
+import { OpenAI } from "openai";
+import 'dotenv/config';
 
 const router = express.Router();
 
@@ -476,4 +475,4 @@ Respond with exactly 5 recommendations tailored to the user's input. Ensure the 
   }
 });
 
-module.exports = router;
+export default router;

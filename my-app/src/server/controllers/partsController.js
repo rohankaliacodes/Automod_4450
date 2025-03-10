@@ -1,6 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url'; // Import fileURLToPath
+import { dirname } from 'path'; // Import dirname
 
+const __filename = fileURLToPath(import.meta.url); // Get the current filename
+const __dirname = dirname(__filename); // Get the current directory
 const getParts = async (req, res) => {
     const { make, model, year, trim, engine } = req.body;
 
@@ -17,7 +21,6 @@ const getParts = async (req, res) => {
     });
 };
 
-module.exports = { getParts };
 const searchPartsByName = async (req, res) => {
     const { partName } = req.body;
 
@@ -79,7 +82,4 @@ const searchPartsByName = async (req, res) => {
         res.status(500).json({ status: "error", message: "Internal Server Error" });
     }
 };
-
-
-
-module.exports = { getParts, searchPartsByName};
+export { getParts, searchPartsByName };

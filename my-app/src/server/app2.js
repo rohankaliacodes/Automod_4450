@@ -1,13 +1,10 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const partsRoutes = require('./routes/partsRoutes');
-const authRoutes = require('./routes/authRoutes');
-const recommendationRoutes = require('./routes/recommendationRoutes');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import partsRoutes from './routes/partsRoutes.js';
+import recommendationRoutes from './routes/recommendationRoutes.js';
+import autoMechanicRoute from './routes/autoMechanic.js';
 
-// Connect to the database
-connectDB();
 
 const app = express();
 
@@ -19,8 +16,8 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
 
 // Routes
 app.use('/api/parts', partsRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/autoMechanic', autoMechanicRoute);
 
 // Graceful Shutdown
 process.on('SIGINT', async () => {
@@ -28,4 +25,4 @@ process.on('SIGINT', async () => {
     process.exit();
 });
 
-module.exports = app;
+export default app;
