@@ -2,7 +2,7 @@ import button from "../assets/search-button.png";
 import "../styles/Home.css";
 import Header from "../pages/Header";
 import React, { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const categories = ["Interior", "Wheel/Rim", "Engine Mod", "Suspension", "Exterior"];
@@ -11,23 +11,7 @@ export const Home = () => {
   const [year, setYear] = useState("");
   const [trim, setTrim] = useState("");
   const [engine, setEngine] = useState("");
-  const [modificationType, setModificationType] = useState(""); // State for modification type
-  const [aiInput, setAiInput] = useState(""); // State to manage AI input
-  const [recommendations, setRecommendations] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const RecommendationCard = ({ recommendation }) => (
-    <div className="card">
-      <div className="content">
-        <div>
-          <h4>{recommendation["Part Name"]}</h4>
-          <p>Price: {recommendation["Estimated Price"]}</p>
-          <p>Category: {recommendation["Category"]}</p>
-          <p>Effect: {recommendation["Effect on the Car"]}</p>
-        </div>
-      </div>
-    </div>
-  );
+  const navigate = useNavigate();
 
   const makes = ["Toyota", "Honda"];
   const models = {
@@ -104,7 +88,6 @@ export const Home = () => {
     setYear("");
     setTrim("");
     setEngine("");
-    setModificationType("");
   };
 
   const handleModelChange = (event) => {
@@ -112,56 +95,35 @@ export const Home = () => {
     setYear("");
     setTrim("");
     setEngine("");
-    setModificationType("");
   };
 
   const handleYearChange = (event) => {
     setYear(event.target.value);
     setTrim("");
     setEngine("");
-    setModificationType("");
   };
 
   const handleTrimChange = (event) => {
     setTrim(event.target.value);
     setEngine("");
-    setModificationType("");
   };
 
   const handleEngineChange = (event) => {
     setEngine(event.target.value);
   };
 
-  const handleModificationTypeChange = (event) => {
-    setModificationType(event.target.value);
-  };
-
-  const handleAiInputChange = (event) => {
-    setAiInput(event.target.value);
-  };
-
-  const handleAiSubmit = async () => {
-    const inputData = {
-      Make: make,
-      Model: model,
-      Year: year,
-      Trim: trim,
-      Engine: engine,
-      "Modification Type": modificationType,
-      "User Goal": aiInput,
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const carData = {
+        make: make,
+        model: model,
+        year: year,
+        trim: trim,
+        engine: engine
     };
-
-    try {
-      setLoading(true);
-      const response = await axios.post("http://localhost:5001/api/recommendations/getRecommendations", inputData);
-      setRecommendations(response.data.recommendations);
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-      alert("Failed to fetch recommendations. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    navigate('/garage', { state: carData });
   };
+
 
   const getModels = () => (models[make] ? Object.keys(models[make]) : []);
   const getYears = () => (model && models[make][model] ? Object.keys(models[make][model].years) : []);
@@ -172,137 +134,84 @@ export const Home = () => {
     <div className="background">
       <Header />
       <p className="heading-find-your">Find The Perfect Part For Your Car</p>
-  
+
       <div className="form">
-        <p className="heading-find-cars">Transforming Cars One Mod At A Time</p>
-  
-        <div className="dropdowns">
-          <select className="dropdown" value={make} onChange={handleMakeChange}>
-            <option value="">Select Make</option>
-            {makes.map((makeOption) => (
-              <option key={makeOption} value={makeOption}>
-                {makeOption}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            className="dropdown"
-            value={model}
-            onChange={handleModelChange}
-            disabled={!make}
-          >
-            <option value="">Select Model</option>
-            {getModels().map((modelOption) => (
-              <option key={modelOption} value={modelOption}>
-                {modelOption}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            className="dropdown"
-            value={year}
-            onChange={handleYearChange}
-            disabled={!model}
-          >
-            <option value="">Select Year</option>
-            {getYears().map((yearOption) => (
-              <option key={yearOption} value={yearOption}>
-                {yearOption}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            className="dropdown"
-            value={trim}
-            onChange={handleTrimChange}
-            disabled={!year}
-          >
-            <option value="">Select Trim</option>
-            {getTrims().map((trimOption) => (
-              <option key={trimOption} value={trimOption}>
-                {trimOption}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            className="dropdown"
-            value={engine}
-            onChange={handleEngineChange}
-            disabled={!trim}
-          >
-            <option value="">Select Engine</option>
-            {getEngines().map((engineOption) => (
-              <option key={engineOption} value={engineOption}>
-                {engineOption}
-              </option>
-            ))}
-          </select>
-  
-          <select
-            className="dropdown"
-            value={modificationType}
-            onChange={handleModificationTypeChange}
-            disabled={!engine}
-          >
-            <option value="">Select Modification Type</option>
-            <option value="Aesthetics">Aesthetics</option>
-            <option value="Performance">Performance</option>
-            <option value="Functional">Functional</option>
-          </select>
-        </div>
-  
-        <div className="ai-mechanic-section">
-          <input
-            className="ai-input"
-            type="text"
-            placeholder="Type your query here..."
-            value={aiInput}
-            onChange={handleAiInputChange}
-            maxLength={100}
-          />
-          <small
-            style={{
-              color: "red",
-              fontSize: "12px",
-              marginTop: "5px",
-              display: "block",
-            }}
-          >
-            {100 - aiInput.length} characters remaining
-          </small>
-          <button
-            className="ai-submit-button"
-            onClick={handleAiSubmit}
-            disabled={loading}
-          >
-            {loading ? "Loading..." : "Send"}
-          </button>
-        </div>
-  
-        {recommendations && recommendations.length > 0 && (
-          <div className="recommendations-grid">
-            <h2>Recommendations:</h2>
-            <div className="grid">
-              {recommendations.map((recommendation, index) => (
-                <div key={index} className="card">
-                  <div className="content">
-                    <div>
-                      <h4>{recommendation["Part Name"]}</h4>
-                      <p>Price: {recommendation["Estimated Price"]}</p>
-                      <p>Category: {recommendation["Category"]}</p>
-                      <p>Effect: {recommendation["Effect on the Car"]}</p>
-                    </div>
-                  </div>
-                </div>
+        <p className="heading-find-cars">Select Your Vehicle</p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="dropdowns">
+            <select className="dropdown" value={make} onChange={handleMakeChange}>
+              <option value="">Select Make</option>
+              {makes.map((makeOption) => (
+                <option key={makeOption} value={makeOption}>
+                  {makeOption}
+                </option>
               ))}
-            </div>
+            </select>
+
+            <select
+              className="dropdown"
+              value={model}
+              onChange={handleModelChange}
+              disabled={!make}
+            >
+              <option value="">Select Model</option>
+              {getModels().map((modelOption) => (
+                <option key={modelOption} value={modelOption}>
+                  {modelOption}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="dropdown"
+              value={year}
+              onChange={handleYearChange}
+              disabled={!model}
+            >
+              <option value="">Select Year</option>
+              {getYears().map((yearOption) => (
+                <option key={yearOption} value={yearOption}>
+                  {yearOption}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="dropdown"
+              value={trim}
+              onChange={handleTrimChange}
+              disabled={!year}
+            >
+              <option value="">Select Trim</option>
+              {getTrims().map((trimOption) => (
+                <option key={trimOption} value={trimOption}>
+                  {trimOption}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="dropdown"
+              value={engine}
+              onChange={handleEngineChange}
+              disabled={!trim}
+            >
+              <option value="">Select Engine</option>
+              {getEngines().map((engineOption) => (
+                <option key={engineOption} value={engineOption}>
+                  {engineOption}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-  
+
+          <button type="submit" className="custom-button">
+            Submit
+          </button>
+        </form>
+
+
         <p className="text-wrapper">Or Browse Part By Category</p>
         <div className="categories">
           {categories.map((category, index) => (
@@ -317,4 +226,3 @@ export const Home = () => {
 };
 
 export default Home;
-
