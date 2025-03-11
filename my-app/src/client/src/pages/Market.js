@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 import Header from "./Header";
+import { useLocation } from "react-router-dom";
+
+
 
 function Market () {
-    const navigate = useNavigate();
+    const location = useLocation();
+    const category = location.state?.category || "";
+
     const [make, setMake] = React.useState("");
     const [model, setModel] = React.useState("");
     const [year, setYear] = React.useState("");
@@ -20,7 +25,35 @@ function Market () {
     const [isChanged, setIsChanged] = React.useState(false);    
 
 
+   async function fetchAllParts(){
+        try{
+            const response = await fetch("http://localhost:5001/api/parts/getAllParts", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"}
+            });
+            const data = await response.json();
+            if(data.status === "ok"){
+                setPartsArray(data.data);
+                setCompletePartsArray(data.data);
+                if(category){
+                    sortPartsByCategory(category, data.data);
+                }
+            }
+            else{
+                console.log(data.message);
+                setMessage("No parts found");
+            }
+        }
+        catch(err){
+            setMessage("Internal Server Error");
+        }
+    }
 
+    useEffect(() => {
+        if(category){
+            fetchAllParts();
+        }
+    }, [category]);
 
     async function fetchParts(event){
         event.preventDefault();
@@ -68,8 +101,9 @@ function Market () {
         }
     };
 
-    function sortPartsByCategory(category){
+    function sortPartsByCategory(category, data = completePartsArray){
         if(category === "All"){
+            setPartsArray(data);
             resetPartsArray();
         }
         else{

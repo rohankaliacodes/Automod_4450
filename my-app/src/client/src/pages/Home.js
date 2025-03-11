@@ -121,7 +121,7 @@ export const Home = () => {
         trim: trim,
         engine: engine
     };
-    navigate('/garage', { state: carData });
+    navigate('/carView', { state: carData });
   };
 
 
@@ -206,7 +206,7 @@ export const Home = () => {
             </select>
           </div>
 
-          <button type="submit" className="custom-button">
+          <button type="submit" disabled={!make || !model || !year || !trim || !engine}className="custom-button">
             Submit
           </button>
         </form>
@@ -215,9 +215,9 @@ export const Home = () => {
         <p className="text-wrapper">Or Browse Part By Category</p>
         <div className="categories">
           {categories.map((category, index) => (
-            <div key={index} className="category-button">
+            <button key={index} className="category-button" onClick={() => navigate("/market", { state: { category } })}>
               {category}
-            </div>
+            </button>
           ))}
         </div>
       </div>
