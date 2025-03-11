@@ -130,7 +130,7 @@ function Settings() {
                 <button className="settings-btn" onClick={handlePasswordFormToggle}>
                     {showPasswordForm ? "Cancel" : "Change Password"}
                 </button>
-                <button className="forgot-password" onClick={sendPasswordRecoveryEmail}>Forgot Password?</button>
+                <a className="forgot-password" onClick={sendPasswordRecoveryEmail}>Forgot Password?</a>
                     
 
                 {showUsernameForm && (

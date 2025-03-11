@@ -2,6 +2,7 @@ import { useGLTF } from "@react-three/drei";
 import { useEffect, useState, useRef } from "react";
 import { Box3, Vector3 } from "three";
 
+
 const LoadModelView = ({ carIdentifier }) => { // Receive carIdentifier prop
   const carModels = {
     "toyota-gr supra-2020": "Models/toyota_gr_supra/scene.gltf",

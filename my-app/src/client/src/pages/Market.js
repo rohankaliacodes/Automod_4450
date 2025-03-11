@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
+import Header from "./Header";
 
 function Market () {
     const navigate = useNavigate();
@@ -385,21 +386,8 @@ function Market () {
 
     return (
         <div className="marketplace-background">
-            <div className="top-bar">
-            
-                        <button className="top-button" onClick={() => navigate("/")}>
-                            Home
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/login")}>
-                            Login
-                        </button>
-                        <button className="top-button" onClick={() => navigate("/register")}>
-                            Register
-                        </button>
-
-
-            </div>
-            <h1>Browse Parts By Vehicle</h1>
+            <Header />
+            <h1 className="market-header">Browse Parts By Vehicle</h1>
             <p>Enter in your car's specifics and view compatible parts</p>
             <input className="searchBar" type="text" placeholder="Search By Part Name or SKU: " value={searchInput} onChange={(event) => setSearchInput(event.target.value)}></input>
             <button className="top-button" onClick={(event) => { searchParts(event); setSearched(true); }}>Search</button>
