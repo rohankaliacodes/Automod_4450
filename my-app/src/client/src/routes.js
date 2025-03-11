@@ -9,6 +9,8 @@ import Settings from "./pages/Settings";
 import Companies from "./pages/Companies";
 import DeleteAccount from "./pages/DeleteAccount";
 import CarView from "./pages/CarView/CarView";
+import Contact from "./pages/Contact";
+
 
 
 const AppRoutes = () => {
@@ -41,6 +43,8 @@ const AppRoutes = () => {
 
                 {/* Companies Page */}
                 <Route path="/companies" element={<Companies />} />
+
+                <Route path="/contact" element={<Contact />} /> {/* Add this line */}
 
 
             </Routes>
