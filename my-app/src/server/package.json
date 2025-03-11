@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "description": "Backend for AI-powered car modification planner",
+  "type": "module",
   "dependencies": {
+    "@google/generative-ai": "^0.24.0",
     "@react-three/drei": "^9.121.3",
     "@react-three/fiber": "^8.17.12",
     "bcrypt": "^5.1.1",
