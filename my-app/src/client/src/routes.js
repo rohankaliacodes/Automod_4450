@@ -9,6 +9,7 @@ import Settings from "./pages/Settings";
 import Companies from "./pages/Companies";
 import DeleteAccount from "./pages/DeleteAccount";
 import CarView from "./pages/CarView/CarView";
+import Garage from "./pages/Garage";
 
 
 const AppRoutes = () => {
@@ -33,8 +34,11 @@ const AppRoutes = () => {
                 {/* Market Page */}
                 <Route path="/market" element={<Market />} />
 
+                {/* CarView Page */}
+                <Route path="/carView" element={<CarView />} /> 
+
                 {/* Garage Page */}
-                <Route path="/garage" element={<CarView />} /> 
+                <Route path="/garage" element={<Garage />} />
 
                 {/* Delete Account Page */}
                 <Route path="/deleteAccount" element={<DeleteAccount />} />

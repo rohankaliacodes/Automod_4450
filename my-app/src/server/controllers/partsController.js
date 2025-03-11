@@ -5,6 +5,8 @@ import { dirname } from 'path'; // Import dirname
 
 const __filename = fileURLToPath(import.meta.url); // Get the current filename
 const __dirname = dirname(__filename); // Get the current directory
+
+
 const getParts = async (req, res) => {
     const { make, model, year, trim, engine } = req.body;
 
@@ -20,6 +22,8 @@ const getParts = async (req, res) => {
         res.status(200).json({ message: 'File found', data: JSON.parse(data), status: "ok" });
     });
 };
+
+
 
 const searchPartsByName = async (req, res) => {
     const { partName } = req.body;
@@ -82,4 +86,45 @@ const searchPartsByName = async (req, res) => {
         res.status(500).json({ status: "error", message: "Internal Server Error" });
     }
 };
-export { getParts, searchPartsByName };
+
+
+const getAllParts = async (req, res) => {
+    const partsDirectory = path.join(__dirname, `../partsFiles/`);
+    let results = [];
+
+    const readFiles = (dir) => {
+        const files = fs.readdirSync(dir);
+        files.forEach(file => {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
+
+            if (stat.isDirectory()) {
+                readFiles(filePath);
+            } else if (path.extname(file) === '.json') {
+                try {
+                    const data = fs.readFileSync(filePath, 'utf8');
+                    const jsonData = JSON.parse(data);
+
+                    if(Array.isArray(jsonData)) {
+                        results = results.concat(jsonData);
+                    }
+                } catch (error) {
+                    console.log(`Error reading file: ${filePath}`, error);
+                }
+            }
+        })
+    };
+    try {
+        readFiles(partsDirectory);
+        if (results.length > 0) {
+            res.status(200).json({ status: "ok", data: results });
+        } else {
+            res.status(404).json({ status: "error", message: "No parts found" });
+        }
+    } catch(error){
+        console.log("Error during search:", error);
+        res.status(500).json({ status: "error", message: "Internal Server Error" });
+    }
+};
+
+export { getParts, searchPartsByName, getAllParts };

@@ -1,31 +1,37 @@
-.garageBackground {
-    background-color: black; /* Background for the container */
-    width: 100vw; /* Full screen width */
-    height: 100vh; /* Full screen height */
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.garage-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  overflow: hidden; /* Prevents scrolling */
+}
 
-  .overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
 
-  .garageText {
-    color: white;
-    font-size: 2em;
-    text-align: center;
-  }
-
-  .garageButton {
-    pointer-events: auto;
-    background-color: #4CAF50;
-    width: 100px;
-  }
+.garage-contents {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the div */
   
+  width: 80vw; /* Makes it take up 80% of the screen width */
+  height: 70vh; /* Makes it take up 70% of the screen height */
+
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 10; /* Ensures it appears above the Canvas */
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
