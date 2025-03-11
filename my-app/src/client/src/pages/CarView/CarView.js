@@ -4,6 +4,7 @@ import Scene from './components/Scene';
 import AutoIntelligence from '../AutoIntelligence';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import Header from '../Header';
 
 function CarView() {
   const location = useLocation();
@@ -27,6 +28,7 @@ function CarView() {
 
   return (
     <div className="car-view-container">
+      <Header />
       <AutoIntelligence />
       <div className="canvas-container">
         <Canvas>
