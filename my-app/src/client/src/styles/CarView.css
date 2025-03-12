@@ -10,6 +10,7 @@
   flex: 1; /* Canvas takes up the remaining space */
   height: 100%;
   pointer-events: auto;
+  position: relative;
 }
 
 .App {
@@ -22,4 +23,36 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.add-button {
+  position: absolute;
+  right: 20px;
+  padding: 8px 16px;
+  bottom: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #c81058; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.add-button:hover {
+  background-color: #c81058;
+  transform: scale(1.05);
+}
+
+.add-garage-message {
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: bold;
+  color: #c81058;
+  z-index: 1000;
 }
