@@ -2,59 +2,57 @@
     display: flex;
     height: 100vh;
     width: 100%;
+    background: #333; /* Dark background for a sleek look */
 }
 
 .image-container {
-    position: fixed; /* Fixes the background in place */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    z-index: -1; /* Moves it behind the content */
+    z-index: -1;
 }
 
 .delete-account-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures the image covers the whole area */
+    object-fit: cover;
+    filter: brightness(60%); /* Darken the image for better visibility of content */
 }
 
-.delete-account-header{
+.delete-account-header {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 10px;
-    color: white;
+    color: #c81058; /* Using the highlight color */
     align-items: center;
+    text-align: center; /* Centers header text */
 }
 
-.delete-account-p{
+.delete-account-p {
     font-size: 1rem;
-    font-family:'Times New Roman', Times, serif;
+    font-family: 'Times New Roman', Times, serif;
     margin-top: 30px;
     color: white;
+    text-align: center; /* Ensures paragraph text is centered */
 }
 
-
 .delete-account-container {
-    left: 0;
-    border-radius: 0 15px 15px 0;
-    flex: 0.2;
-    background-color: rgba(255, 255, 255, 0.2); /* White with 20% opacity */
-    backdrop-filter: blur(10px); /* Adds a frosted glass effect */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Adds subtle shadow for visibility */
+    border-radius: 15px 0 0 15px;
+    background-color: rgba(0, 0, 0, 0.8); /* Darker background for better readability */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers content horizontally */
-    justify-content: center; /* Centers content vertically */
-    text-align: center; /* Ensures text inside is centered */
-    
+    justify-content: center;
+    text-align: center;
     padding: 20px;
+    margin-right: auto; /* Keeps the container aligned to the left */
+    width: 100%; /* Adjusted for full width on smaller screens */
+    max-width: 300px; /* Maximum width for better form management */
 }
-
 
 .home-icon {
     position: absolute;
@@ -64,16 +62,13 @@
     z-index: 1;
 }
 
-.home-icon img{
+.home-icon img {
     width: 40px;
     height: 40px;
-    cursor: pointer;
 }
 
-
-
 .delete-btn {
-    background-color: crimson;
+    background-color: #c81058;
     color: white;
     padding: 12px 24px;
     font-size: 1rem;
@@ -91,33 +86,30 @@
 }
 
 .delete-btn:hover {
-    background-color: maroon;
+    background-color: #ff70a6; /* Lighter shade for hover effect */
     transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-    .settings-page {
+    .delete-account-page {
         flex-direction: column;
     }
 
     .image-container {
         flex: none;
-        height: 50vh;
+        height: 50vh; /* Adjust height for mobile devices */
     }
 
-    .settings-container {
-        flex: none;
-        width: 100%;
-        padding: 20px;
+    .delete-account-container {
+        width: 100%; /* Full width on small screens */
+        padding: 20px; /* Padding for better layout */
     }
 
-    .settings-btn {
+    .delete-btn {
         max-width: 100%;
     }
-
-
 }
 
 .text {
-    color: white;
+    color: white; /* White text for better visibility against dark background */
 }

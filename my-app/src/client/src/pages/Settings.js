@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import settingsImage from "../assets/settingsbg.jpg";
+import settingsImage from "../assets/bmw-vision-m-next-be.jpg";
 import homeImage from "../assets/home.svg";
 import "../styles/settings.css";    
 import { auth } from "../config/firebase"; // Ensure Firebase auth is imported

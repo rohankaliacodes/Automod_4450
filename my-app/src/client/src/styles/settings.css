@@ -2,64 +2,56 @@
     display: flex;
     height: 100vh;
     width: 100%;
+/*background: #333;*//* Dark background for a sleek look */
 }
 
 .image-container {
-    position: fixed; /* Fixes the background in place */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    z-index: -1; /* Moves it behind the content */
+    z-index: -1;
 }
 
 .settings-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures the image covers the whole area */
+    object-fit: cover;
 }
 
 .forgot-password {
     font-size: 1rem;
     margin-top: 30px;
-    color: white;
+    color: #c81058; /* Highlight color */
     cursor: pointer;
 }
 
 .forgot-password:hover {
     text-decoration: underline;
+    color: #ff70a6; /* Lighter shade for hover effect */
 }
 
-
-
 .settings-container {
-    left: 0;
-    border-radius: 0 15px 15px 0;
     flex: 0.2;
-    background-color: rgba(255, 255, 255, 0.2); /* White with 20% opacity */
-    backdrop-filter: blur(10px); /* Adds a frosted glass effect */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Adds subtle shadow for visibility */
+    background-color: rgba(0, 0, 0, 0.8); /* Dark semi-transparent background */
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-radius: 0 15px 15px 0;
 }
-
 
 .settings-header {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 10px;
-    color: white;
-}
-
-.settings-username {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #555;
+    color: #c81058; /* Using highlight color */
 }
 
 .settings-btn {
-    background-color: goldenrod;
+    background-color: #c81058;
     color: white;
     padding: 12px 24px;
     font-size: 1rem;
@@ -76,14 +68,15 @@
 }
 
 .settings-btn:hover {
-    background-color: darkgoldenrod;
+    background-color: #ff70a6; /* Lighter shade for hover effect */
     transform: translateY(-2px);
 }
+
 .settings-form-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center items horizontally */
-    justify-content: center; /* Center items vertically */
+    align-items: center;
+    justify-content: center;
     width: 100%;
     padding: 20px;
 }
@@ -91,20 +84,20 @@
 .change-form {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center elements horizontally */
-    justify-content: center; /* Align form content centrally */
+    align-items: center;
+    justify-content: center;
     width: 100%;
     gap: 15px;
 }
 
 .input-field {
-    width: 80%; /* Adjust width for better centering */
+    width: 80%;
     max-width: 250px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
-    text-align: center; /* Centers text inside input field */
+    text-align: center;
 }
 
 .home-icon {
@@ -118,13 +111,10 @@
 .home-icon img{
     width: 40px;
     height: 40px;
-    cursor: pointer;
 }
 
-
-
 .delete-btn {
-    background-color: crimson;
+    background-color: #c81058;
     color: white;
     padding: 12px 24px;
     font-size: 1rem;
@@ -142,7 +132,7 @@
 }
 
 .delete-btn:hover {
-    background-color: maroon;
+    background-color: #ff70a6;
     transform: translateY(-2px);
 }
 
@@ -165,10 +155,8 @@
     .settings-btn {
         max-width: 100%;
     }
-
-
 }
 
 .text {
-    color: white;
+    color: white; /* Ensures readability against darker backgrounds */
 }
