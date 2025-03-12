@@ -1,11 +1,13 @@
 import {query, where, getDocs, collection, deleteDoc, doc} from 'firebase/firestore';
 import {db, auth} from '../config/firebase';
 import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Header from './Header';
 import '../styles/Garage.css';
 
 
 function Garage(){
+    const navigate = useNavigate();
 
     const [garageContents, setGarageContents] = useState([]);
 
@@ -21,6 +23,21 @@ function Garage(){
         fetchGarageContents();
       }, []);
 
+    const handleCarClick = (car) => {
+      const carData ={
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        trim: car.trim,
+        engine: car.engine
+      };
+      navigate('/carView', {state: carData});
+    };
+
+    const getCarImage = (car) => {
+        return `/carImages/${car.year} ${car.make} ${car.model} ${car.trim}.png`;
+    };
+
       return (
         <div className='garage-container'>
           <Header />
@@ -28,8 +45,11 @@ function Garage(){
             <h1 className="garage-heading">{auth.currentUser.displayName}'s Garage</h1>
                 {garageContents.map((car) => (
                 <div key={car.id} className="garage-car">
-                    <h2>{car.year} {car.make} {car.model} {car.trim} {car.engine}</h2>
+                  <div className='car-box'>
+                    <img onClick={() => handleCarClick(car)} className="car-image" src={getCarImage(car)} alt="Car" />
+                    <h2 className="car-name-header">{car.year} {car.make} {car.model} {car.trim}</h2>
                     <button
+                    className='remove-button'
                     onClick={async () => {
                         const user = auth.currentUser;
                         if (!user) return;
@@ -40,6 +60,7 @@ function Garage(){
                     >
                     Remove
                     </button>
+                  </div>
                 </div>
                 ))}
             </div>
