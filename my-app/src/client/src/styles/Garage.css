@@ -34,4 +34,53 @@
 }
 
 
+.garage-heading {
+  font-size: 50px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
 
+.car-name-header {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.remove-button {
+  background-color: #c81058;
+  color: white;
+  border-radius: 5px;
+  font-size: 20px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.remove-button:hover {
+  background-color: #ff3366;
+}
+
+.car-box {
+  background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+  backdrop-filter: blur(8px); /* Glassmorphism effect */
+  border-radius: 15px; /* Rounded corners */
+  padding: 20px;
+  margin: 20px auto; /* Center horizontally */
+  width: 90%; /* Adjust width as needed */
+  max-width: 500px; /* Prevents it from being too large */
+  text-align: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth hover effect */
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1); /* Subtle glow effect */
+}
+
+.car-box:hover {
+  transform: scale(1.05); /* Slightly enlarges when hovered */
+  box-shadow: 0px 8px 20px rgba(255, 255, 255, 0.3); /* Stronger glow on hover */
+}
+
+/* Styling for the car image */
+.car-image {
+  width: 100%; /* Ensure image fits inside the box */
+  max-height: 250px; /* Limit height */
+  object-fit: cover; /* Ensures aspect ratio is maintained */
+  border-radius: 10px; /* Rounded edges */
+  cursor: pointer;
+}
