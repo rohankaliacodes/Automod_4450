@@ -10,6 +10,7 @@ function Garage(){
     const navigate = useNavigate();
 
     const [garageContents, setGarageContents] = useState([]);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         const fetchGarageContents = async () => {
@@ -19,6 +20,8 @@ function Garage(){
           const userGarageSnapshot = await getDocs(userGarageRef);
           const cars = userGarageSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
           setGarageContents(cars);
+          setMessage(cars.length === 0 ? 'Your garage is empty!' : '');
+          
         }
         fetchGarageContents();
       }, []);
@@ -42,7 +45,9 @@ function Garage(){
         <div className='garage-container'>
           <Header />
           <div className='garage-contents'>
-            <h1 className="garage-heading">{auth.currentUser.displayName}'s Garage</h1>
+          <h1 className="garage-heading">{auth.currentUser ? `${auth.currentUser.displayName}'s Garage` : "Your Garage"}</h1>
+              <p>{message}</p>
+              <div className='garage-grid'>
                 {garageContents.map((car) => (
                 <div key={car.id} className="garage-car">
                   <div className='car-box'>
@@ -55,14 +60,20 @@ function Garage(){
                         if (!user) return;
                         const userGarageRef = doc(db, `users/${user.uid}/garage`, car.id);
                         await deleteDoc(userGarageRef);
-                        setGarageContents((prev) => prev.filter((c) => c.id !== car.id));
+                        setGarageContents((prev) => {
+                          const updatedContents = prev.filter((c) => c.id !== car.id)
+                          setMessage(updatedContents.length === 0 ? 'Your garage is empty!' : '');
+                          return updatedContents;
+                        });
                     }}
                     >
                     Remove
                     </button>
+                    
                   </div>
                 </div>
                 ))}
+            </div>
             </div>
         </div>
       )
