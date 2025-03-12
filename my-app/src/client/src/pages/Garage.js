@@ -38,7 +38,7 @@ function Garage(){
     };
 
     const getCarImage = (car) => {
-        return `/carImages/${car.year} ${car.make} ${car.model} ${car.trim}.png`;
+        return `/carImages/${car.make} ${car.model} ${car.trim}.png`;
     };
 
       return (
