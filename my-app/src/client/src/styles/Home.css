@@ -19,7 +19,7 @@
 }
 
 .heading-find-your {
-    color: #ffffff;
+    color: #c81058; /* Highlight color for main headings */
     font-family: "DM Sans-Bold", Helvetica;
     font-size: 40px;
     font-weight: 700;
@@ -54,7 +54,7 @@
 }
 
 .category-button {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white for buttons */
     border-radius: 20px;
     padding: 10px 15px;
     color: #fff;
@@ -115,7 +115,7 @@
     width: 45px;
     height: 45px;
     margin-left: 10px;
-    background-color: #007bff;
+    background-color: #c81058; /* Highlight color */
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -166,7 +166,7 @@
 
 /* Submit Button */
 .ai-submit-button {
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* Kept original green for contrast */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -176,4 +176,33 @@
 
 .ai-submit-button:hover {
     background-color: #45a049;
+}
+
+.custom-button {
+    background-color: #c81058; /* Highlight color for button */
+    color: white; /* Text color */
+    padding: 8px 16px; /* Smaller padding for a more compact button */
+    font-size: 14px; /* Smaller font size */
+    font-weight: bold; /* Bold font weight for readability */
+    border: none; /* No border */
+    border-radius: 5px; /* Slight rounding of corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    outline: none; /* Remove outline */
+    margin: 5px; /* Margin for spacing */
+    width: auto; /* Auto width based on content size */
+    display: inline-block; /* Allows setting width and center alignment */
+    text-align: center; /* Center text inside button */
+}
+
+.custom-button:hover {
+    background-color: #ff70a6; /* Lighter shade for hover effect */
+}
+
+.custom-button:disabled {
+    background-color: #cccccc; /* Greyed out button when disabled */
+    color: #666666; /* Darker text color for disabled state */
+    cursor: not-allowed; /* Cursor to indicate button is disabled */
+    box-shadow: none; /* No shadow when disabled */
 }
