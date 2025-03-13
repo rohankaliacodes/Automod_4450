@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../styles/styles.css";
 import Header from "./Header";
 import { useLocation } from "react-router-dom";
+import {auth, db} from "../config/firebase";
+import { getDocs, collection } from "firebase/firestore";
 
 
 
@@ -10,6 +12,7 @@ function Market () {
     const location = useLocation();
     const category = location.state?.category || "";
 
+    const [recommendations, setRecommendations] = React.useState([]);
     const [make, setMake] = React.useState("");
     const [model, setModel] = React.useState("");
     const [year, setYear] = React.useState("");
@@ -24,6 +27,43 @@ function Market () {
     const [price, setPrice] = React.useState(0);
     const [isChanged, setIsChanged] = React.useState(false);    
 
+    useEffect(() => {
+        const fetchGarageContents = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userGarageRef = collection(db, `users/${user.uid}/garage`);
+            const userGarageSnapshot = await getDocs(userGarageRef);
+            const cars = userGarageSnapshot.docs.map((doc) => doc.data());
+
+            if(cars.length > 0){
+                fetchRecommendations(cars);
+            }
+        };
+        fetchGarageContents();
+    }, []);
+
+    async function fetchRecommendations(cars){
+        try{
+            const response = await fetch("http://localhost:5001/api/parts/getRecommendations", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({cars})
+            });
+            const data = await response.json();
+            if(data.status === "ok"){
+                console.log(data.data);
+                setRecommendations(data.data);
+                console.log("recs", data);
+            }
+            else{
+                setRecommendations([]);
+                console.log(data.message);
+            }
+        } catch(err){
+            console.log(err);
+        }
+    }
 
    async function fetchAllParts(){
         try{
@@ -54,6 +94,7 @@ function Market () {
             fetchAllParts();
         }
     }, [category]);
+
 
     async function fetchParts(event){
         event.preventDefault();
@@ -423,6 +464,24 @@ function Market () {
             <Header />
             <h1 className="market-header">Browse Parts By Vehicle</h1>
             <p>Enter in your car's specifics and view compatible parts</p>
+            <div className="rec-container">
+            <h2 className="rec-header">Recommended Parts for You</h2>
+            {recommendations.length > 0 ? (
+                <div className="recommendations">
+                    {recommendations.map((part, index) => (
+                        <div key={index} className="part-item">
+                            <p><strong>Part Name: {part["Part Name"]}</strong></p>
+                            <p><strong>Category: {part["Category"]}</strong></p>
+                            <p><strong>Price: {part["Price"]}</strong></p>
+                            <p><strong>{part["SKU Number"]}</strong></p>
+                            <a href={part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
+                        </div>
+                    ))}
+                </div>  
+                    
+                ) : null}
+            </div>
+           
             <input className="searchBar" type="text" placeholder="Search By Part Name or SKU: " value={searchInput} onChange={(event) => setSearchInput(event.target.value)}></input>
             <button className="top-button" onClick={(event) => { searchParts(event); setSearched(true); }}>Search</button>
             <br></br>

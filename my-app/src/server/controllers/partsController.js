@@ -23,6 +23,34 @@ const getParts = async (req, res) => {
     });
 };
 
+const getRecommendations = async (req, res) => {
+    const { cars } = req.body;
+    if(!cars || cars.length === 0){
+        return res.status(400).json({ status: "error", message: "Please provide car data" });
+    }
+    try {
+        let recommendations = [];
+        for (const car of cars){
+            const filePath = path.join(__dirname, `../partsFiles/${car.make}/${car.make} ${car.model}/${car.year} ${car.make} ${car.model} ${car.trim} ${car.engine}.json`);
+
+            if (fs.existsSync(filePath)) {
+                const fileData = fs.readFileSync(filePath, 'utf8');
+                const parts = JSON.parse(fileData);
+
+                if(parts.length > 0){
+                    const part = parts[Math.floor(Math.random() * parts.length)];
+                    recommendations.push(part);
+                }
+
+            }
+        }
+        res.json({ status: "ok", data: recommendations });
+    } catch (error) {
+        console.log("Error getting recommendations:", error);
+        res.status(500).json({ status: "error", message: "Internal Server Error" });
+    }
+};
+
 
 
 const searchPartsByName = async (req, res) => {
@@ -127,4 +155,4 @@ const getAllParts = async (req, res) => {
     }
 };
 
-export { getParts, searchPartsByName, getAllParts };
+export { getParts, searchPartsByName, getAllParts, getRecommendations };

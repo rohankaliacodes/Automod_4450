@@ -246,3 +246,65 @@ select:focus {
         gap: 30px;
     }
 }
+
+.rec-container {
+    position: fixed; /* Stays fixed on the right */
+    top: 50%; /* Centers vertically */
+    right: 20px; /* Positioning on the right */
+    transform: translateY(-50%); /* Ensures proper centering */
+    
+    width: 280px; /* Optimal width */
+    max-height: 350px; /* Limits height */
+    
+    background: rgba(30, 30, 30, 0.85); /* Darker, elegant background */
+    backdrop-filter: blur(12px); /* Smooth blur effect */
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Subtle, modern shadow */
+    
+    color: white;
+    font-size: 14px;
+    text-align: center;
+    z-index: 1000; /* Ensures it appears above other elements */
+    
+    overflow-y: auto; /* Enables scrolling if content overflows */
+    scrollbar-width: thin; /* Modern, slim scrollbar */
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+
+/* Custom scrollbar for better appearance */
+.rec-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rec-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+}
+
+.rec-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Recommendations Section */
+.recommendations {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+/* Recommendation Header */
+.rec-header {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 5px;
+}
+
+.part-item:hover {
+    transform: translateY(-5px); /* Lifts the card slightly on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhances shadow on hover */
+}
