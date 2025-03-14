@@ -30,11 +30,8 @@
 
 .chat-box.pinned {
     opacity: 1;
-    pointer-events: auto; /* Ensure interactions are active when pinned */
+    pointer-events: auto;
     transform: translateY(0);
-    /* Optional: Styles to indicate pinned state */
-    /* border: 2px solid #c81058;  Example: Add a border when pinned */
-    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); Example: Stronger shadow */
 }
 
 
@@ -101,22 +98,29 @@
     margin-bottom: 4px;
     max-width: 95%;
     font-size: 0.9em;
-    white-space: pre-wrap;
+    /* Remove white-space: pre-wrap; from .message */
+    word-wrap: break-word; /* Keep break-word */
+     display: flex; /* Add flexbox to .message */
+    flex-direction: column; /* Stack content vertically */
 }
 
 .message.received {
     background-color: transparent;
     color: #eee;
     align-self: flex-start;
-    text-indent: 10px;
+    /* Remove text-indent, use margin for spacing */
+     margin-left: 10px;
 }
 
 .message.sent {
-    background-color: transparent;
-    color: #bbb;
+    background-color: #444;
+    color: #eee;
     align-self: flex-end;
-    text-align: right;
+    text-align: left;
     margin-right: 10px;
+    border-radius: 20px;
+    padding: 10px 15px;
+    word-wrap: break-word;
 }
 
 .input-area {
@@ -129,7 +133,7 @@
     position: relative;
     box-sizing: border-box;
     width: 100%;
-    max-width: 100%; /* ADDED: Ensure input-area doesn't expand too much */
+    max-width: 100%;
 }
 
 .input-container {
@@ -152,15 +156,15 @@
     outline: none;
     margin-bottom: 0;
     resize: vertical;
-    overflow-y: auto; /*  Kept - but we need to fix the strike-through */
+    overflow-y: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
     height: auto;
     min-height: 30px;
     max-height: 150px;
-    width: 90%; /* Simplified width for testing */
+    width: 90%;
     box-sizing: border-box;
-    margin-right: 0; /* Removed margin-right for simplification */
+    margin-right: 0;
 }
 
 .message-input::placeholder {
@@ -186,7 +190,7 @@
 
 .send-button:hover {
     opacity: 1;
-    filter: drop-shadow(0 0 2px #c81058); /* Use drop-shadow filter */
+    filter: drop-shadow(0 0 2px #c81058);
 }
 
 .options-bar {
@@ -240,8 +244,7 @@
 
 .option-icon.selected-icon {
     opacity: 1;
-    /* box-shadow: 0 0 8px 2px #c81058;  Remove box-shadow */
-    filter: drop-shadow(0 0 8px #c81058); /* Use drop-shadow filter */
+    filter: drop-shadow(0 0 8px #c81058);
     transform: scale(1.1);
 }
 
@@ -252,30 +255,26 @@
     margin-left: auto;
 }
 
-
+/* Larger sources and alignment fixes */
 .sources {
     margin-top: 5px;
-    font-size: 0.8em;
+    font-size: 1em; /* Increased font size */
     color: #aaa;
-}
-
-.sources p {
-    margin-bottom: 2px;
-}
-
-.sources ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    padding-left: 0;
-}
-
-.sources li {
-    margin-bottom: 1px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    align-items: center;
 }
 
 .sources a {
-    color: #88c0d0; /* Example link color */
+    color: #88c0d0;
     text-decoration: none;
+    white-space: nowrap;
+}
+
+.sources a:not(:last-child)::after{
+    content: ',';
+    margin-right: 0.25em;
 }
 
 .sources a:hover {
@@ -285,16 +284,16 @@
 .source-link {
     background-color: transparent;
     border: none;
-    color: #88c0d0; /* Or any color you prefer for the link text */
+    color: #88c0d0;
     cursor: pointer;
-    padding: 0 2px; /* Add some padding */
-    font-size: 0.8em;
-    text-decoration: none; /* Remove underline by default */
-    vertical-align: baseline; /* Ensure proper alignment */
+    padding: 0 2px;
+    font-size: 1em; /* Increased font size */
+    text-decoration: none;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
 }
 
-.source-link:hover {
-    text-decoration: underline; /* Add underline on hover for clarity */
-    /* Optionally add a subtle background on hover */
-    /* background-color: rgba(136, 192, 208, 0.2);  */
+.segment-text {
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
 }

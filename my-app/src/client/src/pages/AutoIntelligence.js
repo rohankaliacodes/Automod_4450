@@ -8,7 +8,7 @@ const AutoIntelligence = () => {
     const [isChatVisible, setIsChatVisible] = useState(false);
     const [isChatPinned, setIsChatPinned] = useState(isChatVisible);
     const [messages, setMessages] = useState([
-        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [] }, // Initialize with empty segments
+        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [] },
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
@@ -16,13 +16,24 @@ const AutoIntelligence = () => {
     const chatBoxRef = useRef(null);
     const [loadingResponse, setLoadingResponse] = useState(false);
     const [sessionId, setSessionId] = useState(null);
+    const [hasError, setHasError] = useState(false);
+    const [currentEventSource, setCurrentEventSource] = useState(null); // Store the current EventSource
+
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
-        setMessages([...messages, { text: inputMessage, sender: 'sent', segments: [] }]); // Initialize segments for sent messages too
+        const userMessage = { text: inputMessage, sender: 'sent', segments: [] };
+        setMessages(prevMessages => [...prevMessages, userMessage]);
         setInputMessage('');
-        setLoadingResponse(true); // Set loading to true BEFORE fetching
+        setLoadingResponse(true);
+        setHasError(false);
+
+        // Close any existing EventSource connection before starting a new one
+        if (currentEventSource) {
+            currentEventSource.close();
+            setCurrentEventSource(null); // Clear the old EventSource
+        }
 
         let apiUrl = '';
         if (selectedIconType === 'autoMechanic') {
@@ -37,6 +48,8 @@ const AutoIntelligence = () => {
             setLoadingResponse(false);
             return;
         }
+
+        let eventSource;
 
         try {
             if (selectedIconType === 'autoMechanic') {
@@ -53,22 +66,20 @@ const AutoIntelligence = () => {
                     throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                const { sessionId } = await initResponse.json(); // Only get sessionId
+                const { sessionId } = await initResponse.json();
                 setSessionId(sessionId);
-                // DON'T add initialResponse as a message here
 
-                const eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`);
+                eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`);
+                setCurrentEventSource(eventSource); // Store the new EventSource
 
                 eventSource.onopen = () => {
-                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [] }]); // Add Loading message
+                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [] }]);
                 };
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
                     setMessages(prevMessages => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
-
-                        // Function to process segments
                         const processSegments = (text, supports, sources) => {
                             if (!supports || supports.length === 0) {
                                 return [{ text: text, sources: [] }];
@@ -98,19 +109,15 @@ const AutoIntelligence = () => {
                             return segments;
                         };
 
-
-                         if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
-                           const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
-                            //Replace "Loading..."
-                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments}];
-
+                        if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
+                            const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
+                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments }];
                         } else if (messageData.role === 'model') {
                             const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
                             if (lastMessage && lastMessage.sender === 'received') {
-                                // *** Update *both* text and segments here ***
                                 return prevMessages.map((msg, index) =>
                                     index === prevMessages.length - 1
-                                        ? { ...msg, text: msg.text + messageData.text, segments: [...msg.segments, ...newSegments] } // Append text and segments
+                                        ? { ...msg, text: msg.text + messageData.text, segments: [...msg.segments, ...newSegments] }
                                         : msg
                                 );
                             } else {
@@ -121,25 +128,35 @@ const AutoIntelligence = () => {
                     });
                 };
 
-
-
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
-                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI (streaming error).', sender: 'received', segments: [] }]);
+                    // Don't add error message here.
                     setLoadingResponse(false);
-                    eventSource.close();
+                    if (eventSource) {
+                        eventSource.close();
+                    }
                 };
-                 return () => {
-                    eventSource.close();
-                }
+           
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-                // ... (recommendation API call - unchanged) ...
+                // ... recommendation API call (unchanged) ...
             }
         } catch (error) {
             console.error('Error setting up SSE:', error);
-            setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [] }]);
+             if (!hasError) {
+                setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [] }]);
+                setHasError(true);
+            }
             setLoadingResponse(false);
+              if (eventSource) {
+                    eventSource.close();
+                }
         }
+          return () => {
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+        };
+
     };
 
     const handleInputChange = (e) => {
@@ -191,23 +208,29 @@ const AutoIntelligence = () => {
             <div className="messages-area">
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.sender}`}>
-                        {message.segments.map((segment, segmentIndex) => (
-                            <React.Fragment key={segmentIndex}>
-                                {segment.text}
-                                {segment.sources.map((source, sourceIndex) => (
-                                    <a
-                                        key={sourceIndex}
-                                        href={source.uri}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="source-link"
-                                        title={source.uri}
-                                    >
-                                     [{source.title}]
-                                    </a>
-                                ))}
-                            </React.Fragment>
-                        ))}
+                        {message.segments && message.segments.length > 0 ? (
+                            message.segments.map((segment, segmentIndex) => (
+                                <React.Fragment key={segmentIndex}>
+                                    <span className="segment-text">{segment.text}</span> {/* Wrap text in a span */}
+                                    <div className="sources">
+                                        {segment.sources.map((source, sourceIndex) => (
+                                            <a
+                                                key={sourceIndex}
+                                                href={source.uri}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="source-link"
+                                                title={source.uri}
+                                            >
+                                                [{source.title}]
+                                            </a>
+                                        ))}
+                                    </div>
+                                </React.Fragment>
+                            ))
+                        ) : (
+                            message.text
+                        )}
                     </div>
                 ))}
                 {loadingResponse && <div className="message received">Loading...</div>}
