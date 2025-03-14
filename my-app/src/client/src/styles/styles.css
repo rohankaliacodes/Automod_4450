@@ -109,6 +109,22 @@ html, body {
     gap: 15px;
 }
 
+.cat-button {
+    background-color: #c81058;
+    color: white;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 5px;
+    
+}
+
+.cat-button:hover {
+    background-color: #ff3366;
+    transform: scale(1.05);
+}
+
 /* Dropdown Styles */
 select {
     width: 100%;
@@ -249,7 +265,7 @@ select:focus {
 
 .rec-container {
     position: fixed; /* Stays fixed on the right */
-    top: 50%; /* Centers vertically */
+    top: 35%; /* Centers vertically */
     right: 20px; /* Positioning on the right */
     transform: translateY(-50%); /* Ensures proper centering */
     

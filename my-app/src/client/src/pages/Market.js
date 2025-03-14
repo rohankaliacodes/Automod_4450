@@ -468,13 +468,14 @@ function Market () {
             <h2 className="rec-header">Recommended Parts for You</h2>
             {recommendations.length > 0 ? (
                 <div className="recommendations">
-                    {recommendations.map((part, index) => (
+                    {recommendations.map((data, index) => (
                         <div key={index} className="part-item">
-                            <p><strong>Part Name: {part["Part Name"]}</strong></p>
-                            <p><strong>Category: {part["Category"]}</strong></p>
-                            <p><strong>Price: {part["Price"]}</strong></p>
-                            <p><strong>{part["SKU Number"]}</strong></p>
-                            <a href={part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
+                            <p><strong>Part Name: {data.part["Part Name"]}</strong></p>
+                            <p><strong>For: {data.car.year} {data.car.make} {data.car.model} {data.car.trim} {data.car.engine}</strong></p>
+                            <p><strong>Category: {data.part["Category"]}</strong></p>
+                            <p><strong>Price: {data.part["Price"]}</strong></p>
+                            <p><strong>{data.part["SKU Number"]}</strong></p>
+                            <a href={data.part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
                         </div>
                     ))}
                 </div>  
@@ -549,16 +550,16 @@ function Market () {
             <p>{message}</p>
             {isSubmitted || searched ? (
                     <div className="sort-buttons">
-                        <button className="top-button" onClick={() => sortPartsByCategory("All")}>All</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Belts/Hoses/Cooling")}>Belts/Hoses/Cooling</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Body/Cable/Misc")}>Body/Cable/Misc</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Brake/Wheel Bearing")}>Brake/Wheel Bearing</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Electrical")}>Electrical</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Fuel/Emissions")}>Fuel/Emissions</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Heating/AC")}>Heating/AC</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Ignition/Filters")}>Ignition/Filters</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Tires/Accessories")}>Tires/Accessories</button>
-                        <button className="top-button" onClick={() => sortPartsByCategory("Wipers/Lamps/Fuses")}>Wipers/Lamps/Fuses</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("All")}>All</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Belts/Hoses/Cooling")}>Belts/Hoses/Cooling</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Body/Cable/Misc")}>Body/Cable/Misc</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Brake/Wheel Bearing")}>Brake/Wheel Bearing</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Electrical")}>Electrical</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Fuel/Emissions")}>Fuel/Emissions</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Heating/AC")}>Heating/AC</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Ignition/Filters")}>Ignition/Filters</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Tires/Accessories")}>Tires/Accessories</button>
+                        <button className="cat-button" onClick={() => sortPartsByCategory("Wipers/Lamps/Fuses")}>Wipers/Lamps/Fuses</button>
                     </div>
                 ) : null}
             {isSubmitted || searched ? (

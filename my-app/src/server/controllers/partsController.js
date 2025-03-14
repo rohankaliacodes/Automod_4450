@@ -39,7 +39,16 @@ const getRecommendations = async (req, res) => {
 
                 if(parts.length > 0){
                     const part = parts[Math.floor(Math.random() * parts.length)];
-                    recommendations.push(part);
+                    recommendations.push({
+                    car: {
+                        make: car.make,
+                        model: car.model,
+                        year: car.year,
+                        trim: car.trim,
+                        engine: car.engine
+                    },
+                        part
+                });
                 }
 
             }
