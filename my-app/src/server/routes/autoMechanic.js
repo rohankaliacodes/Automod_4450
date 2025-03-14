@@ -1,8 +1,9 @@
 import express from 'express';
 const { Router } = express;
-import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -14,16 +15,16 @@ console.log("API Key from env:", apiKey ? "Present" : "Missing!");
 const genAI = new GoogleGenerativeAI(apiKey);
 console.log("genAI object:", genAI);
 
-// Updated Model Initialization for Gemini 2.0 Pro Experimental with **Empty Object** Google Search
+// --- CRUCIAL FIX:  Specify apiVersion and model name correctly ---
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-pro-exp", // Changed to Gemini 2.0 Pro Experimental
+    model: 'gemini-2.0-flash-exp', // or 'models/gemini-2.0-flash' - try both
     tools: [
         {
-            googleSearch: {},  // **Use an empty object for googleSearch**
+            googleSearch: {},
         },
     ],
-    apiVersion: "v1beta", // Explicitly set apiVersion to v1beta - keep this for now
-});
+}, { apiVersion: "v1beta" });
+
 
 console.log("Initialized Gemini model:", model);
 
@@ -32,86 +33,142 @@ const generationConfig = {
     topP: 0.95,
     topK: 64,
     maxOutputTokens: 65536,
-    responseMimeType: "text/plain",
 };
 
-const chatSessions = new Map();
+const chatSessions = new Map(); // Store chat sessions by ID
 
-// Configure multer for handling file uploads
+// Configure multer (for image uploads, if needed)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Updated chat route to handle image uploads and grounding
+// POST /api/autoMechanic/chat (Initiate chat and return session ID)
 router.post('/chat', upload.single('image'), async (req, res) => {
-    const userId = req.id;
-    const userMessage = req.body.message;
-    const imageFile = req.file;
-
-    if (!userMessage && !imageFile) {
-        return res.status(400).json({ error: 'Message or Image is required' });
-    }
-
-    let chatSession = chatSessions.get(userId);
-
-    if (!chatSession) {
-        console.log("chatSession is null, initializing new session...");
-        chatSession = model.startChat({
-            generationConfig,
-            history: [],
-        });
-        chatSessions.set(userId, chatSession);
-        console.log("New chatSession initialized:", chatSession);
-        console.log("Type of new chatSession:", typeof chatSession);
-    } else {
-        console.log("Retrieved existing chatSession:", chatSession);
-        console.log("Type of existing chatSession:", typeof chatSession);
-    }
-
-    let parts = [];
-
-    if (userMessage) {
-        parts.push({ text: userMessage });
-    }
-
-    if (imageFile) {
-        console.log('Image received:', imageFile.originalname, imageFile.mimetype, imageFile.buffer.length);
-        parts.push({
-            inlineData: {  // Using inlineData for image as per docs example
-                mimeType: imageFile.mimetype,
-                data: imageFile.buffer.toString('base64') // Convert buffer to base64 string
-            }
-        });
-    }
-
-
     try {
-        const result = await chatSession.sendMessage(parts); // Corrected line: Passing parts array directly
-        const responseText = result.response.text();
+        const userMessage = req.body.message;
+        const imageFile = req.file;
 
-        // Log grounding metadata if available
-        if (result.response.candidates && result.response.candidates[0].groundingMetadata) {
-            console.log("Grounding Metadata:", result.response.candidates[0].groundingMetadata);
-        } else {
-            console.log("No Grounding Metadata in the response.");
+        if (!userMessage && !imageFile) {
+            return res.status(400).json({ error: 'Message or Image is required' });
         }
 
+        let parts = [];
+        if (userMessage) {
+            parts.push({ text: userMessage });
+        }
+        if (imageFile) {
+            parts.push({
+                inlineData: {
+                    mimeType: imageFile.mimetype,
+                    data: imageFile.buffer.toString('base64')
+                }
+            });
+        }
 
-        chatSessions.set(userId, chatSession);
+        const result = await model.generateContent(parts); // Use generateContent here
+        const response = result.response;
+        const text = response.text();
 
-        res.json({ response: responseText });
+        console.log("Full Response Text:", text);
+
+        if (response.candidates && response.candidates.length > 0) {
+            const candidate = response.candidates[0];
+
+            if (candidate.groundingMetadata) {
+                console.log("Grounding Metadata:", candidate.groundingMetadata);
+
+                if (candidate.groundingMetadata.webSearchQueries) {
+                    console.log("Web Search Queries:", candidate.groundingMetadata.webSearchQueries);
+                } else {
+                    console.log("No webSearchQueries found in groundingMetadata.");
+                }
+
+            } else {
+                console.log("No Grounding Metadata in the response.");
+            }
+        } else {
+            console.log("No candidates in the response.");
+        }
+
+        res.json({ response: text }); // Just send back the text response
+
+
     } catch (error) {
-        console.error('Gemini API error:', error);
-        res.status(500).json({
-            error: 'Failed to send message to AI',
-            details: error.message,
-            stack: error.stack
-        });
+        console.error('Error initiating chat:', error);
+        res.status(500).json({ error: 'Failed to initiate chat' });
     }
 });
 
+// GET /api/autoMechanic/chat/stream (Stream responses, with detailed logging)
+router.get('/chat/stream', async (req, res) => {
+    const sessionId = req.query.sessionId;
+    const userMessage = req.query.message;
+
+    if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID is required' });
+    }
+    if (!userMessage) {
+        return res.status(400).json({ error: 'User message is required' });
+    }
+
+    const chatSession = chatSessions.get(sessionId);
+    if (!chatSession) {
+        return res.status(404).json({ error: 'Session not found' });
+    }
+
+    try {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const parts = [{ text: userMessage }];
+        const resultStream = await chatSession.sendMessageStream(parts);
+
+        let fullResponseText = "";
+        for await (const chunk of resultStream.stream) {
+            const chunkText = chunk.text();
+            res.write(`data: ${JSON.stringify({ role: "model", text: chunkText })}\n\n`);
+            fullResponseText += chunkText;
+        }
+
+        console.log("Full Response Text:", fullResponseText);
+
+       if (resultStream.response.candidates && resultStream.response.candidates.length > 0) {
+            const candidate = resultStream.response.candidates[0];
+
+            if (candidate.groundingMetadata) {
+                console.log("Grounding Metadata:", candidate.groundingMetadata);
+
+                // Access and log webSearchQueries (like in the reference output)
+                if (candidate.groundingMetadata.webSearchQueries) {
+                    console.log("Web Search Queries:", candidate.groundingMetadata.webSearchQueries);
+                } else {
+                     console.log("No webSearchQueries found in groundingMetadata.");
+                }
+
+            } else {
+                console.log("No Grounding Metadata in the response.");
+            }
+        } else {
+            console.log("No candidates in the response.");
+        }
+
+
+        res.end();
+
+    } catch (error) {
+        console.error('Error during streaming:', error);
+        // Log the error *details* - this is VERY important for debugging
+        console.error(error);
+        res.status(500).write('data: error\n\n');
+        res.end();
+    }
+});
+
+// Reset endpoint (remains unchanged)
 router.post('/reset', async (req, res) => {
-    const userId = req.user.id;
-    chatSessions.delete(userId);
+    for (const [sessionId, chatSession] of chatSessions) {
+        chatSessions.delete(sessionId);
+    }
     res.json({ message: 'Chat history reset successfully' });
 });
 
