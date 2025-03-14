@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
-  const categories = ["Interior", "Wheel/Rim", "Engine Mod", "Suspension", "Exterior"];
+  const categories = ["All", "Belts/Hoses/Cooling", "Body/Cable/Misc", "Brake/Wheel Bearing", "Electrical", "Fuel/Emissions", "Heating/AC", "Ignition/Filters", "Tires/Accessories", "Wipers/Lamps/Fuses"];
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");

@@ -10,7 +10,7 @@ import { getDocs, collection } from "firebase/firestore";
 
 function Market () {
     const location = useLocation();
-    const category = location.state?.category || "";
+    const category = location.state?.category || null;
 
     const [recommendations, setRecommendations] = React.useState([]);
     const [make, setMake] = React.useState("");
@@ -43,6 +43,17 @@ function Market () {
         fetchGarageContents();
     }, []);
 
+    useEffect(() => {
+        fetchAllParts();
+    }, []);
+
+    useEffect(() => {
+        if(category && completePartsArray.length > 0){
+            setIsSubmitted(true);
+            sortPartsByCategory(category, completePartsArray);
+        }
+    }, [category, completePartsArray]);
+
     async function fetchRecommendations(cars){
         try{
             const response = await fetch("http://localhost:5001/api/parts/getRecommendations", {
@@ -52,13 +63,10 @@ function Market () {
             });
             const data = await response.json();
             if(data.status === "ok"){
-                console.log(data.data);
                 setRecommendations(data.data);
-                console.log("recs", data);
             }
             else{
                 setRecommendations([]);
-                console.log(data.message);
             }
         } catch(err){
             console.log(err);
@@ -73,14 +81,10 @@ function Market () {
             });
             const data = await response.json();
             if(data.status === "ok"){
-                setPartsArray(data.data);
+                console.log("Parts: ", data.data);
                 setCompletePartsArray(data.data);
-                if(category){
-                    sortPartsByCategory(category, data.data);
-                }
             }
             else{
-                console.log(data.message);
                 setMessage("No parts found");
             }
         }
@@ -88,12 +92,6 @@ function Market () {
             setMessage("Internal Server Error");
         }
     }
-
-    useEffect(() => {
-        if(category){
-            fetchAllParts();
-        }
-    }, [category]);
 
 
     async function fetchParts(event){
@@ -110,7 +108,6 @@ function Market () {
                 setCompletePartsArray(data.data);
             }
             else{
-                console.log(data.message);
                 setMessage("No vehicle specified");
             }
         }
@@ -148,6 +145,7 @@ function Market () {
             resetPartsArray();
         }
         else{
+            console.log("complete list", completePartsArray)
             const sortedParts = completePartsArray.filter(part => part["Category"] === category);
             setPartsArray(sortedParts);
             setMessage("");
