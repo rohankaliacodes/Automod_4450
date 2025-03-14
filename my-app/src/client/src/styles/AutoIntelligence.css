@@ -28,6 +28,16 @@
     transform: translateY(0);
 }
 
+.chat-box.pinned {
+    opacity: 1;
+    pointer-events: auto; /* Ensure interactions are active when pinned */
+    transform: translateY(0);
+    /* Optional: Styles to indicate pinned state */
+    /* border: 2px solid #c81058;  Example: Add a border when pinned */
+    /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); Example: Stronger shadow */
+}
+
+
 .chat-header {
     padding: 10px 15px;
     text-align: left;
@@ -164,7 +174,7 @@
     color: white;
     cursor: pointer;
     width: 40px;
-    height: 40px; 
+    height: 40px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -186,7 +196,7 @@
     padding-bottom: 5px;
     background-color: transparent;
     color: #f0f0f0;
-    
+
     border-radius: inherit;
 }
 
@@ -240,4 +250,34 @@
     align-items: center;
     gap: 8px;
     margin-left: auto;
+}
+
+
+.sources {
+    margin-top: 5px;
+    font-size: 0.8em;
+    color: #aaa;
+}
+
+.sources p {
+    margin-bottom: 2px;
+}
+
+.sources ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.sources li {
+    margin-bottom: 1px;
+}
+
+.sources a {
+    color: #88c0d0; /* Example link color */
+    text-decoration: none;
+}
+
+.sources a:hover {
+    text-decoration: underline;
 }

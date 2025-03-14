@@ -15,6 +15,7 @@ const AutoIntelligence = () => {
     const [selectedIconType, setSelectedIconType] = useState('autoMechanic');
     const chatBoxRef = useRef(null);
     const [loadingResponse, setLoadingResponse] = useState(false);
+    const [sessionId, setSessionId] = useState(null); // Store the session ID
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
@@ -25,9 +26,9 @@ const AutoIntelligence = () => {
 
         let apiUrl = '';
         if (selectedIconType === 'autoMechanic') {
-            apiUrl = 'http://localhost:5001/api/autoMechanic/chat';
+            apiUrl = 'http://localhost:5001/api/autoMechanic/chat'; // Initial POST to /chat
         } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-            apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations'; // Keep this separate
+            apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
         if (!apiUrl) {
@@ -39,8 +40,8 @@ const AutoIntelligence = () => {
 
         try {
             if (selectedIconType === 'autoMechanic') {
-                // Send POST request to /chat endpoint (non-streaming now)
-                const response = await fetch(apiUrl, {
+                // 1. Initial POST request to /chat to start session and get sessionId
+                const initResponse = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -48,22 +49,72 @@ const AutoIntelligence = () => {
                     body: JSON.stringify({ message: inputMessage }),
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`POST request failed: ${response.status} - ${errorText}`);
+                if (!initResponse.ok) {
+                    const errorText = await initResponse.text();
+                    throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                const responseData = await response.json();
-                setMessages(prevMessages => [...prevMessages, { text: responseData.response, sender: 'received' }]); // Display text response
-                setLoadingResponse(false);
+                const { sessionId, initialResponse } = await initResponse.json();
+                setSessionId(sessionId); // Store the session ID
+                setMessages(prevMessages => [...prevMessages, { text: initialResponse, sender: 'received' }]); // Display initial response
+
+                // 2. Connect to SSE stream using sessionId
+                const eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`); // Include message in SSE URL
+
+                eventSource.onopen = () => {
+                    setMessages(prevMessages => [...prevMessages]); // Optionally indicate "Loading..." here if you want
+                };
+
+                eventSource.onmessage = (event) => {
+                    const messageData = JSON.parse(event.data);
+                    setMessages(prevMessages => {
+                        const lastMessage = prevMessages[prevMessages.length - 1];
+                        const newMessage = { text: messageData.text, sender: messageData.role }; // Create message object
+
+                        if (messageData.sources) { // Attach sources if present
+                            newMessage.sources = messageData.sources;
+                        }
+
+                        if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
+                            // Replace "Loading..." with the first chunk
+                            return [...prevMessages.slice(0, prevMessages.length - 1), newMessage]; // Use newMessage
+                        } else if (messageData.role === 'model') {
+                            // Append to the last message if it's from the model and we are streaming
+                            if (lastMessage && lastMessage.sender === 'received') {
+                                return prevMessages.map((msg, index) =>
+                                    index === prevMessages.length - 1 ? { ...msg, text: msg.text + messageData.text, sources: messageData.sources || msg.sources } : msg // Merge sources
+                                );
+                            } else {
+                                return [...prevMessages, newMessage]; // Use newMessage
+                            }
+                        }
+                        return prevMessages;
+                    });
+                };
+
+
+                eventSource.onerror = (error) => {
+                    console.error("SSE error:", error);
+                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI (streaming error).', sender: 'received' }]);
+                    setLoadingResponse(false);
+                    eventSource.close();
+                };
+
+                eventSource.addEventListener('readystatechange', () => {
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        setLoadingResponse(false);
+                        eventSource.close();
+                    }
+                });
+
 
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
                 // ... (recommendation API call - unchanged if you have it) ...
             }
 
         } catch (error) {
-            console.error('Error sending message:', error);
-            setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI.', sender: 'received' }]);
+            console.error('Error setting up SSE:', error);
+            setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received' }]);
             setLoadingResponse(false);
         }
     };
@@ -121,6 +172,27 @@ const AutoIntelligence = () => {
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.sender}`}>
                         {message.text}
+                        {message.sources && message.sources.length > 0 && ( // Conditionally render sources
+                            <div className="sources">
+                                <p>Sources:</p>
+                                <ul>
+                                    {message.sources.map((source, sourceIndex) => {
+                                        // Check if source.web and source.web.uri exist before accessing
+                                        if (source.web && source.web.uri) {
+                                            return (
+                                                <li key={sourceIndex}>
+                                                    <a href={source.web.uri} target="_blank" rel="noopener noreferrer">
+                                                        {source.web.uri} // Or source.web.title if you want to display the title
+                                                    </a>
+                                                </li>
+                                            );
+                                        } else {
+                                           return <li key={sourceIndex}>Source data unavailable</li>;
+                                        }
+                                    })}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 ))}
                 {loadingResponse && <div className="message received">Loading...</div>}
@@ -161,9 +233,9 @@ const AutoIntelligence = () => {
                     </div>
                 </div>
                 <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /><path d="m21.854 2.147-10.94 10.939" /></svg></button>
+                </div>
             </div>
-        </div>
-    );
-};
+        );
+    };
 
-export default AutoIntelligence;
+    export default AutoIntelligence;
