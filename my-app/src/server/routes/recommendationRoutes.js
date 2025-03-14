@@ -52,7 +52,7 @@ Example of Output for Performance Modifications:
   ... (additional four recommendations)
 ]
 
-
++
 Example of Output for Functional Modifications:
 [
   {

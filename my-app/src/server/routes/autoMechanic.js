@@ -1,24 +1,31 @@
 import express from 'express';
 const { Router } = express;
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai';
 import dotenv from 'dotenv';
+import multer from 'multer';
 
 dotenv.config();
 
 const router = Router();
 
 const apiKey = process.env.GEMINI_API_KEY;
-console.log("API Key from env:", apiKey ? "Present" : "Missing!"); // Check if API key is loaded
+console.log("API Key from env:", apiKey ? "Present" : "Missing!");
 
 const genAI = new GoogleGenerativeAI(apiKey);
-console.log("genAI object:", genAI); // Log genAI object immediately after initialization
+console.log("genAI object:", genAI);
 
-
+// Updated Model Initialization for Gemini 2.0 Pro Experimental with **Empty Object** Google Search
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-thinking-exp-01-21",
+    model: "gemini-2.0-pro-exp", // Changed to Gemini 2.0 Pro Experimental
+    tools: [
+        {
+            googleSearch: {},  // **Use an empty object for googleSearch**
+        },
+    ],
+    apiVersion: "v1beta", // Explicitly set apiVersion to v1beta - keep this for now
 });
-console.log("Initialized Gemini model:", model); // Log model initialization
 
+console.log("Initialized Gemini model:", model);
 
 const generationConfig = {
     temperature: 0.7,
@@ -30,12 +37,18 @@ const generationConfig = {
 
 const chatSessions = new Map();
 
-router.post('/chat', async (req, res) => {
+// Configure multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Updated chat route to handle image uploads and grounding
+router.post('/chat', upload.single('image'), async (req, res) => {
     const userId = req.id;
     const userMessage = req.body.message;
+    const imageFile = req.file;
 
-    if (!userMessage) {
-        return res.status(400).json({ error: 'Message is required' });
+    if (!userMessage && !imageFile) {
+        return res.status(400).json({ error: 'Message or Image is required' });
     }
 
     let chatSession = chatSessions.get(userId);
@@ -54,10 +67,34 @@ router.post('/chat', async (req, res) => {
         console.log("Type of existing chatSession:", typeof chatSession);
     }
 
+    let parts = [];
+
+    if (userMessage) {
+        parts.push({ text: userMessage });
+    }
+
+    if (imageFile) {
+        console.log('Image received:', imageFile.originalname, imageFile.mimetype, imageFile.buffer.length);
+        parts.push({
+            inlineData: {  // Using inlineData for image as per docs example
+                mimeType: imageFile.mimetype,
+                data: imageFile.buffer.toString('base64') // Convert buffer to base64 string
+            }
+        });
+    }
+
 
     try {
-        const result = await chatSession.sendMessage(userMessage);
+        const result = await chatSession.sendMessage(parts); // Corrected line: Passing parts array directly
         const responseText = result.response.text();
+
+        // Log grounding metadata if available
+        if (result.response.candidates && result.response.candidates[0].groundingMetadata) {
+            console.log("Grounding Metadata:", result.response.candidates[0].groundingMetadata);
+        } else {
+            console.log("No Grounding Metadata in the response.");
+        }
+
 
         chatSessions.set(userId, chatSession);
 

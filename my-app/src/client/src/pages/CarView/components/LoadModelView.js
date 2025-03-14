@@ -7,9 +7,9 @@ const LoadModelView = ({ carIdentifier }) => { // Receive carIdentifier prop
   const carModels = {
     "toyota-gr supra-2020": "Models/toyota_gr_supra/scene.gltf",
     "toyota-corolla-2020": "Models/corolla_2020_free_highpoly/scene.gltf",
-    "honda-civic-2023": "Models/custom_honda_civic_type-r_2024/scene.gltf", // Assuming 'Typer' was a typo for 'TypeR' and you want to use Civic TypeR model
+    "honda-civic-2023": "Models/custom_honda_civic_type-r_2024/scene.gltf",
     "toyota-86-2020": "Models/toyota_gt86_3d_model_free/scene.gltf",
-    "toyota-tacoma-2020": "Models/01- Toyota.Tacoma.TRD.2020/718c52293bab4087a11464fbbd41465f_Textured.gltf",
+    "toyota-tacoma-2020": "Models/bmw_m3_e92_stance/scene.gltf",
     "default-model": "Models/toyota_gr_supra/scene.gltf" // Default model path
   };
 
