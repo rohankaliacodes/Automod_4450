@@ -16,7 +16,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 console.log("genAI object:", genAI);
 
 const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp', // Correctly using gemini-2.0-flash-exp
+    model: 'gemini-2.0-pro-exp',
     tools: [
         {
             googleSearch: {},
@@ -28,7 +28,7 @@ const model = genAI.getGenerativeModel({
 console.log("Initialized Gemini model:", model);
 
 const generationConfig = {
-    temperature: 0.7,
+    temperature: 0.6,
     topP: 0.95,
     topK: 64,
     maxOutputTokens: 65536,
@@ -107,20 +107,45 @@ router.get('/chat/stream', async (req, res) => {
         let fullResponseText = "";
         for await (const chunk of resultStream.stream) {
             const chunkText = chunk.text();
-            let chunkGroundingChunks = null; // Initialize
+            let chunkData = {
+                role: "model",
+                text: chunkText,
+                sources: [], // Initialize sources as an empty array
+                supports: [] // Initialize supports as an empty array
+            };
 
-            // *** CRITICAL FIX: Access groundingMetadata from the *chunk* itself ***
-            if (chunk.candidates && chunk.candidates.length > 0 && chunk.candidates[0].groundingMetadata && chunk.candidates[0].groundingMetadata.groundingChunks) {
-                chunkGroundingChunks = chunk.candidates[0].groundingMetadata.groundingChunks;
+            if (chunk.candidates && chunk.candidates.length > 0 && chunk.candidates[0].groundingMetadata) {
+                const metadata = chunk.candidates[0].groundingMetadata;
+
+                if (metadata.groundingChunks) {
+                    // Map groundingChunks to a simpler format for the client
+                    chunkData.sources = metadata.groundingChunks.map(chunk => {
+                        if (chunk.web) {  // Only process web chunks
+                            return {
+                                uri: chunk.web.uri,
+                                title: chunk.web.title
+                            };
+                        }
+                        return null; // Or handle other chunk types if needed
+                    }).filter(source => source !== null); // Remove null entries (non-web chunks)
+                }
+
+                if (metadata.groundingSupports) {
+                  chunkData.supports = metadata.groundingSupports.map(support => ({
+                    startIndex: support.segment.startIndex,
+                    endIndex: support.segment.endIndex,
+                    chunkIndices: support.groundingChunkIndices
+                }));
+                }
             }
 
-            res.write(`data: ${JSON.stringify({ role: "model", text: chunkText, sources: chunkGroundingChunks })}\n\n`);
+            res.write(`data: ${JSON.stringify(chunkData)}\n\n`);
             fullResponseText += chunkText;
         }
 
         console.log("Full Response Text:", fullResponseText);
 
-        // Access overall response metadata *after* the loop (for final logging)
+        // Access overall response metadata *after* the loop (for final logging - kept for debugging)
        if (resultStream.response.candidates && resultStream.response.candidates.length > 0) {
             console.log("Response Candidates Found:", resultStream.response.candidates.length);
 

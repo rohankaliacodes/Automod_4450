@@ -6,41 +6,40 @@ import aesthethics from '../assets/SVG/design.svg';
 
 const AutoIntelligence = () => {
     const [isChatVisible, setIsChatVisible] = useState(false);
-    const [isChatPinned, setIsChatPinned] = useState(isChatVisible); // Initialize pinned state with visibility
+    const [isChatPinned, setIsChatPinned] = useState(isChatVisible);
     const [messages, setMessages] = useState([
-        { text: 'Hello, how can I help you modify your car?', sender: 'received' },
+        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [] }, // Initialize with empty segments
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
     const [selectedIconType, setSelectedIconType] = useState('autoMechanic');
     const chatBoxRef = useRef(null);
     const [loadingResponse, setLoadingResponse] = useState(false);
-    const [sessionId, setSessionId] = useState(null); // Store the session ID
+    const [sessionId, setSessionId] = useState(null);
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
-        setMessages([...messages, { text: inputMessage, sender: 'sent' }]);
+        setMessages([...messages, { text: inputMessage, sender: 'sent', segments: [] }]); // Initialize segments for sent messages too
         setInputMessage('');
-        setLoadingResponse(true);
+        setLoadingResponse(true); // Set loading to true BEFORE fetching
 
         let apiUrl = '';
         if (selectedIconType === 'autoMechanic') {
-            apiUrl = 'http://localhost:5001/api/autoMechanic/chat'; // Initial POST to /chat
+            apiUrl = 'http://localhost:5001/api/autoMechanic/chat';
         } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
             apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
-            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received' }]);
+            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [] }]);
             setLoadingResponse(false);
             return;
         }
 
         try {
             if (selectedIconType === 'autoMechanic') {
-                // 1. Initial POST request to /chat to start session and get sessionId
                 const initResponse = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -54,38 +53,68 @@ const AutoIntelligence = () => {
                     throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                const { sessionId, initialResponse } = await initResponse.json();
-                setSessionId(sessionId); // Store the session ID
-                setMessages(prevMessages => [...prevMessages, { text: initialResponse, sender: 'received' }]); // Display initial response
+                const { sessionId } = await initResponse.json(); // Only get sessionId
+                setSessionId(sessionId);
+                // DON'T add initialResponse as a message here
 
-                // 2. Connect to SSE stream using sessionId
-                const eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`); // Include message in SSE URL
+                const eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`);
 
                 eventSource.onopen = () => {
-                    setMessages(prevMessages => [...prevMessages]); // Optionally indicate "Loading..." here if you want
+                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [] }]); // Add Loading message
                 };
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
                     setMessages(prevMessages => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
-                        const newMessage = { text: messageData.text, sender: messageData.role }; // Create message object
 
-                        if (messageData.sources) { // Attach sources if present
-                            newMessage.sources = messageData.sources;
-                        }
+                        // Function to process segments
+                        const processSegments = (text, supports, sources) => {
+                            if (!supports || supports.length === 0) {
+                                return [{ text: text, sources: [] }];
+                            }
 
-                        if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
-                            // Replace "Loading..." with the first chunk
-                            return [...prevMessages.slice(0, prevMessages.length - 1), newMessage]; // Use newMessage
+                            let segments = [];
+                            let lastIndex = 0;
+
+                            supports.sort((a, b) => a.startIndex - b.startIndex);
+
+                            for (const support of supports) {
+                                if (support.startIndex > lastIndex) {
+                                    segments.push({ text: text.substring(lastIndex, support.startIndex), sources: [] });
+                                }
+
+                                const segmentText = text.substring(support.startIndex, support.endIndex);
+                                const segmentSources = support.chunkIndices
+                                    .map(index => sources[index])
+                                    .filter(source => source !== undefined);
+
+                                segments.push({ text: segmentText, sources: segmentSources });
+                                lastIndex = support.endIndex;
+                            }
+                            if (lastIndex < text.length) {
+                                segments.push({ text: text.substring(lastIndex), sources: [] });
+                            }
+                            return segments;
+                        };
+
+
+                         if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
+                           const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
+                            //Replace "Loading..."
+                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments}];
+
                         } else if (messageData.role === 'model') {
-                            // Append to the last message if it's from the model and we are streaming
+                            const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
                             if (lastMessage && lastMessage.sender === 'received') {
+                                // *** Update *both* text and segments here ***
                                 return prevMessages.map((msg, index) =>
-                                    index === prevMessages.length - 1 ? { ...msg, text: msg.text + messageData.text, sources: messageData.sources || msg.sources } : msg // Merge sources
+                                    index === prevMessages.length - 1
+                                        ? { ...msg, text: msg.text + messageData.text, segments: [...msg.segments, ...newSegments] } // Append text and segments
+                                        : msg
                                 );
                             } else {
-                                return [...prevMessages, newMessage]; // Use newMessage
+                                return [...prevMessages, { text: messageData.text, sender: 'received', segments: newSegments }];
                             }
                         }
                         return prevMessages;
@@ -93,28 +122,22 @@ const AutoIntelligence = () => {
                 };
 
 
+
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
-                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI (streaming error).', sender: 'received' }]);
+                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to get response from AI (streaming error).', sender: 'received', segments: [] }]);
                     setLoadingResponse(false);
                     eventSource.close();
                 };
-
-                eventSource.addEventListener('readystatechange', () => {
-                    if (eventSource.readyState === EventSource.CLOSED) {
-                        setLoadingResponse(false);
-                        eventSource.close();
-                    }
-                });
-
-
+                 return () => {
+                    eventSource.close();
+                }
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-                // ... (recommendation API call - unchanged if you have it) ...
+                // ... (recommendation API call - unchanged) ...
             }
-
         } catch (error) {
             console.error('Error setting up SSE:', error);
-            setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received' }]);
+            setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [] }]);
             setLoadingResponse(false);
         }
     };
@@ -140,17 +163,15 @@ const AutoIntelligence = () => {
 
     const handleChatBoxClick = (e) => {
         e.stopPropagation();
-        setIsChatPinned(!isChatPinned); // Toggle pin state on click within chatbox
-        setIsChatVisible(true); // Keep chat visible when interacting, even if pinning
+        setIsChatPinned(!isChatPinned);
+        setIsChatVisible(true);
     };
-
 
     const handleDocumentClick = (e) => {
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
             setIsChatVisible(false);
         }
     };
-
 
     useEffect(() => {
         document.addEventListener('mousemove', handleMouseMove);
@@ -161,42 +182,37 @@ const AutoIntelligence = () => {
         };
     }, [isChatPinned]);
 
-
     return (
         <div
-            className={`chat-box ${isChatVisible ? 'visible' : ''} ${isChatPinned ? 'pinned' : ''}`} // Add 'pinned' class conditionally
+            className={`chat-box ${isChatVisible ? 'visible' : ''} ${isChatPinned ? 'pinned' : ''}`}
             ref={chatBoxRef}
             onClick={handleChatBoxClick}
         >
             <div className="messages-area">
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.sender}`}>
-                        {message.text}
-                        {message.sources && message.sources.length > 0 && ( // Conditionally render sources
-                            <div className="sources">
-                                <p>Sources:</p>
-                                <ul>
-                                    {message.sources.map((source, sourceIndex) => {
-                                        // Check if source.web and source.web.uri exist before accessing
-                                        if (source.web && source.web.uri) {
-                                            return (
-                                                <li key={sourceIndex}>
-                                                    <a href={source.web.uri} target="_blank" rel="noopener noreferrer">
-                                                        {source.web.uri} // Or source.web.title if you want to display the title
-                                                    </a>
-                                                </li>
-                                            );
-                                        } else {
-                                           return <li key={sourceIndex}>Source data unavailable</li>;
-                                        }
-                                    })}
-                                </ul>
-                            </div>
-                        )}
+                        {message.segments.map((segment, segmentIndex) => (
+                            <React.Fragment key={segmentIndex}>
+                                {segment.text}
+                                {segment.sources.map((source, sourceIndex) => (
+                                    <a
+                                        key={sourceIndex}
+                                        href={source.uri}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="source-link"
+                                        title={source.uri}
+                                    >
+                                     [{source.title}]
+                                    </a>
+                                ))}
+                            </React.Fragment>
+                        ))}
                     </div>
                 ))}
                 {loadingResponse && <div className="message received">Loading...</div>}
             </div>
+
             <div className="input-area">
                 <div className="input-container">
                     <input
@@ -233,9 +249,9 @@ const AutoIntelligence = () => {
                     </div>
                 </div>
                 <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /><path d="m21.854 2.147-10.94 10.939" /></svg></button>
-                </div>
             </div>
-        );
-    };
+        </div>
+    );
+};
 
-    export default AutoIntelligence;
+export default AutoIntelligence;

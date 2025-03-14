@@ -281,3 +281,20 @@
 .sources a:hover {
     text-decoration: underline;
 }
+
+.source-link {
+    background-color: transparent;
+    border: none;
+    color: #88c0d0; /* Or any color you prefer for the link text */
+    cursor: pointer;
+    padding: 0 2px; /* Add some padding */
+    font-size: 0.8em;
+    text-decoration: none; /* Remove underline by default */
+    vertical-align: baseline; /* Ensure proper alignment */
+}
+
+.source-link:hover {
+    text-decoration: underline; /* Add underline on hover for clarity */
+    /* Optionally add a subtle background on hover */
+    /* background-color: rgba(136, 192, 208, 0.2);  */
+}
