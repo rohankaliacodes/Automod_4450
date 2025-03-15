@@ -3,14 +3,16 @@ import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
 import aesthethics from '../assets/SVG/design.svg';
-import MarkdownIt from 'markdown-it';  // Import markdown-it
+import MarkdownIt from 'markdown-it';
+import { auth } from '../config/firebase'; // Import Firebase auth -- CORRECT IMPORT
+import { onAuthStateChanged } from "firebase/auth"; // Corrected import
+import { useLocation } from 'react-router-dom';
+
 
 const AutoIntelligence = () => {
     const [isChatVisible, setIsChatVisible] = useState(false);
     const [isChatPinned, setIsChatPinned] = useState(isChatVisible);
-    const [messages, setMessages] = useState([
-        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [], html: '<p>Hello, how can I help you modify your car?</p>' },
-    ]);
+    const [displayName, setDisplayName] = useState("User"); // Default to "User"
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
     const [selectedIconType, setSelectedIconType] = useState('autoMechanic');
@@ -19,14 +21,35 @@ const AutoIntelligence = () => {
     const [sessionId, setSessionId] = useState(null);
     const [hasError, setHasError] = useState(false);
     const [currentEventSource, setCurrentEventSource] = useState(null);
+    const location = useLocation();
+    const carData = location.state;
+     const [messages, setMessages] = useState([]);
 
-    // Initialize markdown-it with better list handling
+    // Initialize markdown-it
     const md = new MarkdownIt({
         html: true,
         linkify: true,
         typographer: true,
         breaks: true
     });
+
+    // useEffect for setting the initial message and user authentication
+    useEffect(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setDisplayName(user.displayName || "User"); // Use displayName if available
+        } else {
+          setDisplayName("User");
+        }
+      });
+      // Construct the initial message based on carData and displayName
+      let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready.`;
+        if (carData) {
+            initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready. How can I help with your ${carData.make} ${carData.model} today?`;
+        }
+        setMessages([{ text: initialMessageText, sender: 'received', segments: [], html: md.render(initialMessageText) }]);
+      return () => unsubscribe(); // Cleanup the auth listener
+    }, [carData, displayName]);
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
@@ -37,7 +60,7 @@ const AutoIntelligence = () => {
         setLoadingResponse(true);
         setHasError(false);
 
-        // Close any existing EventSource connection before starting a new one
+        // Close any existing EventSource connection
         if (currentEventSource) {
             currentEventSource.close();
             setCurrentEventSource(null);
@@ -66,7 +89,7 @@ const AutoIntelligence = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: inputMessage }),
+                    body: JSON.stringify({ message: inputMessage, carData: carData }),
                 });
 
                 if (!initResponse.ok) {
@@ -77,71 +100,44 @@ const AutoIntelligence = () => {
                 const { sessionId } = await initResponse.json();
                 setSessionId(sessionId);
 
-                eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`);
+                let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`;
+                if(carData) {
+                   streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
+                }
+                eventSource = new EventSource(streamUrl);
+
                 setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
-                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [], html: '<p>Loading...</p>' }]);
+                    // No "Loading..." message here
                 };
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
+
                     setMessages(prevMessages => {
-                        const lastMessage = prevMessages[prevMessages.length - 1];
+                        if (messageData.role === 'model') {
+                            const lastMessage = prevMessages[prevMessages.length - 1];
 
-                        // Improve markdown processing for segments
-                        const processSegments = (text, supports, sources) => {
-                            if (!supports || supports.length === 0) {
-                                // Ensure proper rendering of standalone text
-                                return [{ text: text, sources: [], html: md.render(text) }];
-                            }
-
-                            let segments = [];
-                            let lastIndex = 0;
-
-                            supports.sort((a, b) => a.startIndex - b.startIndex);
-
-                            for (const support of supports) {
-                                if (support.startIndex > lastIndex) {
-                                    const plainText = text.substring(lastIndex, support.startIndex);
-                                    segments.push({ text: plainText, sources: [], html: md.render(plainText) });
-                                }
-
-                                const segmentText = text.substring(support.startIndex, support.endIndex);
-                                const segmentSources = support.chunkIndices
-                                    .map(index => sources[index])
-                                    .filter(source => source !== undefined);
-
-                                segments.push({ text: segmentText, sources: segmentSources, html: md.render(segmentText) });
-                                lastIndex = support.endIndex;
-                            }
-                            if (lastIndex < text.length) {
-                                const plainText = text.substring(lastIndex);
-                                segments.push({ text: plainText, sources: [], html: md.render(plainText) });
-                            }
-                            return segments;
-                        };
-
-                        if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
-                            const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
-                            // Ensure proper markdown rendering for the full message
-                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments, html: md.render(messageData.text) }];
-                        } else if (messageData.role === 'model') {
-                            const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
                             if (lastMessage && lastMessage.sender === 'received') {
-                                // Combine text for rendering, but keep segments separate
-                                const combinedText = lastMessage.text + messageData.text;
-                                // Ensure proper markdown rendering for the combined message
-                                return prevMessages.map((msg, index) =>
-                                    index === prevMessages.length - 1
-                                        ? { ...msg, text: combinedText, segments: [...lastMessage.segments, ...newSegments], html: md.render(combinedText) }
-                                        : msg
-                                );
+                                const updatedMessage = {
+                                    ...lastMessage,
+                                    text: lastMessage.text + messageData.text,
+                                    html: md.render(lastMessage.text + messageData.text),
+                                     segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
+                                };
+                                return [...prevMessages.slice(0, -1), updatedMessage];
                             } else {
-                                return [...prevMessages, { text: messageData.text, sender: 'received', segments: newSegments, html: md.render(messageData.text) }];
+                                return [...prevMessages, {
+                                    text: messageData.text,
+                                    sender: 'received',
+                                     segments: processSegments(messageData.text, messageData.supports, messageData.sources),
+                                    html: md.render(messageData.text)
+                                }];
                             }
                         }
-                        return prevMessages;
+                          return prevMessages;
+
                     });
                 };
 
@@ -172,6 +168,36 @@ const AutoIntelligence = () => {
                 currentEventSource.close();
             }
         };
+    };
+     const processSegments = (text, supports, sources) => {
+        if (!supports || supports.length === 0) {
+            return [{ text: text, sources: [], html: md.render(text) }];
+        }
+
+        let segments = [];
+        let lastIndex = 0;
+
+        supports.sort((a, b) => a.startIndex - b.startIndex);
+
+        for (const support of supports) {
+            if (support.startIndex > lastIndex) {
+                const plainText = text.substring(lastIndex, support.startIndex);
+                segments.push({ text: plainText, sources: [], html: md.render(plainText) });
+            }
+
+            const segmentText = text.substring(support.startIndex, support.endIndex);
+            const segmentSources = support.chunkIndices
+                .map(index => sources[index])
+                .filter(source => source !== undefined);
+
+            segments.push({ text: segmentText, sources: segmentSources, html: md.render(segmentText) });
+            lastIndex = support.endIndex;
+        }
+        if (lastIndex < text.length) {
+            const plainText = text.substring(lastIndex);
+            segments.push({ text: plainText, sources: [], html: md.render(plainText) });
+        }
+        return segments;
     };
 
     const handleInputChange = (e) => {
@@ -224,10 +250,14 @@ const AutoIntelligence = () => {
                 const errorText = await response.text();
                 throw new Error(`Reset failed: ${response.status} - ${errorText}`);
               }
-          setMessages([{ text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [], html: '<p>Hello, how can I help you modify your car?</p>' }]); //resets to default message.
-          setSessionId(null);
-          setInputMessage('');
-          setLoadingResponse(false)
+            let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence ready.`;
+            if (carData) {
+                initialMessageText = `Welcome back, ${displayName}! Auto Intelligence ready. How can I help with your ${carData.make} ${carData.model} today?`;
+            }
+            setMessages([{ text: initialMessageText, sender: 'received', segments: [], html: md.render(initialMessageText) }]);
+            setSessionId(null);
+            setInputMessage('');
+            setLoadingResponse(false)
 
         } catch (error) {
             console.error('Error resetting chat:', error);
@@ -235,14 +265,18 @@ const AutoIntelligence = () => {
         }
     };
 
-    useEffect(() => {
+     useEffect(() => {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('click', handleDocumentClick);
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('click', handleDocumentClick);
+             if (currentEventSource) {
+                currentEventSource.close();
+            }
         };
-    }, [isChatPinned]);
+    }, [isChatPinned, currentEventSource]);
+
 
     return (
         <div
@@ -253,10 +287,8 @@ const AutoIntelligence = () => {
             <div className="messages-area">
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.sender}`}>
-                        {/* Apply message content directly from html */}
                         <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
-                        
-                        {/* Show sources only if present */}
+
                         {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
                             <div className="message-sources">
                                 {message.segments.map((segment, segmentIndex) => (

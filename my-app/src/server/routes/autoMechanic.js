@@ -45,13 +45,29 @@ router.post('/chat', upload.single('image'), async (req, res) => {
     try {
         const userMessage = req.body.message;
         const imageFile = req.file;
+        const carData = req.body.carData; // Access carData from the request body
+
 
         if (!userMessage && !imageFile) {
             return res.status(400).json({ error: 'Message or Image is required' });
         }
 
+        // Construct initial history with carData context
+        let initialHistory = [];
+        if (carData) {
+            initialHistory.push({
+                role: "user",
+                parts: [{ text: `User's Car: ${JSON.stringify(carData)}` }], // Include car data in history
+            });
+            initialHistory.push({
+                role: "model",
+                parts: [{text: "Understood."}],
+            });
+        }
+
+
         // Create a new chat session
-        const chatSession = model.startChat({ generationConfig, history: [] });
+        const chatSession = model.startChat({ generationConfig, history: initialHistory }); // Pass initialHistory
         const sessionId = uuidv4();
         chatSessions.set(sessionId, chatSession);
 
@@ -68,6 +84,7 @@ router.post('/chat', upload.single('image'), async (req, res) => {
             });
         }
 
+
         const initialResult = await chatSession.sendMessage(parts);
         const initialResponse = initialResult.response;
         const initialText = initialResponse.text();
@@ -83,6 +100,9 @@ router.post('/chat', upload.single('image'), async (req, res) => {
 router.get('/chat/stream', async (req, res) => {
     const sessionId = req.query.sessionId;
     const userMessage = req.query.message;
+    const carDataString = req.query.carData; // Get carData as a string
+    const carData = carDataString ? JSON.parse(decodeURIComponent(carDataString)) : null; // Parse carData
+
 
     if (!sessionId) {
         return res.status(400).json({ error: 'Session ID is required' });
@@ -100,6 +120,14 @@ router.get('/chat/stream', async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+
+
+        // NO LONGER NEEDED, already in initial history
+        // let initialPrompt = "";
+        // if (carData) {
+        //     initialPrompt = `User's car: ${JSON.stringify(carData)}. `;
+        // }
+        // const parts = [{ text: initialPrompt + userMessage }]; // Combine car data and message
 
         const parts = [{ text: userMessage }];
         const resultStream = await chatSession.sendMessageStream(parts);
