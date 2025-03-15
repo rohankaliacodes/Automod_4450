@@ -3,12 +3,13 @@ import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
 import aesthethics from '../assets/SVG/design.svg';
+import MarkdownIt from 'markdown-it';  // Import markdown-it
 
 const AutoIntelligence = () => {
     const [isChatVisible, setIsChatVisible] = useState(false);
     const [isChatPinned, setIsChatPinned] = useState(isChatVisible);
     const [messages, setMessages] = useState([
-        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [] },
+        { text: 'Hello, how can I help you modify your car?', sender: 'received', segments: [], html: '<p>Hello, how can I help you modify your car?</p>' },
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
@@ -17,13 +18,20 @@ const AutoIntelligence = () => {
     const [loadingResponse, setLoadingResponse] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const [hasError, setHasError] = useState(false);
-    const [currentEventSource, setCurrentEventSource] = useState(null); // Store the current EventSource
+    const [currentEventSource, setCurrentEventSource] = useState(null);
 
+    // Initialize markdown-it with better list handling
+    const md = new MarkdownIt({
+        html: true,
+        linkify: true,
+        typographer: true,
+        breaks: true
+    });
 
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
-        const userMessage = { text: inputMessage, sender: 'sent', segments: [] };
+        const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
         setMessages(prevMessages => [...prevMessages, userMessage]);
         setInputMessage('');
         setLoadingResponse(true);
@@ -32,7 +40,7 @@ const AutoIntelligence = () => {
         // Close any existing EventSource connection before starting a new one
         if (currentEventSource) {
             currentEventSource.close();
-            setCurrentEventSource(null); // Clear the old EventSource
+            setCurrentEventSource(null);
         }
 
         let apiUrl = '';
@@ -44,7 +52,7 @@ const AutoIntelligence = () => {
 
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
-            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [] }]);
+            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [], html: '<p>Error: Could not determine AI type.</p>' }]);
             setLoadingResponse(false);
             return;
         }
@@ -70,19 +78,22 @@ const AutoIntelligence = () => {
                 setSessionId(sessionId);
 
                 eventSource = new EventSource(`http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`);
-                setCurrentEventSource(eventSource); // Store the new EventSource
+                setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
-                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [] }]);
+                    setMessages(prevMessages => [...prevMessages, { text: "Loading...", sender: 'received', segments: [], html: '<p>Loading...</p>' }]);
                 };
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
                     setMessages(prevMessages => {
                         const lastMessage = prevMessages[prevMessages.length - 1];
+
+                        // Improve markdown processing for segments
                         const processSegments = (text, supports, sources) => {
                             if (!supports || supports.length === 0) {
-                                return [{ text: text, sources: [] }];
+                                // Ensure proper rendering of standalone text
+                                return [{ text: text, sources: [], html: md.render(text) }];
                             }
 
                             let segments = [];
@@ -92,7 +103,8 @@ const AutoIntelligence = () => {
 
                             for (const support of supports) {
                                 if (support.startIndex > lastIndex) {
-                                    segments.push({ text: text.substring(lastIndex, support.startIndex), sources: [] });
+                                    const plainText = text.substring(lastIndex, support.startIndex);
+                                    segments.push({ text: plainText, sources: [], html: md.render(plainText) });
                                 }
 
                                 const segmentText = text.substring(support.startIndex, support.endIndex);
@@ -100,28 +112,33 @@ const AutoIntelligence = () => {
                                     .map(index => sources[index])
                                     .filter(source => source !== undefined);
 
-                                segments.push({ text: segmentText, sources: segmentSources });
+                                segments.push({ text: segmentText, sources: segmentSources, html: md.render(segmentText) });
                                 lastIndex = support.endIndex;
                             }
                             if (lastIndex < text.length) {
-                                segments.push({ text: text.substring(lastIndex), sources: [] });
+                                const plainText = text.substring(lastIndex);
+                                segments.push({ text: plainText, sources: [], html: md.render(plainText) });
                             }
                             return segments;
                         };
 
                         if (lastMessage && lastMessage.sender === 'received' && lastMessage.text === "Loading...") {
                             const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
-                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments }];
+                            // Ensure proper markdown rendering for the full message
+                            return [...prevMessages.slice(0, -1), { text: messageData.text, sender: 'received', segments: newSegments, html: md.render(messageData.text) }];
                         } else if (messageData.role === 'model') {
                             const newSegments = processSegments(messageData.text, messageData.supports, messageData.sources);
                             if (lastMessage && lastMessage.sender === 'received') {
+                                // Combine text for rendering, but keep segments separate
+                                const combinedText = lastMessage.text + messageData.text;
+                                // Ensure proper markdown rendering for the combined message
                                 return prevMessages.map((msg, index) =>
                                     index === prevMessages.length - 1
-                                        ? { ...msg, text: msg.text + messageData.text, segments: [...msg.segments, ...newSegments] }
+                                        ? { ...msg, text: combinedText, segments: [...lastMessage.segments, ...newSegments], html: md.render(combinedText) }
                                         : msg
                                 );
                             } else {
-                                return [...prevMessages, { text: messageData.text, sender: 'received', segments: newSegments }];
+                                return [...prevMessages, { text: messageData.text, sender: 'received', segments: newSegments, html: md.render(messageData.text) }];
                             }
                         }
                         return prevMessages;
@@ -130,33 +147,31 @@ const AutoIntelligence = () => {
 
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
-                    // Don't add error message here.
                     setLoadingResponse(false);
                     if (eventSource) {
                         eventSource.close();
                     }
                 };
-           
+
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
                 // ... recommendation API call (unchanged) ...
             }
         } catch (error) {
             console.error('Error setting up SSE:', error);
-             if (!hasError) {
-                setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [] }]);
+            if (!hasError) {
+                setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [], html: '<p>Failed to connect to AI service.</p>' }]);
                 setHasError(true);
             }
             setLoadingResponse(false);
-              if (eventSource) {
-                    eventSource.close();
-                }
+            if (eventSource) {
+                eventSource.close();
+            }
         }
-          return () => {
+        return () => {
             if (currentEventSource) {
                 currentEventSource.close();
             }
         };
-
     };
 
     const handleInputChange = (e) => {
@@ -208,28 +223,31 @@ const AutoIntelligence = () => {
             <div className="messages-area">
                 {messages.map((message, index) => (
                     <div key={index} className={`message ${message.sender}`}>
-                        {message.segments && message.segments.length > 0 ? (
-                            message.segments.map((segment, segmentIndex) => (
-                                <React.Fragment key={segmentIndex}>
-                                    <span className="segment-text">{segment.text}</span> {/* Wrap text in a span */}
-                                    <div className="sources">
-                                        {segment.sources.map((source, sourceIndex) => (
-                                            <a
-                                                key={sourceIndex}
-                                                href={source.uri}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="source-link"
-                                                title={source.uri}
-                                            >
-                                                [{source.title}]
-                                            </a>
-                                        ))}
-                                    </div>
-                                </React.Fragment>
-                            ))
-                        ) : (
-                            message.text
+                        {/* Apply message content directly from html */}
+                        <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
+                        
+                        {/* Show sources only if present */}
+                        {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
+                            <div className="message-sources">
+                                {message.segments.map((segment, segmentIndex) => (
+                                    segment.sources && segment.sources.length > 0 && (
+                                        <div key={segmentIndex} className="sources">
+                                            {segment.sources.map((source, sourceIndex) => (
+                                                <a
+                                                    key={sourceIndex}
+                                                    href={source.uri}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="source-link"
+                                                    title={source.uri}
+                                                >
+                                                    [{source.title}]
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )
+                                ))}
+                            </div>
                         )}
                     </div>
                 ))}

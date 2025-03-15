@@ -34,36 +34,6 @@
     transform: translateY(0);
 }
 
-
-.chat-header {
-    padding: 10px 15px;
-    text-align: left;
-    font-weight: bold;
-    font-size: 1em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-options {
-    display: flex;
-    gap: 10px;
-}
-
-.chat-option-icon {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease-in-out;
-}
-
-.chat-option-icon:hover {
-    opacity: 1;
-}
-
 .messages-area {
     padding: 10px;
     flex-grow: 1;
@@ -98,18 +68,51 @@
     margin-bottom: 4px;
     max-width: 95%;
     font-size: 0.9em;
-    /* Remove white-space: pre-wrap; from .message */
-    word-wrap: break-word; /* Keep break-word */
-     display: flex; /* Add flexbox to .message */
-    flex-direction: column; /* Stack content vertically */
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add styles for markdown elements inside messages */
+.message ul, .message ol {
+    margin-left: 20px;
+    padding-left: 15px;
+}
+
+.message li {
+    margin-bottom: 5px;
+}
+
+.message strong, .message b {
+    font-weight: bold;
+}
+
+.message em, .message i {
+    font-style: italic;
+}
+
+.message h1, .message h2, .message h3, .message h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.message p {
+    margin-bottom: 10px;
+}
+
+.message code {
+    font-family: monospace;
+    background-color: rgba(50, 50, 50, 0.5);
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 .message.received {
     background-color: transparent;
     color: #eee;
     align-self: flex-start;
-    /* Remove text-indent, use margin for spacing */
-     margin-left: 10px;
+    margin-left: 10px;
 }
 
 .message.sent {
@@ -200,7 +203,6 @@
     padding-bottom: 5px;
     background-color: transparent;
     color: #f0f0f0;
-
     border-radius: inherit;
 }
 
@@ -211,7 +213,8 @@
     white-space: nowrap;
     font-weight: 600;
 }
-.reset-chat{
+
+.reset-chat {
     background-color: transparent;
     border: transparent;
     display: flex;
@@ -220,7 +223,8 @@
     cursor: pointer;
     margin-right: 15px;
 }
-.reset-chat:hover{
+
+.reset-chat:hover {
     opacity: 1;
     filter: drop-shadow(0 0 1px #bebebe);
 }
@@ -255,10 +259,9 @@
     margin-left: auto;
 }
 
-/* Larger sources and alignment fixes */
 .sources {
     margin-top: 5px;
-    font-size: 1em; /* Increased font size */
+    font-size: 1em;
     color: #aaa;
     display: flex;
     flex-wrap: wrap;
@@ -272,7 +275,7 @@
     white-space: nowrap;
 }
 
-.sources a:not(:last-child)::after{
+.sources a:not(:last-child)::after {
     content: ',';
     margin-right: 0.25em;
 }
@@ -287,7 +290,7 @@
     color: #88c0d0;
     cursor: pointer;
     padding: 0 2px;
-    font-size: 1em; /* Increased font size */
+    font-size: 1em;
     text-decoration: none;
     vertical-align: middle;
     display: inline-flex;
@@ -295,5 +298,5 @@
 }
 
 .segment-text {
-    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    white-space: pre-wrap;
 }
