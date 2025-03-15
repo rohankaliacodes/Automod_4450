@@ -1,11 +1,14 @@
+// my-app/src/client/src/pages/Settings.js
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import settingsImage from "../assets/bmw-vision-m-next-be.jpg";
-import homeImage from "../assets/home.svg";
-import "../styles/settings.css";    
-import { auth } from "../config/firebase"; // Ensure Firebase auth is imported
+//import homeImage from "../assets/home.svg"; // No longer needed here
+import "../styles/settings.css";
+import { auth } from "../config/firebase";
 import { updatePassword, updateProfile, EmailAuthProvider, reauthenticateWithCredential, sendPasswordResetEmail } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
+import Header from "./Header"; // Import Header
 
 function Settings() {
     const [username, setUsername] = useState("");
@@ -16,7 +19,7 @@ function Settings() {
     const [showPasswordForm, setShowPasswordForm] = useState(false);
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
-    
+
     const handleUsernameFormToggle = () => {
         setShowUsernameForm(!showUsernameForm);
     };
@@ -45,10 +48,10 @@ function Settings() {
                navigate("/login");
            }
        });
-    
+
        return () => unsubscribe();
     }, []);
-    
+
 
     const handleUsernameChange = async (event) => {
         event.preventDefault();
@@ -82,7 +85,7 @@ function Settings() {
             setMessage("Please enter a valid password.");
             return;
         }
-        
+
         const currentPassword = prompt("Please enter your current password to continue:");
         if(!currentPassword){
             setMessage("Password change cancelled.");
@@ -115,9 +118,10 @@ function Settings() {
             <div className="image-container">
                 <img src={settingsImage} alt="Background" className="settings-image" />
             </div>
-            <div className="home-icon" onClick={() => navigate("/")}>
+            {/* <div className="home-icon" onClick={() => navigate("/")}>  No longer needed 
                 <img src={homeImage} alt="home"></img>
-            </div>
+            </div> */}
+             <Header /> {/* Include Header here */}
             <div className="settings-container">
                 <h1 className="settings-header">Settings</h1>
                 <div className="settings-form">
@@ -131,7 +135,7 @@ function Settings() {
                     {showPasswordForm ? "Cancel" : "Change Password"}
                 </button>
                 <a className="forgot-password" onClick={sendPasswordRecoveryEmail}>Forgot Password?</a>
-                    
+
 
                 {showUsernameForm && (
                     <div className="settings-form-container">
@@ -165,7 +169,7 @@ function Settings() {
                         {message && <p className="error-text">{message}</p>}
                     </div>
                 )}
-                
+
 
                 <button className="delete-btn" onClick={() => navigate("/deleteAccount")}>Delete Account</button>
             </div>
