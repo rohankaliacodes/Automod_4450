@@ -4,15 +4,14 @@ import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
 import aesthethics from '../assets/SVG/design.svg';
 import MarkdownIt from 'markdown-it';
-import { auth } from '../config/firebase'; // Import Firebase auth -- CORRECT IMPORT
-import { onAuthStateChanged } from "firebase/auth"; // Corrected import
+import { auth } from '../config/firebase';
+import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 
 
-const AutoIntelligence = () => {
-    const [isChatVisible, setIsChatVisible] = useState(false);
-    const [isChatPinned, setIsChatPinned] = useState(isChatVisible);
-    const [displayName, setDisplayName] = useState("User"); // Default to "User"
+const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinned and onClick
+    const [isChatVisible, setIsChatVisible] = useState(true); //  Keep local visibility state
+    const [displayName, setDisplayName] = useState("User");
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
     const [selectedIconType, setSelectedIconType] = useState('autoMechanic');
@@ -23,7 +22,7 @@ const AutoIntelligence = () => {
     const [currentEventSource, setCurrentEventSource] = useState(null);
     const location = useLocation();
     const carData = location.state;
-     const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([]);
 
     // Initialize markdown-it
     const md = new MarkdownIt({
@@ -35,20 +34,20 @@ const AutoIntelligence = () => {
 
     // useEffect for setting the initial message and user authentication
     useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setDisplayName(user.displayName || "User"); // Use displayName if available
-        } else {
-          setDisplayName("User");
-        }
-      });
-      // Construct the initial message based on carData and displayName
-      let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready.`;
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setDisplayName(user.displayName || "User"); // Use displayName if available
+            } else {
+                setDisplayName("User");
+            }
+        });
+        // Construct the initial message based on carData and displayName
+        let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready.`;
         if (carData) {
             initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready. How can I help with your ${carData.make} ${carData.model} today?`;
         }
         setMessages([{ text: initialMessageText, sender: 'received', segments: [], html: md.render(initialMessageText) }]);
-      return () => unsubscribe(); // Cleanup the auth listener
+        return () => unsubscribe(); // Cleanup the auth listener
     }, [carData, displayName]);
 
     const handleSendMessage = async () => {
@@ -101,8 +100,8 @@ const AutoIntelligence = () => {
                 setSessionId(sessionId);
 
                 let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`;
-                if(carData) {
-                   streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
+                if (carData) {
+                    streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
                 }
                 eventSource = new EventSource(streamUrl);
 
@@ -124,19 +123,19 @@ const AutoIntelligence = () => {
                                     ...lastMessage,
                                     text: lastMessage.text + messageData.text,
                                     html: md.render(lastMessage.text + messageData.text),
-                                     segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
+                                    segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
                                 };
                                 return [...prevMessages.slice(0, -1), updatedMessage];
                             } else {
                                 return [...prevMessages, {
                                     text: messageData.text,
                                     sender: 'received',
-                                     segments: processSegments(messageData.text, messageData.supports, messageData.sources),
+                                    segments: processSegments(messageData.text, messageData.supports, messageData.sources),
                                     html: md.render(messageData.text)
                                 }];
                             }
                         }
-                          return prevMessages;
+                        return prevMessages;
 
                     });
                 };
@@ -169,7 +168,7 @@ const AutoIntelligence = () => {
             }
         };
     };
-     const processSegments = (text, supports, sources) => {
+    const processSegments = (text, supports, sources) => {
         if (!supports || supports.length === 0) {
             return [{ text: text, sources: [], html: md.render(text) }];
         }
@@ -209,23 +208,33 @@ const AutoIntelligence = () => {
         setSelectedIconType(iconType);
     };
 
-    const handleMouseMove = (e) => {
+     const handleMouseMove = (e) => {
         if (isChatPinned) return;
-        const containerRect = chatBoxRef.current.getBoundingClientRect();
-        if (e.clientX < containerRect.width + 20) {
+
+        // Larger trigger area in the bottom-left corner
+        const triggerArea = {
+            width: 700,  
+            height: 700,
+            x: 0,       // Starts at the left edge
+            y: window.innerHeight - 700, // Starts 300px from the bottom
+        };
+
+        if (
+            e.clientX >= triggerArea.x &&
+            e.clientX <= triggerArea.x + triggerArea.width &&
+            e.clientY >= triggerArea.y &&
+            e.clientY <= triggerArea.y + triggerArea.height
+        ) {
             setIsChatVisible(true);
         } else {
             setIsChatVisible(false);
         }
     };
 
-    const handleChatBoxClick = (e) => {
-        e.stopPropagation();
-        setIsChatPinned(!isChatPinned);
-        setIsChatVisible(true);
-    };
+
 
     const handleDocumentClick = (e) => {
+        // Hide only if NOT pinned, and click is outside chatBoxRef
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
             setIsChatVisible(false);
         }
@@ -233,23 +242,23 @@ const AutoIntelligence = () => {
 
     // --- Reset Chat Handler ---
     const handleResetChat = async () => {
-      if (currentEventSource) {
-        currentEventSource.close();
-        setCurrentEventSource(null);
-      }
+        if (currentEventSource) {
+            currentEventSource.close();
+            setCurrentEventSource(null);
+        }
 
         try {
-          const response = await fetch('http://localhost:5001/api/autoMechanic/reset', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+            const response = await fetch('http://localhost:5001/api/autoMechanic/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Reset failed: ${response.status} - ${errorText}`);
-              }
+            }
             let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence ready.`;
             if (carData) {
                 initialMessageText = `Welcome back, ${displayName}! Auto Intelligence ready. How can I help with your ${carData.make} ${carData.model} today?`;
@@ -261,17 +270,17 @@ const AutoIntelligence = () => {
 
         } catch (error) {
             console.error('Error resetting chat:', error);
-            setMessages(prevMessages => [...prevMessages, { text: 'Failed to reset chat.', sender: 'received', segments:[] , html: '<p>Failed to reset chat.</p>' }]);
+            setMessages(prevMessages => [...prevMessages, { text: 'Failed to reset chat.', sender: 'received', segments: [], html: '<p>Failed to reset chat.</p>' }]);
         }
     };
 
-     useEffect(() => {
+    useEffect(() => {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('click', handleDocumentClick);
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('click', handleDocumentClick);
-             if (currentEventSource) {
+            if (currentEventSource) {
                 currentEventSource.close();
             }
         };
@@ -282,7 +291,7 @@ const AutoIntelligence = () => {
         <div
             className={`chat-box ${isChatVisible ? 'visible' : ''} ${isChatPinned ? 'pinned' : ''}`}
             ref={chatBoxRef}
-            onClick={handleChatBoxClick}
+            onClick={onClick} // Use the passed onClick prop
         >
             <div className="messages-area">
                 {messages.map((message, index) => (
@@ -323,7 +332,7 @@ const AutoIntelligence = () => {
                         placeholder="Type your message here..."
                         value={inputMessage}
                         onChange={handleInputChange}
-                        onKeyPress={(event) => event.key === 'Enter' ? handleSendMessage() : null}
+                        onKeyPress={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSendMessage(); } }}
                         className="message-input"
                     />
                     <div className="options-bar">
