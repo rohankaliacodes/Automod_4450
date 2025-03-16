@@ -1,8 +1,9 @@
+// my-app/src/client/src/pages/Register.js
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
-
-import loginImage from "../assets/registerImage.jpg";  // Make SURE this is correct
+import loginImage from "../assets/registerImage.jpg";
 import googleLogo from "../assets/google-logo.svg";
 import {
   createUserWithEmailAndPassword,
@@ -50,7 +51,7 @@ function RegisterPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
+      
       console.log("Google sign up successful:", user);
       navigate("/");
     } catch (error) {
@@ -84,7 +85,6 @@ function RegisterPage() {
   return (
     <div className="login-page">
       <div className="image-container">
-        {/* Use the imported image variable */}
         <img src={loginImage} alt="Background" className="background-image" />
       </div>
       <div className="login-form">
