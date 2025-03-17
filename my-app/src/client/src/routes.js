@@ -11,6 +11,7 @@ import DeleteAccount from "./pages/DeleteAccount";
 import CarView from "./pages/CarView/CarView";
 import Garage from "./pages/Garage";
 import Contact from "./pages/Contact";
+import Modshop from "./pages/Modshop";
 
 
 
@@ -49,6 +50,8 @@ const AppRoutes = () => {
                 <Route path="/companies" element={<Companies />} />
 
                 <Route path="/contact" element={<Contact />} /> {/* Add this line */}
+
+                <Route path="/modshop" element={<Modshop/>} /> 
 
 
             </Routes>

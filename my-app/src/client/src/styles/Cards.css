@@ -1,0 +1,68 @@
+
+   .cards-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-height: 60vh; /* ✅ Ensures scrolling */
+    overflow-y: auto; /* ✅ Enables vertical scrolling */
+    padding: 20px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 80%;  
+    max-width: 600px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image {
+    width: 100px;  
+    height: 100px;
+    background: url(https://static.codia.ai/image/2025-03-12/3a038e43-3407-4e77-98af-ff1ca1f007c9.png) no-repeat center;
+    background-size: contain;
+    margin-bottom: 10px;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.body-text {
+    font-size: 14px;
+    color: #757575;
+    display: block;
+}
+
+.button-group {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 8px;
+}
+
+.button {
+    background: #c81058;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
