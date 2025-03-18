@@ -47,6 +47,7 @@
 /* Apply consistent margin to profile-icon-container */
 .profile-icon-container {
     margin-left: 20px; /* Consistent margin, same as nav-item */
+    color: white;
 }
 
 

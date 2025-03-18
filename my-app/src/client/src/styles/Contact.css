@@ -1,4 +1,4 @@
-.main-container {
+/* .main-container {
   overflow: hidden;
   box-sizing: border-box;
   position: relative;
@@ -60,7 +60,7 @@
   max-width: 600px;
   padding: 20px;
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+  background: rgba(0, 0, 0, 0.7); 
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -71,4 +71,133 @@
   color: var(--highlight-color);
   font-size: 24px;
   font-weight: bold;
-}
+} */
+
+:root {
+    --default-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Ubuntu, "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+      "Hiragino Sans GB", "Microsoft Yahei UI", "Microsoft Yahei",
+      "Source Han Sans CN", sans-serif;
+    --highlight-color: #c81058; /* Theme's highlight color */
+    --text-color: #ffffff;      /* Bright white for high contrast */
+    --background-dark: black; /* Dark background for a sleek look */
+    --input-bg-color: #faf9f6;  /* Dark input fields for sleek design */
+    --border-color: #444;       /* Subtle borders for inputs */
+  }
+  
+  /* Replacing .main-container with .contact-main-container */
+  .contact-main-container {
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    margin: 0 auto;
+    background: var(--background-dark);
+    color: var(--text-color);
+    font-family: var(--default-font-family);
+  }
+  
+  .contact-image {
+    position: absolute;
+    width: 65vh;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background: url(https://static.codia.ai/image/2025-03-11/4edb0ce5-0dff-470b-8075-8314fc862850.png) no-repeat center;
+    background-size: cover;
+    z-index: 1;
+  }
+  
+  /* Replacing .button & .button-f with .contact-button & .contact-button-f */
+  .contact-button,
+  .contact-button-f {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    padding: 10px 20px;
+    background: var(--highlight-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    z-index: 2;
+  }
+  
+  .contact-button:hover,
+  .contact-button-f:hover {
+    background-color: #ff70a6;
+    transform: translateY(-2px);
+  }
+  
+  .contact-button:disabled,
+  .contact-button-f:disabled {
+    background-color: white;
+    color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  /* Replacing .frame with .contact-frame */
+  .contact-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    position: absolute;
+    width: 80%;
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 8px;
+    background: white; /* Semi-transparent black background */
+    top: 50%;
+    left: 67%;
+    transform: translate(-50%, -50%);
+    box-shadow: white;
+  }
+  
+  /* Keep your nested frames, just renamed to .contact-frame-# */
+  .contact-frame-1,
+  .contact-frame-2,
+  .contact-frame-3,
+  .contact-frame-4,
+  .contact-frame-5,
+  .contact-frame-6,
+  .contact-frame-7,
+  .contact-frame-8,
+  .contact-frame-9,
+  .contact-frame-a,
+  .contact-frame-b,
+  .contact-frame-c,
+  .contact-frame-d {
+    /* No specific styles needed unless you want to add them */
+  }
+  
+  input,
+  textarea {
+    width: 100%;
+    padding: 12px;
+    background: var(--input-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 16px;
+  }
+  
+  .contact-send-us-message {
+    color: var(--highlight-color);
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Additional label styling (optional) */
+  .contact-name,
+  .contact-email,
+  .contact-subject,
+  .contact-message {
+    /* If you want to style these text labels, do so here */
+  }
+  
