@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import settingsImage from "../assets/bmw-vision-m-next-be.jpg";
+import settingsImage from "../assets/settingsImage.jpg";
 //import homeImage from "../assets/home.svg"; // No longer needed here
 import "../styles/settings.css";
 import { auth } from "../config/firebase";
