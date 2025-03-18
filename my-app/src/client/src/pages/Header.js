@@ -57,7 +57,7 @@ function Header() {
     const pages = [
         { path: "/", name: "Home" },
         { path: "/Garage", name: "My Garage" },
-        { path: "/Market", name: "Modshop" },
+        { path: "/modshop", name: "Modshop" },
         { path: "/contact", name: "Contact" }
     ];
 
