@@ -13,7 +13,7 @@ export const Home = () => {
   const [engine, setEngine] = useState("");
   const navigate = useNavigate();
 
-  const makes = ["Toyota", "Honda"];
+  const makes = ["Toyota", "Honda", "BMW"];
   const models = {
     Toyota: {
       "GR Supra": {
@@ -80,6 +80,13 @@ export const Home = () => {
         },
       },
     },
+    BMW: {
+      "335i":{
+        years: {
+          "2007": { trims: { Base: { engine: ["N54B30"] } } },
+        }
+      }
+    }
   };
 
   const handleMakeChange = (event) => {

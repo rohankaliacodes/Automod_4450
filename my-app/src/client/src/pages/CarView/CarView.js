@@ -21,7 +21,6 @@ function CarView() {
     }, [carData]);
 
     const addToGarage = async (carData) => {
-        carData.preventDefault();
         const user = auth.currentUser;
         if (!user) return;
         const userGarageRef = collection(db, `users/${user.uid}/garage`);

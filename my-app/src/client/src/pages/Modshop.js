@@ -104,7 +104,7 @@ export default function Modshop() {
   }
 
   // Handle vehicle dropdown selections
-  const makes = ["Toyota", "Honda"];
+  const makes = ["Toyota", "Honda", "BMW"];
   const models = {
     Toyota: {
         "GR Supra":{
@@ -342,6 +342,19 @@ export default function Modshop() {
                     trims: {
                         Sport: {
                             engine: ["V6-3471cc 3.5L FI J35Y6 285HP"]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    BMW: {
+        "335i":{
+            years: {
+                "2007": {
+                    trims: {
+                        Base: {
+                            engine: ["N54B30"]
                         }
                     }
                 }

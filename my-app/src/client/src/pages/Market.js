@@ -5,6 +5,7 @@ import Header from "./Header";
 import { useLocation } from "react-router-dom";
 import {auth, db} from "../config/firebase";
 import { getDocs, collection } from "firebase/firestore";
+import { set } from "mongoose";
 
 
 
@@ -106,9 +107,11 @@ function Market () {
             if(data.status === "ok"){
                 setPartsArray(data.data);
                 setCompletePartsArray(data.data);
+                setMessage("");
             }
             else{
                 setMessage("No vehicle specified");
+                setPartsArray([]);
             }
         }
         catch(err){
@@ -169,7 +172,7 @@ function Market () {
         setMessage("");
     }
 
-    const makes = ["Toyota", "Honda"];
+    const makes = ["Toyota", "Honda", "BMW"];
     const models = {
         Toyota: {
             "GR Supra":{
@@ -412,8 +415,15 @@ function Market () {
                     }
                 }
             }
-        }
-    }
+        },
+        BMW: {
+            "335i":{
+                years: {
+                    "2007": { trims: { Base: { engine: ["N54B30"] } } },
+                  }
+                }    
+            }
+    };
 
 
     const handleMakeChange = (event) => {
