@@ -4,6 +4,10 @@ import Header from "../pages/Header";
 import { useLocation } from "react-router-dom";
 import Cards from "../pages/Cards";
 
+import { auth, db } from "../config/firebase";
+import { getDocs, collection } from "firebase/firestore";
+
+
 export default function Modshop() {
   const location = useLocation();
   const category = location.state?.category || "";
@@ -18,6 +22,7 @@ export default function Modshop() {
   const [message, setMessage] = useState("");
   const [partsArray, setPartsArray] = useState([]);
   const [completePartsArray, setCompletePartsArray] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     if (make && model && year && trim && engine) {
@@ -25,6 +30,41 @@ export default function Modshop() {
     }
 }, [make, model, year, trim, engine]);
 
+
+useEffect(() => {
+    const fetchGarageContents = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const userGarageRef = collection(db, `users/${user.uid}/garage`);
+        const userGarageSnapshot = await getDocs(userGarageRef);
+        const cars = userGarageSnapshot.docs.map((doc) => doc.data());
+
+        if(cars.length > 0){
+            fetchRecommendations(cars);
+        }
+    };
+    fetchGarageContents();
+}, []);
+
+async function fetchRecommendations(cars){
+    try{
+        const response = await fetch("http://localhost:5001/api/parts/getRecommendations", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({cars})
+        });
+        const data = await response.json();
+        if(data.status === "ok"){
+            setRecommendations(data.data);
+        }
+        else{
+            setRecommendations([]);
+        }
+    } catch(err){
+        console.log(err);
+    }
+}
   // Fetch all parts
   async function fetchAllParts() {
     try {
@@ -457,11 +497,51 @@ export default function Modshop() {
         ))}
       </div>
 
-       {/* Parts Display Section */}
-       <div className="cards-scroll-container">
-  <Cards partsArray={partsArray} />
-</div>
+      {/* Main Content: Parts + Recommendations side-by-side */}
+      <div className="modshop-content">
+        {/* Parts Display */}
+        <div className="cards-scroll-container">
+          <Cards partsArray={partsArray} />
+        </div>
 
+        {/* Recommendations UI - on the right side */}
+        <div className="recommendations-container">
+          <h2 className="rec-header">Recommended Parts for You</h2>
+          {recommendations.length > 0 ? (
+            <div className="recommendations-list">
+              {recommendations.map((data, index) => (
+                <div key={index} className="part-item">
+                  <p>
+                    <strong>Part Name: {data.part["Part Name"]}</strong>
+                  </p>
+                  <p>
+                    <strong>
+                      For: {data.car.year} {data.car.make} {data.car.model}{" "}
+                      {data.car.trim} {data.car.engine}
+                    </strong>
+                  </p>
+                  <p>
+                    <strong>Category: {data.part["Category"]}</strong>
+                  </p>
+                  <p>
+                    <strong>Price: {data.part["Price"]}</strong>
+                  </p>
+                  <p>
+                    <strong>{data.part["SKU Number"]}</strong>
+                  </p>
+                  <a href={data.part["Link"]} target="_blank" rel="noreferrer">
+                    Buy Now
+                  </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No recommendations found.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+
+

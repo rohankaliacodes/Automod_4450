@@ -102,12 +102,72 @@
   
 
 
-  .cards-scroll-container {
-    width: 100%;
+/* Existing .cards-scroll-container can stay the same, or adjust if needed */
+.cards-scroll-container {
+    flex: 2; /* Takes more space than the recommendations on the right */
     max-height: 60vh;
-    overflow-y: auto; /* ✅ Enables scrolling */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-top: 0; /* If you want it aligned with recommendations */
+  }
+/* Wrap the parts + recommendations in a row flex container */
+.modshop-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    /* If you need a certain max-height, you can define it here. */
     margin-top: 20px;
+    gap: 20px; /* Space between parts and recommendations */
+    padding: 0 20px; /* Optional side padding */
+  }
+  /* New container for recommendations on the right */
+.recommendations-container {
+  flex: 1; /* Takes less space than the parts section */
+  max-height: 60vh; 
+  overflow-y: auto;
+  background: #1e1e14; /* Example darker background */
+  border-radius: 12px;
+  padding: 20px;
+  color: #fff;
+  font-family: var(--font-family);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Title styling for the recommendation header */
+.recommendations-container .rec-header {
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 5px;
+}
+
+/* The list container */
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Each recommended part item */
+.recommendations-list .part-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Hover effect on each recommendation card */
+.recommendations-list .part-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Link styling for 'Buy Now' */
+.recommendations-list .part-item a {
+  color: #ff70a6;
+  text-decoration: underline;
 }
