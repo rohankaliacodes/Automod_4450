@@ -1,3 +1,5 @@
+// my-app/src/client/src/pages/Register.js
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/userLogin.css";
@@ -110,12 +112,12 @@ function RegisterPage() {
             className="input-field"
           />
           <button type="submit" className="sign-in-button">
-            Sign Up
+            <span>Sign Up</span>
           </button>
           <div className="separator"></div>
           <button onClick={handleGoogleSignUp} className="google-button" type="button">
             <img src={googleLogo} alt="Google Logo" />
-            Sign up with Google
+            <span>Sign up with Google</span>
           </button>
           <div className="signup-link">
             <p>

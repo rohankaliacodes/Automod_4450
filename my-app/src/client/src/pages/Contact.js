@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import "../styles/Contact.css";
+import Header from "./Header"; // Import the Header
 
 export default function Contact() {
   const navigate = useNavigate();
@@ -42,17 +43,18 @@ export default function Contact() {
       );
   };
 
-  // Navigate back to homepage
-  const goToHomePage = () => {
-    navigate("/");
-  };
+  // Navigate back to homepage - NO LONGER NEEDED, handled by Header
+  // const goToHomePage = () => {
+  //   navigate("/");
+  // };
 
   return (
     <div className="main-container">
+      <Header /> {/* Include the Header component */}
       <div className="image">
-        <button className="button" onClick={goToHomePage}>
+        {/* <button className="button" onClick={goToHomePage}>  Removed button
           Back To Homepage
-        </button>
+        </button> */}
       </div>
       <div className="frame">
         <form ref={formRef} onSubmit={sendEmail}>

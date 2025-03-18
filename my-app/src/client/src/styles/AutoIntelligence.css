@@ -28,33 +28,10 @@
     transform: translateY(0);
 }
 
-.chat-header {
-    padding: 10px 15px;
-    text-align: left;
-    font-weight: bold;
-    font-size: 1em;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-options {
-    display: flex;
-    gap: 10px;
-}
-
-.chat-option-icon {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease-in-out;
-}
-
-.chat-option-icon:hover {
+.chat-box.pinned {
     opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 .messages-area {
@@ -91,22 +68,62 @@
     margin-bottom: 4px;
     max-width: 95%;
     font-size: 0.9em;
-    white-space: pre-wrap;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add styles for markdown elements inside messages */
+.message ul, .message ol {
+    margin-left: 20px;
+    padding-left: 15px;
+}
+
+.message li {
+    margin-bottom: 5px;
+}
+
+.message strong, .message b {
+    font-weight: bold;
+}
+
+.message em, .message i {
+    font-style: italic;
+}
+
+.message h1, .message h2, .message h3, .message h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.message p {
+    margin-bottom: 10px;
+}
+
+.message code {
+    font-family: monospace;
+    background-color: rgba(50, 50, 50, 0.5);
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 .message.received {
     background-color: transparent;
     color: #eee;
     align-self: flex-start;
-    text-indent: 10px;
+    margin-left: 10px;
 }
 
 .message.sent {
-    background-color: transparent;
-    color: #bbb;
+    background-color: #444;
+    color: #eee;
     align-self: flex-end;
-    text-align: right;
+    text-align: left;
     margin-right: 10px;
+    border-radius: 20px;
+    padding: 10px 15px;
+    word-wrap: break-word;
 }
 
 .input-area {
@@ -119,7 +136,7 @@
     position: relative;
     box-sizing: border-box;
     width: 100%;
-    max-width: 100%; /* ADDED: Ensure input-area doesn't expand too much */
+    max-width: 100%;
 }
 
 .input-container {
@@ -142,15 +159,15 @@
     outline: none;
     margin-bottom: 0;
     resize: vertical;
-    overflow-y: auto; /*  Kept - but we need to fix the strike-through */
+    overflow-y: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
     height: auto;
     min-height: 30px;
     max-height: 150px;
-    width: 90%; /* Simplified width for testing */
+    width: 90%;
     box-sizing: border-box;
-    margin-right: 0; /* Removed margin-right for simplification */
+    margin-right: 0;
 }
 
 .message-input::placeholder {
@@ -164,7 +181,7 @@
     color: white;
     cursor: pointer;
     width: 40px;
-    height: 40px; 
+    height: 40px;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -176,7 +193,7 @@
 
 .send-button:hover {
     opacity: 1;
-    filter: drop-shadow(0 0 2px #c81058); /* Use drop-shadow filter */
+    filter: drop-shadow(0 0 2px #c81058);
 }
 
 .options-bar {
@@ -186,7 +203,6 @@
     padding-bottom: 5px;
     background-color: transparent;
     color: #f0f0f0;
-    
     border-radius: inherit;
 }
 
@@ -197,7 +213,8 @@
     white-space: nowrap;
     font-weight: 600;
 }
-.reset-chat{
+
+.reset-chat {
     background-color: transparent;
     border: transparent;
     display: flex;
@@ -206,7 +223,8 @@
     cursor: pointer;
     margin-right: 15px;
 }
-.reset-chat:hover{
+
+.reset-chat:hover {
     opacity: 1;
     filter: drop-shadow(0 0 1px #bebebe);
 }
@@ -230,8 +248,7 @@
 
 .option-icon.selected-icon {
     opacity: 1;
-    /* box-shadow: 0 0 8px 2px #c81058;  Remove box-shadow */
-    filter: drop-shadow(0 0 8px #c81058); /* Use drop-shadow filter */
+    filter: drop-shadow(0 0 8px #c81058);
     transform: scale(1.1);
 }
 
@@ -240,4 +257,46 @@
     align-items: center;
     gap: 8px;
     margin-left: auto;
+}
+
+.sources {
+    margin-top: 5px;
+    font-size: 1em;
+    color: #aaa;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.sources a {
+    color: #88c0d0;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sources a:not(:last-child)::after {
+    content: ',';
+    margin-right: 0.25em;
+}
+
+.sources a:hover {
+    text-decoration: underline;
+}
+
+.source-link {
+    background-color: transparent;
+    border: none;
+    color: #88c0d0;
+    cursor: pointer;
+    padding: 0 2px;
+    font-size: 1em;
+    text-decoration: none;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+}
+
+.segment-text {
+    white-space: pre-wrap;
 }

@@ -81,13 +81,13 @@ function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="input-field"
           />
-          <button type="submit" className="sign-in-button">
-            Sign-In
+          <button type="submit" className="sign-in-button btn-5">
+            <span>Sign In</span>
           </button>
           <div className="separator"> </div>
           <button onClick={handleGoogleSignIn} className="google-button" type="button">
             <img src={googleLogo} alt="Google Logo" />
-            Log in with Google
+            <span>Log In with Google</span>
           </button>
           <div className="signup-link">
             <p>
