@@ -1,129 +1,184 @@
+/* Contact2.css - Unique class names to avoid conflicts */
+
 
 :root {
+    /* You can keep or remove these variables if they conflict with others.
+       Consider renaming them if they do. */
     --default-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
       Ubuntu, "Helvetica Neue", Helvetica, Arial, "PingFang SC",
       "Hiragino Sans GB", "Microsoft Yahei UI", "Microsoft Yahei",
       "Source Han Sans CN", sans-serif;
-    --highlight-color: #c81058; /* Theme's highlight color */
-    --text-color: #ffffff;      /* Bright white for high contrast */
-    --background-dark: black; /* Dark background for a sleek look */
-    --input-bg-color: #faf9f6;  /* Dark input fields for sleek design */
-    --border-color: #444;       /* Subtle borders for inputs */
+    --highlight-color: #c81058; 
+    --text-color: #000;               /* Black text for form */
+    --background-dark: #fff;          /* White background on right side */
+    --input-bg-color: #faf9f6;        /* Light input background */
+    --border-color: #ccc;             /* Subtle borders for inputs */
   }
   
-  /* Replacing .main-container with .contact-main-container */
-  .contact-main-container {
-    overflow: hidden;
-    box-sizing: border-box;
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    margin: 0 auto;
-    background: var(--background-dark);
-    color: var(--text-color);
-    font-family: var(--default-font-family);
+  /* Main Container - two-column layout, left image + right form */
+  .contact2-main-container {
+    display: flex !important;
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important; /* Prevents scrollbars */
+    box-sizing: border-box !important;
+    background-color: var(--background-dark) !important; /* White background */
+    font-family: var(--default-font-family) !important;
+  }
+
+  .contact2-main-container .header-container *{
+
+    color: black !important;
+
   }
   
-  .contact-image {
-    position: absolute;
-    width: 65vh;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    background: url(https://static.codia.ai/image/2025-03-11/4edb0ce5-0dff-470b-8075-8314fc862850.png) no-repeat center;
-    background-size: cover;
-    z-index: 1;
+  
+  /* Left half - image */
+  .contact2-image {
+    flex: 0 0 50% !important;
+    position: relative !important;
+    width: 50% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    background: url("https://static.codia.ai/image/2025-03-11/4edb0ce5-0dff-470b-8075-8314fc862850.png") no-repeat center !important;
+    background-size: cover !important; 
+    display: block !important;
   }
   
-  /* Replacing .button & .button-f with .contact-button & .contact-button-f */
-  .contact-button,
-  .contact-button-f {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    padding: 10px 20px;
-    background: var(--highlight-color);
-    color: var(--text-color);
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    z-index: 2;
+  /* Right half - form container */
+  .contact2-frame {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 2rem !important;
+    background-color: #fff !important;
+    width: 50% !important;
   }
   
-  .contact-button:hover,
-  .contact-button-f:hover {
-    background-color: #ff70a6;
-    transform: translateY(-2px);
+  /* Title / heading */
+  .contact2-send-us-message {
+    font-size: 2.5rem !important;
+    margin-bottom: 2rem !important;
+    text-align: center !important;
+    width: 100% !important;
+    color: #000 !important;  /* black text color */
+    font-weight: 700 !important; /* Bold font */
+    margin-top: 100px;
   }
   
-  .contact-button:disabled,
-  .contact-button-f:disabled {
-    background-color: white;
-    color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  /* Replacing .frame with .contact-frame */
-  .contact-frame {
+  /* Nested frames for layout structure */
+  .contact2-frame-1,
+  .contact2-frame-2,
+  .contact2-frame-3,
+  .contact2-frame-4,
+  .contact2-frame-5,
+  .contact2-frame-6,
+  .contact2-frame-7,
+  .contact2-frame-8,
+  .contact2-frame-9,
+  .contact2-frame-a,
+  .contact2-frame-b,
+  .contact2-frame-c,
+  .contact2-frame-d {
+    /* No special styling unless desired */
+    width: 100%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    position: absolute;
-    width: 80%;
-    max-width: 600px;
-    padding: 20px;
-    border-radius: 8px;
-    background: white; /* Semi-transparent black background */
-    top: 50%;
-    left: 67%;
-    transform: translate(-50%, -50%);
-    box-shadow: white;
+    align-items: stretch;
   }
   
-  /* Keep your nested frames, just renamed to .contact-frame-# */
-  .contact-frame-1,
-  .contact-frame-2,
-  .contact-frame-3,
-  .contact-frame-4,
-  .contact-frame-5,
-  .contact-frame-6,
-  .contact-frame-7,
-  .contact-frame-8,
-  .contact-frame-9,
-  .contact-frame-a,
-  .contact-frame-b,
-  .contact-frame-c,
-  .contact-frame-d {
-    /* No specific styles needed unless you want to add them */
-  }
-  
-  input,
-  textarea {
-    width: 100%;
-    padding: 12px;
-    background: var(--input-bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: 16px;
-  }
-  
-  .contact-send-us-message {
-    color: var(--highlight-color);
-    font-size: 24px;
+  /* Label text */
+  .contact2-name,
+  .contact2-email,
+  .contact2-subject,
+  .contact2-message {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: #333;
     font-weight: bold;
   }
   
-  /* Additional label styling (optional) */
-  .contact-name,
-  .contact-email,
-  .contact-subject,
-  .contact-message {
-    /* If you want to style these text labels, do so here */
+  /* Inputs and textarea */
+  .contact2-frame-7,
+  .contact2-frame-9,
+  .contact2-frame-b,
+  .contact2-frame-d {
+    padding: 1.2rem;
+    font-size: 1.1rem;
+    border: 1px solid rgba(204, 204, 204, 0.7);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: var(--input-bg-color);
+    color: var(--text-color);
+  }
+  
+  /* Textarea specifically */
+  .contact2-frame-d {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  /* Focus states */
+  .contact2-frame-7:focus,
+  .contact2-frame-9:focus,
+  .contact2-frame-b:focus,
+  .contact2-frame-d:focus {
+    outline: none;
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 5px rgba(200, 16, 86, 0.5);
+  }
+  
+  /* Send button */
+  .contact2-button-f {
+    width: 100% !important;
+    padding: 1.2rem !important;
+    font-size: 1.1rem !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    margin-bottom: 0.5rem !important;
+    position: relative !important;
+    overflow: hidden !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    background-color: #000 !important;
+    border: none !important;
+    transition: background-color 0.3s ease !important;
+  }
+  
+  /* Hover effect overlay */
+  .contact2-button-f::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--highlight-color);
+    border-radius: 8px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 1;
+  }
+  
+  .contact2-button-f:hover::before {
+    transform: translateY(0);
+  }
+  
+  .contact2-button-f:active {
+    background-color: var(--highlight-color);
+  }
+  
+  /* If you wrap text in <span> inside button, keep it above overlay */
+  .contact2-button-f span {
+    position: relative;
+    z-index: 2;
   }
   
