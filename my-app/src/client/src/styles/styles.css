@@ -222,10 +222,6 @@ select:focus {
     box-shadow: none;
 }
 
-.custom-button:hover:not(:disabled) {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-}
 
 .custom-button:active:not(:disabled) {
     background-color: #004085;
