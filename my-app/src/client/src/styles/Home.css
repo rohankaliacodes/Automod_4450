@@ -63,6 +63,11 @@
     cursor: pointer;
 }
 
+.category-button:hover {
+    transform: translateY(2px);
+    background-color: #c81058; /* Lighter shade on hover */
+}
+
 /* Responsive Categories */
 @media (max-width: 768px) {
     .category-button {
