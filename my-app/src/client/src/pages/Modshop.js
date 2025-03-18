@@ -10,7 +10,7 @@ import { getDocs, collection } from "firebase/firestore";
 
 export default function Modshop() {
   const location = useLocation();
-  const category = location.state?.category || "";
+  const category = location.state?.category || null;
 
   // State variables
   const [make, setMake] = useState("");
@@ -23,12 +23,21 @@ export default function Modshop() {
   const [partsArray, setPartsArray] = useState([]);
   const [completePartsArray, setCompletePartsArray] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   useEffect(() => {
     if (make && model && year && trim && engine) {
         fetchParts(new Event("click"));  // Simulate an event trigger
     }
 }, [make, model, year, trim, engine]);
+
+ // 🔹 If we have a category from Home and we have parts, sort them
+ useEffect(() => {
+    if (category && completePartsArray.length > 0) {
+      setIsSubmitted(true);
+      sortPartsByCategory(category, completePartsArray);
+    }
+  }, [category, completePartsArray]);
 
 
 useEffect(() => {
@@ -44,6 +53,7 @@ useEffect(() => {
             fetchRecommendations(cars);
         }
     };
+    fetchAllParts();
     fetchGarageContents();
 }, []);
 
