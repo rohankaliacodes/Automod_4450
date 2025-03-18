@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Market from "./pages/Market";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import Companies from "./pages/Companies";
@@ -35,7 +34,7 @@ const AppRoutes = () => {
                 <Route path="/chat" element={<Chat />} />
 
                 {/* Market Page */}
-                <Route path="/market" element={<Market />} />
+                <Route path="/modshop" element={<Modshop />} />
 
                 {/* CarView Page */}
                 <Route path="/carView" element={<CarView />} /> 
@@ -51,7 +50,6 @@ const AppRoutes = () => {
 
                 <Route path="/contact" element={<Contact />} /> {/* Add this line */}
 
-                <Route path="/modshop" element={<Modshop/>} /> 
 
 
             </Routes>

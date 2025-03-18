@@ -222,7 +222,7 @@ export const Home = () => {
         <p className="text-wrapper">Or Browse Part By Category</p>
         <div className="categories">
           {categories.map((category, index) => (
-            <button key={index} className="category-button" onClick={() => navigate("/market", { state: { category } })}>
+            <button key={index} className="category-button" onClick={() => navigate("/modshop", { state: { category } })}>
               {category}
             </button>
           ))}
