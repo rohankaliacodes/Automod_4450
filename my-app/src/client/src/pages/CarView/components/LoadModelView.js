@@ -9,7 +9,7 @@ const LoadModelView = ({ carIdentifier, onModelClick }) => { // Receive onModelC
         "toyota-corolla-2020": "Models/corolla_2020_free_highpoly/scene.gltf",
         "honda-civic-2023": "Models/custom_honda_civic_type-r_2024/scene.gltf",
         "toyota-86-2020": "Models/toyota_gt86_3d_model_free/scene.gltf",
-        "toyota-tacoma-2020": "Models/bmw_m3_e92_stance/scene.gltf",
+        "bmw-335i-2007": "Models/bmw_m3_e92_stance/scene.gltf",
         "default-model": "Models/toyota_gr_supra/scene.gltf" // Default model path
     };
 
