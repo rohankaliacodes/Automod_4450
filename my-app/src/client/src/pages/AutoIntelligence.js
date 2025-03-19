@@ -31,17 +31,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         breaks: true
     });
 
-    // --- State Variables ---
     const [selectedImage, setSelectedImage] = useState(null);
-    const [selectedMedia, setSelectedMedia] = useState(null); // For audio/video
-
-
-    // --- Removed MediaRecorder related state and functions ---
-    // const [isRecording, setIsRecording] = useState(false); REMOVED
-    // const [audioChunks, setAudioChunks] = useState([]); REMOVED
-    // const mediaRecorderRef = useRef(null); REMOVED
-    // const startRecording = async () => { ... }; REMOVED
-    // const stopRecording = () => { ... }; REMOVED
+    const [selectedMedia, setSelectedMedia] = useState(null);
 
 
     useEffect(() => {
@@ -60,14 +51,12 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         return () => unsubscribe();
     }, [carData, displayName]);
 
-    // --- Helper Functions ---
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedImage(file);
-            setSelectedMedia(null); // Clear any previous media
-            // Image preview
+            setSelectedMedia(null);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
@@ -80,7 +69,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         const file = event.target.files[0];
         if (file) {
           setSelectedMedia(file);
-          setSelectedImage(null);  // Clear any previous image
+          setSelectedImage(null);
 
           if (file.type.startsWith('video/')) {
             getVideoThumbnail(file).then(thumbnail => {
@@ -94,19 +83,17 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
 
 
-    // --- Modified handleSendMessage ---
 
     const handleSendMessage = async () => {
 
-        // Add user message to chat (if there's text).
         if (inputMessage.trim()) {
             const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
             setMessages(prevMessages => [...prevMessages, userMessage]);
-            setInputMessage(''); // Clear the input *after* adding to messages
+            setInputMessage('');
         }
 
         if (!inputMessage.trim() && !selectedImage && !selectedMedia) {
-            return;  // Nothing to send
+            return;
         }
 
         setLoadingResponse(true);
@@ -134,22 +121,20 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         try {
             if (selectedIconType === 'autoMechanic') {
                 const formData = new FormData();
-                formData.append('message', inputMessage);  // Append even if empty
+                formData.append('message', inputMessage);
                 if (selectedImage) {
-                    formData.append('image', selectedImage); // Separate image
+                    formData.append('image', selectedImage);
                 }
                 if (selectedMedia) {
-                    formData.append('media', selectedMedia); // Separate media (audio/video)
+                    formData.append('media', selectedMedia);
                 }
                 if (carData) {
                     formData.append('carData', JSON.stringify(carData));
                 }
 
-
-                // Initial POST request (with image/audio if present)
                 const initResponse = await fetch(apiUrl, {
                     method: 'POST',
-                    body: formData, // Send FormData
+                    body: formData,
                 });
 
                 if (!initResponse.ok) {
@@ -157,24 +142,26 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                const { sessionId } = await initResponse.json();
+                // *** Get initial response and add it to messages ***
+                const { sessionId, initialResponse } = await initResponse.json();
                 setSessionId(sessionId);
-                setSelectedImage(null); // Clear image after sending
-                setSelectedMedia(null);  //Clear media after sending
+                setMessages(prevMessages => [...prevMessages, { text: initialResponse, sender: 'received', segments: [], html: md.render(initialResponse) }]);
+                setLoadingResponse(false); // Turn off loading *after* initial response
 
-                //  SSE Streaming (for subsequent text messages)
+                setSelectedImage(null); // Clear image and media
+                setSelectedMedia(null);
+
+                // --- Streaming (for subsequent messages) ---
                 let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}`;
+                // NO media data here.  It's already been sent.
 
-                // Append message *only* if there's actual text.
-                if (inputMessage.trim()) {
-                    streamUrl += `&message=${encodeURIComponent(inputMessage)}`;
-                }
-
+                //Append car data to the streamUrl
                 if (carData) {
                     streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
                 }
+
                 const eventSource = new EventSource(streamUrl);
-                setCurrentEventSource(eventSource);
+                setCurrentEventSource(eventSource); // Store the EventSource
 
                 eventSource.onopen = () => {
                     // console.log("SSE connection opened");
@@ -182,42 +169,46 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
-
-                    setMessages(prevMessages => {
-                        if (messageData.role === 'model') {
-                            const lastMessage = prevMessages[prevMessages.length - 1];
-
-                            if (lastMessage && lastMessage.sender === 'received') {
-                                const updatedMessage = {
-                                    ...lastMessage,
-                                    text: lastMessage.text + messageData.text,
-                                    html: md.render(lastMessage.text + messageData.text),
-                                    segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
-                                };
-                                return [...prevMessages.slice(0, -1), updatedMessage];
-                            } else {
-                                return [...prevMessages, {
-                                    text: messageData.text,
-                                    sender: 'received',
-                                    segments: processSegments(messageData.text, messageData.supports, messageData.sources),
-                                    html: md.render(messageData.text)
-                                }];
-                            }
+                      if (messageData.role === 'model') {
+                        setMessages((prevMessages) => {
+                          const lastMessage = prevMessages[prevMessages.length - 1];
+                          if (lastMessage && lastMessage.sender === 'received') {
+                            // Append new chunk to the last message
+                            const updatedMessage = {
+                              ...lastMessage,
+                              text: lastMessage.text + messageData.text,
+                              html: md.render(lastMessage.text + messageData.text),
+                              segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
+                            };
+                            return [...prevMessages.slice(0, -1), updatedMessage];
+                          } else {
+                            // Add new message if no previous received message
+                            return [...prevMessages, {
+                                text: messageData.text,
+                                sender: 'received',
+                                segments: processSegments(messageData.text, messageData.supports, messageData.sources),
+                                html: md.render(messageData.text)
+                            }];
                         }
-                        return prevMessages;
-
+                        
                     });
+                    }
                 };
 
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
-                    setLoadingResponse(false);
-                    if (eventSource) {
-                        eventSource.close();
-                    }
+                    setLoadingResponse(false); // Stop loading on error
+                    eventSource.close(); // Close on error
                 };
+
+                 eventSource.onclose = () => {
+                  setLoadingResponse(false);
+                  setCurrentEventSource(null);
+                }
+
+
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-                const inputData = {
+               const inputData = {
                     "Make": carData.make,
                     "Model": carData.model,
                     "Year": carData.year,
@@ -270,11 +261,13 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             setLoadingResponse(false);
             if (currentEventSource) {
                 currentEventSource.close();
+                setCurrentEventSource(null);
             }
         }
         return () => {
             if (currentEventSource) {
                 currentEventSource.close();
+                setCurrentEventSource(null);
             }
         };
     };
@@ -396,14 +389,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
       return new Promise((resolve, reject) => {
         const video = document.createElement('video');
         video.src = URL.createObjectURL(file);
-        video.currentTime = 1; // Capture frame at 1 second
+        video.currentTime = 1;
         video.addEventListener('loadeddata', () => {
           const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth; // Use video dimensions
+          canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const thumbnail = canvas.toDataURL('image/jpeg'); // Or 'image/png'
+          const thumbnail = canvas.toDataURL('image/jpeg');
           resolve(thumbnail);
         });
         video.addEventListener('error', (e) => {
@@ -441,7 +434,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                         <source src={message.src} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
-                      {/* Display thumbnail */}
                       {message.thumbnail && <img src={message.thumbnail} alt="Video Thumbnail" style={{ maxWidth: '100%', maxHeight: '100px' }} />}
                     </div>
                   );
@@ -477,12 +469,10 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 );
                 }
             })}
-            {loadingResponse && <div className="message received">Loading...</div>}
             </div>
 
             <div className="input-area">
                 <div className="input-container">
-                 {/* Separate Image Upload */}
                 <input
                     type="file"
                     accept="image/*"
@@ -494,7 +484,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     Upload Image
                 </label>
 
-                {/* Separate Media (Audio/Video) Upload */}
                 <input
                     type="file"
                     accept="audio/*, video/*"
@@ -553,7 +542,6 @@ function formatRecommendationsToMarkdown(recommendations) {
         markdownString += `* **Category:** ${rec["Category"]}\n`;
         markdownString += `* **Effect on the Car:** ${rec["Effect on the Car"]}\n\n`;
 
-        // Dynamically handle different keys based on available data
         if (rec["Before Modification"]) {
             markdownString += "**Before Modification:**\n";
             for (const key in rec["Before Modification"]) {
@@ -577,7 +565,7 @@ function formatRecommendationsToMarkdown(recommendations) {
             }
             markdownString += "\n";
         }
-        markdownString += "---\n"; // Horizontal rule separator
+        markdownString += "---\n";
 
     });
 
