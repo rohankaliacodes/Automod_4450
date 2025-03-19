@@ -3,6 +3,7 @@ import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
 import aesthethics from '../assets/SVG/design.svg';
+import functional from '../assets/SVG/design.svg';
 import MarkdownIt from 'markdown-it';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
@@ -65,7 +66,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         let apiUrl = '';
         if (selectedIconType === 'autoMechanic') {
             apiUrl = 'http://localhost:5001/api/autoMechanic/chat';
-        } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+        } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics' || selectedIconType === 'functional') {
             apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
@@ -144,7 +145,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     }
                 };
 
-            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics'|| selectedIconType === "functional") {
                 const inputData = {
                     "Make": carData.make,
                     "Model": carData.model,
@@ -157,6 +158,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                 return 'Performance';
                             case 'aesthethics':
                                 return 'Aesthetics';
+                            case 'functional':
+                                return 'Functional';
                             default:
                                 return 'Performance';
                         }
@@ -390,6 +393,12 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                 alt="Aesthethics"
                                 className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`}
                                 onClick={() => handleOptionClick('Aesthethics', 'aesthethics')}
+                            />
+                            <img
+                                src={functional}
+                                alt="Functional Tuner"
+                                className={`option-icon ${selectedIconType === 'functional' ? 'selected-icon' : ''}`}
+                                onClick={() => handleOptionClick('Functional', 'functional')}
                             />
                         </div>
                     </div>
