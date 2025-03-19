@@ -7,11 +7,11 @@ import MarkdownIt from 'markdown-it';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 
-const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinned and onClick
-    const [isChatVisible, setIsChatVisible] = useState(true); //  Keep local visibility state
+const AutoIntelligence = ({ isChatPinned, onClick }) => {
+    const [isChatVisible, setIsChatVisible] = useState(true);
     const [displayName, setDisplayName] = useState("User");
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
@@ -24,8 +24,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
     const location = useLocation();
     const carData = location.state;
     const [messages, setMessages] = useState([]);
-    const [recommendations, setRecommendations] = useState([]); // added for recommendation
-    // Initialize markdown-it
+    const [recommendations, setRecommendations] = useState([]);
     const md = new MarkdownIt({
         html: true,
         linkify: true,
@@ -33,22 +32,20 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         breaks: true
     });
 
-    // useEffect for setting the initial message and user authentication
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                setDisplayName(user.displayName || "User"); // Use displayName if available
+                setDisplayName(user.displayName || "User");
             } else {
                 setDisplayName("User");
             }
         });
-        // Construct the initial message based on carData and displayName
         let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready.`;
         if (carData) {
             initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready. How can I help with your ${carData.make} ${carData.model} today?`;
         }
         setMessages([{ text: initialMessageText, sender: 'received', segments: [], html: md.render(initialMessageText) }]);
-        return () => unsubscribe(); // Cleanup the auth listener
+        return () => unsubscribe();
     }, [carData, displayName]);
 
     const handleSendMessage = async () => {
@@ -60,7 +57,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         setLoadingResponse(true);
         setHasError(false);
 
-        // Close any existing EventSource connection
         if (currentEventSource) {
             currentEventSource.close();
             setCurrentEventSource(null);
@@ -109,7 +105,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                 setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
-                    // No "Loading..." message here
                 };
 
                 eventSource.onmessage = (event) => {
@@ -156,14 +151,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                     "Year": carData.year,
                     "Trim": carData.trim,
                     "Engine": carData.engine,
-                    "Modification Type": (() => {  
+                    "Modification Type": (() => {
                         switch (selectedIconType) {
                             case 'performanceTuner':
                                 return 'Performance';
                             case 'aesthethics':
                                 return 'Aesthetics';
                             default:
-                                return 'Performance'; 
+                                return 'Performance';
                         }
                     })(),
                     "User Goal": inputMessage,
@@ -176,8 +171,9 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                     const response = await axios.post(apiUrl, inputData);
                     if (response.data && response.data.recommendations) {
                       setRecommendations(response.data.recommendations);
-                      // Display the recommendations in message
-                      setMessages(prevMessages => [...prevMessages, { text: `Recommendations:  ${JSON.stringify(response.data.recommendations)}`, sender: 'received', segments: [], html: md.render(`Recommendations:  ${JSON.stringify(response.data.recommendations)}`) }]);
+                      let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
+                      setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
+
                     } else {
                       console.warn("Recommendations API returned an empty or malformed response.");
                       setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
@@ -252,12 +248,11 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
      const handleMouseMove = (e) => {
          if (isChatPinned) return;
 
-         // Larger trigger area in the bottom-left corner
          const triggerArea = {
              width: 700,
              height: 700,
-             x: 0,       // Starts at the left edge
-             y: window.innerHeight - 700, // Starts 300px from the bottom
+             x: 0,
+             y: window.innerHeight - 700,
          };
 
          if (
@@ -275,13 +270,11 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
 
 
     const handleDocumentClick = (e) => {
-        // Hide only if NOT pinned, and click is outside chatBoxRef
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
             setIsChatVisible(false);
         }
     };
 
-    // --- Reset Chat Handler ---
     const handleResetChat = async () => {
         if (currentEventSource) {
             currentEventSource.close();
@@ -332,7 +325,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         <div
             className={`chat-box ${isChatVisible ? 'visible' : ''} ${isChatPinned ? 'pinned' : ''}`}
             ref={chatBoxRef}
-            onClick={onClick} // Use the passed onClick prop
+            onClick={onClick}
         >
             <div className="messages-area">
                 {messages.map((message, index) => (
@@ -406,5 +399,38 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         </div>
     );
 };
+
+function formatRecommendationsToMarkdown(recommendations) {
+    let markdownString = "## Recommendations:\n\n";
+
+    recommendations.forEach((rec, index) => {
+        markdownString += `### ${index + 1}. ${rec["Part Name"]}\n\n`;
+        markdownString += `* **Estimated Price:** ${rec["Estimated Price"]}\n`;
+        markdownString += `* **Category:** ${rec["Category"]}\n`;
+        markdownString += `* **Effect on the Car:** ${rec["Effect on the Car"]}\n\n`;
+
+        if (rec["Before Modification"]) {
+            markdownString += "**Before Modification:**\n";
+            markdownString += `    * Horsepower: ${rec["Before Modification"]["Horsepower"]}\n`;
+            markdownString += `    * Torque (lb-ft): ${rec["Before Modification"]["Torque (lb-ft)"]}\n\n`;
+        }
+
+        if (rec["After Modification"]) {
+            markdownString += "**After Modification:**\n";
+            markdownString += `    * Horsepower: ${rec["After Modification"]["Horsepower"]}\n`;
+            markdownString += `    * Torque (lb-ft): ${rec["After Modification"]["Torque (lb-ft)"]}\n\n`;
+        }
+
+        if (rec["Percentage Change"]) {
+            markdownString += "**Percentage Change:**\n";
+            markdownString += `    * Horsepower: ${rec["Percentage Change"]["Horsepower"]}\n`;
+            markdownString += `    * Torque: ${rec["Percentage Change"]["Torque"]}\n\n`;
+        }
+
+        markdownString += "---\n";
+    });
+
+    return markdownString;
+}
 
 export default AutoIntelligence;
