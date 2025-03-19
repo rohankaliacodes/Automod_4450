@@ -3,6 +3,7 @@ import "../styles/Home.css";
 import Header from "../pages/Header";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
 
 export const Home = () => {
   const categories = ["All", "Belts/Hoses/Cooling", "Body/Cable/Misc", "Brake/Wheel Bearing", "Electrical", "Fuel/Emissions", "Heating/AC", "Ignition/Filters", "Tires/Accessories", "Wipers/Lamps/Fuses"];
@@ -140,14 +141,20 @@ export const Home = () => {
   return (
     <div className="background">
       <Header />
-      <p className="heading-find-your">Find The Perfect Part For Your Car</p>
+     
 
+      <p className="heading-find-your">Find The Perfect Part For Your Car</p>
+      
       <div className="form">
+      <button className="home-info-tooltip" data-tooltip-id="test-tooltip" data-tooltip-content="Welcome to AutoMod! Enter your vehicle's specs to get started, or browse parts by category.">
+?</button>
+<Tooltip id="test-tooltip" />
+
         <p className="heading-find-cars">Select Your Vehicle</p>
 
         <form onSubmit={handleSubmit}>
           <div className="dropdowns">
-            <select className="dropdown" value={make} onChange={handleMakeChange}>
+            <select className="dropdown" value={make} onChange={handleMakeChange} data-tooltip-id="make-tooltip" data-tooltip-content="Select the make of your vehicle">
               <option value="">Select Make</option>
               {makes.map((makeOption) => (
                 <option key={makeOption} value={makeOption}>
@@ -155,12 +162,15 @@ export const Home = () => {
                 </option>
               ))}
             </select>
+            <Tooltip id="make-tooltip" />
 
             <select
               className="dropdown"
               value={model}
               onChange={handleModelChange}
               disabled={!make}
+              data-tooltip-id="model-tooltip"
+              data-tooltip-content="Select the model of your vehicle"
             >
               <option value="">Select Model</option>
               {getModels().map((modelOption) => (
@@ -169,12 +179,15 @@ export const Home = () => {
                 </option>
               ))}
             </select>
+            <Tooltip id="model-tooltip" />
 
             <select
               className="dropdown"
               value={year}
               onChange={handleYearChange}
               disabled={!model}
+              data-tooltip-id="year-tooltip"
+              data-tooltip-content="Select the year of your vehicle"
             >
               <option value="">Select Year</option>
               {getYears().map((yearOption) => (
@@ -183,12 +196,15 @@ export const Home = () => {
                 </option>
               ))}
             </select>
+            <Tooltip id="year-tooltip" />
 
             <select
               className="dropdown"
               value={trim}
               onChange={handleTrimChange}
               disabled={!year}
+              data-tooltip-id="trim-tooltip"
+              data-tooltip-content="Select the trim of your vehicle"
             >
               <option value="">Select Trim</option>
               {getTrims().map((trimOption) => (
@@ -197,12 +213,15 @@ export const Home = () => {
                 </option>
               ))}
             </select>
+            <Tooltip id="trim-tooltip" />
 
             <select
               className="dropdown"
               value={engine}
               onChange={handleEngineChange}
               disabled={!trim}
+              data-tooltip-id="engine-tooltip"
+              data-tooltip-content="Select the engine of your vehicle"
             >
               <option value="">Select Engine</option>
               {getEngines().map((engineOption) => (
@@ -211,6 +230,7 @@ export const Home = () => {
                 </option>
               ))}
             </select>
+            <Tooltip id="engine-tooltip" />
           </div>
 
           <button type="submit" disabled={!make || !model || !year || !trim || !engine}className="custom-button">

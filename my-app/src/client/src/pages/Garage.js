@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Header from './Header';
 import '../styles/Garage.css';
+import {Tooltip} from "react-tooltip";
 
 
 function Garage(){
@@ -47,6 +48,11 @@ function Garage(){
           <div className='garage-contents'>
           <h1 className="garage-heading">{auth.currentUser ? `${auth.currentUser.displayName}'s Garage` : "Your Garage"}</h1>
               <p>{message}</p>
+              <button className="info-tooltip" data-tooltip-id="test-tooltip" data-tooltip-content="Welcome to your garage! Click a car to view a 3D model of it.">
+                    ?
+                  </button>
+                  <Tooltip id="test-tooltip" />
+
               <div className='garage-grid'>
                 {garageContents.map((car) => (
                 <div key={car.id} className="garage-car">

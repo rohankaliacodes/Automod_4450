@@ -4,6 +4,7 @@ import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
 import performanceTuner from '../assets/SVG/performance.svg';
 import aesthethics from '../assets/SVG/design.svg';
+import functional from '../assets/SVG/design.svg';
 import MarkdownIt from 'markdown-it';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
@@ -11,6 +12,8 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import loadingGif from '../assets/loading.gif';
 import uploadIcon from '../assets/SVG/upload.svg'; // Import the upload SVG
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
     const [isChatVisible, setIsChatVisible] = useState(true);
@@ -33,6 +36,29 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         typographer: true,
         breaks: true
     });
+    
+const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+
+const handleRecommendationClick = (recommendation) => {
+    setSelectedRecommendation(recommendation);
+};
+
+const formatDataForChart = (recommendation) => {
+    if (!recommendation) return [];
+
+    let data = [];
+    for (const key in recommendation["Before Modification"]) {
+        data.push({
+            attribute: key,
+            before: recommendation["Before Modification"][key],
+            after: recommendation["After Modification"][key],
+            percentageChange: recommendation["Percentage Change"][key] || "N/A"
+        });
+    }
+    return data;
+};
+
+
 
     const [selectedFile, setSelectedFile] = useState(null); // Single state for both image and media
 
@@ -117,7 +143,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         let apiUrl = '';
         if (selectedIconType === 'autoMechanic') {
             apiUrl = 'http://localhost:5001/api/autoMechanic/chat';
-        } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+        } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics' || selectedIconType === 'functional') {
             apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
@@ -206,15 +232,17 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     setLoadingResponse(false);
                     eventSource.close();
                 };
-
                  eventSource.onclose = () => {
                   setLoadingResponse(false);
                   setCurrentEventSource(null);
                 }
 
 
-            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-               const inputData = {
+
+
+            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics'|| selectedIconType === "functional") {
+                const inputData = {
+
                     "Make": carData.make,
                     "Model": carData.model,
                     "Year": carData.year,
@@ -226,6 +254,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                 return 'Performance';
                             case 'aesthethics':
                                 return 'Aesthetics';
+                            case 'functional':
+                                return 'Functional';
                             default:
                                 return 'Performance';
                         }
@@ -239,6 +269,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     setLoadingResponse(true);
                     const response = await axios.post(apiUrl, inputData);
                     if (response.data && response.data.recommendations) {
+
                         setRecommendations(response.data.recommendations);
                         let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
                         setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
@@ -479,6 +510,23 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 <div className="message received">
                     <img src={loadingGif} alt="Loading..." style={{ width: '50px', height: '50px' }} />
                 </div>
+                
+            {selectedRecommendation && (
+    <div className="graph-container">
+        <h3>Modification Impact Visualization</h3>
+        <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={formatDataForChart(selectedRecommendation)}>
+                <XAxis dataKey="attribute" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="before" fill="#8884d8" name="Before Modification" />
+                <Bar dataKey="after" fill="#82ca9d" name="After Modification" />
+            </BarChart>
+        </ResponsiveContainer>
+        <button onClick={() => setSelectedRecommendation(null)} className= 'close-button'> Close Graph</button>
+    </div>
+
                 )}
             </div>
 
@@ -514,6 +562,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                 className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`}
                                 onClick={() => handleOptionClick('Aesthethics', 'aesthethics')}
                             />
+
                                              <input
                             type="file"
                             accept="image/*, audio/*, video/*"
@@ -524,6 +573,13 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                         <label htmlFor="combined-upload" className="upload-button">
                             <img src={uploadIcon} alt="Upload" className="upload-icon option-icon" />
                         </label>
+
+                            <img
+                                src={functional}
+                                alt="Functional Tuner"
+                                className={`option-icon ${selectedIconType === 'functional' ? 'selected-icon' : ''}`}
+                                onClick={() => handleOptionClick('Functional', 'functional')}
+                            />
                         </div>
                         
                     </div>

@@ -323,3 +323,64 @@
 .segment-text {
     white-space: pre-wrap;
 }
+
+.graph-container {
+    background-color: rgba(30, 30, 30, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.graph-container h3 {
+    color: #f0f0f0;
+    margin-bottom: 10px;
+}
+
+.recommendations-list button {
+    background: #444;
+    color: #eee;
+    border: none;
+    padding: 8px 12px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.recommendations-list button:hover {
+    background: #666;
+}
+
+.close-button {
+    position: absolute;
+    padding: 8px 16px;
+    bottom: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #c81058; 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    bottom: 15px;
+    right: 60px;
+    z-index: 1000; /* Ensure it's on top */
+  }
+  
+  .close-button:hover {
+    background-color: #c81058;
+    transform: scale(1.05);
+  }
+  
+  .close-garage-message {
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: #c81058;
+    z-index: 1000;
+  }

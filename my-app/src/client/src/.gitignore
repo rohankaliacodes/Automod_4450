@@ -1,0 +1,4 @@
+node_modules
+.env
+my-app/src/client/public/Models
+my-app/src/server/partsFiles

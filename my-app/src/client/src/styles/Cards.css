@@ -53,6 +53,8 @@
     display: flex;
     justify-content: flex-start;
     margin-top: 8px;
+    white-space: nowrap;
+
 }
 
 .button {
