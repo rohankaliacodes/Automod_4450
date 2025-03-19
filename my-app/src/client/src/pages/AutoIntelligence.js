@@ -1,3 +1,4 @@
+// my-app/src/client/src/pages/AutoIntelligence.js
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
@@ -9,8 +10,9 @@ import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import loadingGif from '../assets/loading.gif';
+import uploadIcon from '../assets/SVG/upload.svg'; // Import the upload SVG
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
 
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
@@ -58,6 +60,9 @@ const formatDataForChart = (recommendation) => {
 
 
 
+    const [selectedFile, setSelectedFile] = useState(null); // Single state for both image and media
+
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -74,12 +79,59 @@ const formatDataForChart = (recommendation) => {
         return () => unsubscribe();
     }, [carData, displayName]);
 
-    const handleSendMessage = async () => {
-        if (!inputMessage.trim()) return;
 
-        const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-        setInputMessage('');
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedFile(file); // Store the selected file
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+                if (file.type.startsWith('image/')) {
+                  setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
+                } else if (file.type.startsWith('video/')) {
+                    getVideoThumbnail(file).then(thumbnail => {
+                      setMessages(prevMessages => [...prevMessages, { type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail}]);
+                    });
+                } else if (file.type.startsWith('audio/')) {
+                      setMessages(prevMessages => [...prevMessages, {type: 'audio', sender: 'sent', src: URL.createObjectURL(file)}]);
+                }
+            };
+
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);  // Read image files as Data URL
+            } else {
+                // For audio/video, we don't need to read as Data URL *here*.
+                // The preview is handled by URL.createObjectURL in the message display.
+                // Just set the message immediately.
+                if (file.type.startsWith('video/')) {
+                    getVideoThumbnail(file).then(thumbnail => {
+                        setMessages(prevMessages => [...prevMessages, {type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail}]);
+                    })
+                }
+                else{
+                    setMessages(prevMessages => [...prevMessages, {type: 'audio', sender: 'sent', src: URL.createObjectURL(file)}]);
+                }
+            }
+        }
+    };
+
+
+
+
+
+    const handleSendMessage = async () => {
+
+        if (inputMessage.trim()) {
+            const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
+            setMessages(prevMessages => [...prevMessages, userMessage]);
+            setInputMessage('');
+        }
+
+        if (!inputMessage.trim() && !selectedFile) { // Check for selectedFile
+            return;
+        }
+
         setLoadingResponse(true);
         setHasError(false);
 
@@ -102,16 +154,26 @@ const formatDataForChart = (recommendation) => {
             return;
         }
 
-        let eventSource;
-
         try {
             if (selectedIconType === 'autoMechanic') {
+                const formData = new FormData();
+                formData.append('message', inputMessage);
+
+                if (selectedFile) {
+                   if (selectedFile.type.startsWith('image/')) {
+                        formData.append('image', selectedFile); // Append as 'image'
+                    } else {
+                        formData.append('media', selectedFile); // Append as 'media'
+                    }
+                }
+
+                if (carData) {
+                    formData.append('carData', JSON.stringify(carData));
+                }
+
                 const initResponse = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: inputMessage, carData: carData }),
+                    body: formData,
                 });
 
                 if (!initResponse.ok) {
@@ -119,59 +181,68 @@ const formatDataForChart = (recommendation) => {
                     throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                const { sessionId } = await initResponse.json();
+                const { sessionId, initialResponse } = await initResponse.json();
                 setSessionId(sessionId);
+                setMessages(prevMessages => [...prevMessages, { text: initialResponse, sender: 'received', segments: [], html: md.render(initialResponse) }]);
+                setLoadingResponse(false);
 
-                let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`;
+                setSelectedFile(null); // Clear the selected file
+
+                let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}`;
+
                 if (carData) {
                     streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
                 }
-                eventSource = new EventSource(streamUrl);
 
+                const eventSource = new EventSource(streamUrl);
                 setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
+                    // console.log("SSE connection opened");
                 };
 
                 eventSource.onmessage = (event) => {
                     const messageData = JSON.parse(event.data);
-
-                    setMessages(prevMessages => {
-                        if (messageData.role === 'model') {
-                            const lastMessage = prevMessages[prevMessages.length - 1];
-
-                            if (lastMessage && lastMessage.sender === 'received') {
-                                const updatedMessage = {
-                                    ...lastMessage,
-                                    text: lastMessage.text + messageData.text,
-                                    html: md.render(lastMessage.text + messageData.text),
-                                    segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
-                                };
-                                return [...prevMessages.slice(0, -1), updatedMessage];
-                            } else {
-                                return [...prevMessages, {
-                                    text: messageData.text,
-                                    sender: 'received',
-                                    segments: processSegments(messageData.text, messageData.supports, messageData.sources),
-                                    html: md.render(messageData.text)
-                                }];
-                            }
+                      if (messageData.role === 'model') {
+                        setMessages((prevMessages) => {
+                          const lastMessage = prevMessages[prevMessages.length - 1];
+                          if (lastMessage && lastMessage.sender === 'received') {
+                            const updatedMessage = {
+                              ...lastMessage,
+                              text: lastMessage.text + messageData.text,
+                              html: md.render(lastMessage.text + messageData.text),
+                              segments: [...lastMessage.segments, ...processSegments(messageData.text, messageData.supports, messageData.sources)],
+                            };
+                            return [...prevMessages.slice(0, -1), updatedMessage];
+                          } else {
+                            return [...prevMessages, {
+                                text: messageData.text,
+                                sender: 'received',
+                                segments: processSegments(messageData.text, messageData.supports, messageData.sources),
+                                html: md.render(messageData.text)
+                            }];
                         }
-                        return prevMessages;
-
+                        
                     });
+                    }
                 };
 
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
                     setLoadingResponse(false);
-                    if (eventSource) {
-                        eventSource.close();
-                    }
+                    eventSource.close();
                 };
+                 eventSource.onclose = () => {
+                  setLoadingResponse(false);
+                  setCurrentEventSource(null);
+                }
+
+
+
 
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics'|| selectedIconType === "functional") {
                 const inputData = {
+
                     "Make": carData.make,
                     "Model": carData.model,
                     "Year": carData.year,
@@ -198,21 +269,15 @@ const formatDataForChart = (recommendation) => {
                     setLoadingResponse(true);
                     const response = await axios.post(apiUrl, inputData);
                     if (response.data && response.data.recommendations) {
-                      setRecommendations(response.data.recommendations);
-                      let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
-                      setMessages(prevMessages => [...prevMessages, { 
-                        text: markdownOutput, 
-                        sender: 'received', 
-                        segments: [], 
-                        html: md.render(markdownOutput), 
-                        recommendations: response.data.recommendations 
-                    }]);
-                    
+
+                        setRecommendations(response.data.recommendations);
+                        let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
+                        setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
 
                     } else {
-                      console.warn("Recommendations API returned an empty or malformed response.");
-                      setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
-                      setHasError(true);
+                        console.warn("Recommendations API returned an empty or malformed response.");
+                        setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
+                        setHasError(true);
                     }
 
                 } catch (error) {
@@ -222,7 +287,8 @@ const formatDataForChart = (recommendation) => {
                 } finally {
                     setLoadingResponse(false);
                 }
-            }
+             }
+
         } catch (error) {
             console.error('Error setting up SSE:', error);
             if (!hasError) {
@@ -230,16 +296,19 @@ const formatDataForChart = (recommendation) => {
                 setHasError(true);
             }
             setLoadingResponse(false);
-            if (eventSource) {
-                eventSource.close();
+            if (currentEventSource) {
+                currentEventSource.close();
+                setCurrentEventSource(null);
             }
         }
         return () => {
             if (currentEventSource) {
                 currentEventSource.close();
+                setCurrentEventSource(null);
             }
         };
     };
+
     const processSegments = (text, supports, sources) => {
         if (!supports || supports.length === 0) {
             return [{ text: text, sources: [], html: md.render(text) }];
@@ -280,29 +349,27 @@ const formatDataForChart = (recommendation) => {
         setSelectedIconType(iconType);
     };
 
-     const handleMouseMove = (e) => {
-         if (isChatPinned) return;
+    const handleMouseMove = (e) => {
+        if (isChatPinned) return;
 
-         const triggerArea = {
-             width: 700,
-             height: 700,
-             x: 0,
-             y: window.innerHeight - 700,
-         };
+        const triggerArea = {
+            width: 700,
+            height: 700,
+            x: 0,
+            y: window.innerHeight - 700,
+        };
 
-         if (
-             e.clientX >= triggerArea.x &&
-             e.clientX <= triggerArea.x + triggerArea.width &&
-             e.clientY >= triggerArea.y &&
-             e.clientY <= triggerArea.y + triggerArea.height
-         ) {
-             setIsChatVisible(true);
-         } else {
-             setIsChatVisible(false);
-         }
-     };
-
-
+        if (
+            e.clientX >= triggerArea.x &&
+            e.clientX <= triggerArea.x + triggerArea.width &&
+            e.clientY >= triggerArea.y &&
+            e.clientY <= triggerArea.y + triggerArea.height
+        ) {
+            setIsChatVisible(true);
+        } else {
+            setIsChatVisible(false);
+        }
+    };
 
     const handleDocumentClick = (e) => {
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
@@ -355,6 +422,27 @@ const formatDataForChart = (recommendation) => {
         };
     }, [isChatPinned, currentEventSource]);
 
+    const getVideoThumbnail = (file) => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.currentTime = 1;
+        video.addEventListener('loadeddata', () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const thumbnail = canvas.toDataURL('image/jpeg');
+          resolve(thumbnail);
+        });
+        video.addEventListener('error', (e) => {
+          console.error("Error loading video for thumbnail:", e);
+           reject(e);
+        });
+    });
+  };
+
 
     return (
         <div
@@ -363,50 +451,66 @@ const formatDataForChart = (recommendation) => {
             onClick={onClick}
         >
             <div className="messages-area">
-    {messages.map((message, index) => (
-        <div key={index} className={`message ${message.sender}`}>
-            <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
+            {messages.map((message, index) => {
+                if (message.type === 'image') {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <img src={message.src} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '200px' }} />
+                    </div>
+                );
+                } else if (message.type === 'audio') {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <audio controls src={message.src} />
+                    </div>
+                );
+                } else if (message.type === 'video') {
+                  return (
+                    <div key={index} className={`message ${message.sender}`}>
+                      <video controls width="250">
+                        <source src={message.src} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                      {message.thumbnail && <img src={message.thumbnail} alt="Video Thumbnail" style={{ maxWidth: '100%', maxHeight: '100px' }} />}
+                    </div>
+                  );
+                }
+                else {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
 
-            {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
-                <div className="message-sources">
-                    {message.segments.map((segment, segmentIndex) => (
-                        segment.sources && segment.sources.length > 0 && (
+                    {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
+                        <div className="message-sources">
+                        {message.segments.map((segment, segmentIndex) => (
+                            segment.sources && segment.sources.length > 0 && (
                             <div key={segmentIndex} className="sources">
                                 {segment.sources.map((source, sourceIndex) => (
-                                    <a
-                                        key={sourceIndex}
-                                        href={source.uri}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="source-link"
-                                        title={source.uri}
-                                    >
-                                        [{source.title}]
-                                    </a>
+                                <a
+                                    key={sourceIndex}
+                                    href={source.uri}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="source-link"
+                                    title={source.uri}
+                                >
+                                    [{source.title}]
+                                </a>
                                 ))}
                             </div>
-                        )
-                    ))}
+                            )
+                        ))}
+                        </div>
+                    )}
+                    </div>
+                );
+                }
+            })}
+                {loadingResponse && (
+                <div className="message received">
+                    <img src={loadingGif} alt="Loading..." style={{ width: '50px', height: '50px' }} />
                 </div>
-            )}
-
-            {/* Add Recommendations List */}
-            {message.recommendations && (
-                <div className="recommendations-list">
-                    <h4>Click to visualize changes:</h4>
-                    {message.recommendations.map((rec, index) => (
-                        <button key={index} onClick={() => handleRecommendationClick(rec)}>
-                            {rec["Part Name"]}
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
-    ))}
-    {loadingResponse && <div className="message received">Loading...</div>}
-</div>
-
-
+                
             {selectedRecommendation && (
     <div className="graph-container">
         <h3>Modification Impact Visualization</h3>
@@ -422,19 +526,20 @@ const formatDataForChart = (recommendation) => {
         </ResponsiveContainer>
         <button onClick={() => setSelectedRecommendation(null)} className= 'close-button'> Close Graph</button>
     </div>
-)}
 
+                )}
+            </div>
 
             <div className="input-area">
                 <div className="input-container">
-                    <input
-                        type="text"
-                        placeholder="Type your message here..."
-                        value={inputMessage}
-                        onChange={handleInputChange}
-                        onKeyPress={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSendMessage(); } }}
-                        className="message-input"
+                <textarea
+                    placeholder="Type your message here..."
+                    value={inputMessage}
+                    onChange={handleInputChange}
+                    onKeyPress={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }}
+                    className="message-input"
                     />
+                
                     <div className="options-bar">
                         <button className='reset-chat' onClick={handleResetChat}><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g strokeWidth="0" /><g strokeLinecap="round" strokeLinejoin="round" /><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a" /></svg></button>
                         <span className="option-name">{selectedOption}</span>
@@ -457,6 +562,18 @@ const formatDataForChart = (recommendation) => {
                                 className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`}
                                 onClick={() => handleOptionClick('Aesthethics', 'aesthethics')}
                             />
+
+                                             <input
+                            type="file"
+                            accept="image/*, audio/*, video/*"
+                            onChange={handleFileChange}
+                            id="combined-upload"
+                            style={{ display: 'none' }}
+                        />
+                        <label htmlFor="combined-upload" className="upload-button">
+                            <img src={uploadIcon} alt="Upload" className="upload-icon option-icon" />
+                        </label>
+
                             <img
                                 src={functional}
                                 alt="Functional Tuner"
@@ -464,13 +581,16 @@ const formatDataForChart = (recommendation) => {
                                 onClick={() => handleOptionClick('Functional', 'functional')}
                             />
                         </div>
+                        
                     </div>
+                    
                 </div>
                 <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /><path d="m21.854 2.147-10.94 10.939" /></svg></button>
             </div>
         </div>
     );
 };
+
 
 function formatRecommendationsToMarkdown(recommendations) {
     let markdownString = "## Recommendations:\n\n";
@@ -481,7 +601,6 @@ function formatRecommendationsToMarkdown(recommendations) {
         markdownString += `* **Category:** ${rec["Category"]}\n`;
         markdownString += `* **Effect on the Car:** ${rec["Effect on the Car"]}\n\n`;
 
-        // Dynamically handle different keys based on available data
         if (rec["Before Modification"]) {
             markdownString += "**Before Modification:**\n";
             for (const key in rec["Before Modification"]) {
@@ -505,7 +624,7 @@ function formatRecommendationsToMarkdown(recommendations) {
             }
             markdownString += "\n";
         }
-        markdownString += "---\n"; // Horizontal rule separator
+        markdownString += "---\n";
 
     });
 
