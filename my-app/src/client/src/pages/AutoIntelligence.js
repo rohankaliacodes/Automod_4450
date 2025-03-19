@@ -8,7 +8,7 @@ import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import loadingGif from '../assets/loading.gif'; // Import the loading GIF
+import loadingGif from '../assets/loading.gif';
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
     const [isChatVisible, setIsChatVisible] = useState(true);
@@ -32,8 +32,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         breaks: true
     });
 
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [selectedMedia, setSelectedMedia] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null); // Single state for both image and media
 
 
     useEffect(() => {
@@ -53,34 +52,42 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
     }, [carData, displayName]);
 
 
-    const handleImageChange = (event) => {
+    const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            setSelectedImage(file);
-            setSelectedMedia(null);
+            setSelectedFile(file); // Store the selected file
             const reader = new FileReader();
+
             reader.onloadend = () => {
-                setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
+                if (file.type.startsWith('image/')) {
+                  setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
+                } else if (file.type.startsWith('video/')) {
+                    getVideoThumbnail(file).then(thumbnail => {
+                      setMessages(prevMessages => [...prevMessages, { type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail}]);
+                    });
+                } else if (file.type.startsWith('audio/')) {
+                      setMessages(prevMessages => [...prevMessages, {type: 'audio', sender: 'sent', src: URL.createObjectURL(file)}]);
+                }
             };
-            reader.readAsDataURL(file);
+
+            if (file.type.startsWith('image/')) {
+                reader.readAsDataURL(file);  // Read image files as Data URL
+            } else {
+                // For audio/video, we don't need to read as Data URL *here*.
+                // The preview is handled by URL.createObjectURL in the message display.
+                // Just set the message immediately.
+                if (file.type.startsWith('video/')) {
+                    getVideoThumbnail(file).then(thumbnail => {
+                        setMessages(prevMessages => [...prevMessages, {type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail}]);
+                    })
+                }
+                else{
+                    setMessages(prevMessages => [...prevMessages, {type: 'audio', sender: 'sent', src: URL.createObjectURL(file)}]);
+                }
+            }
         }
     };
 
-    const handleMediaChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-          setSelectedMedia(file);
-          setSelectedImage(null);
-
-          if (file.type.startsWith('video/')) {
-            getVideoThumbnail(file).then(thumbnail => {
-              setMessages(prevMessages => [...prevMessages, { type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail }]);
-            });
-          } else if (file.type.startsWith('audio/')) {
-              setMessages(prevMessages => [...prevMessages, { type: 'audio', sender: 'sent', src: URL.createObjectURL(file) }]);
-            }
-          }
-      };
 
 
 
@@ -93,14 +100,13 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             setInputMessage('');
         }
 
-        if (!inputMessage.trim() && !selectedImage && !selectedMedia) {
+        if (!inputMessage.trim() && !selectedFile) { // Check for selectedFile
             return;
         }
 
-        setLoadingResponse(true); // Start loading
+        setLoadingResponse(true);
         setHasError(false);
 
-        // Close any existing EventSource connection
         if (currentEventSource) {
             currentEventSource.close();
             setCurrentEventSource(null);
@@ -116,7 +122,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
             setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [], html: '<p>Error: Could not determine AI type.</p>' }]);
-            setLoadingResponse(false); // Stop loading
+            setLoadingResponse(false);
             return;
         }
 
@@ -124,12 +130,15 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             if (selectedIconType === 'autoMechanic') {
                 const formData = new FormData();
                 formData.append('message', inputMessage);
-                if (selectedImage) {
-                    formData.append('image', selectedImage);
+
+                if (selectedFile) {
+                   if (selectedFile.type.startsWith('image/')) {
+                        formData.append('image', selectedFile); // Append as 'image'
+                    } else {
+                        formData.append('media', selectedFile); // Append as 'media'
+                    }
                 }
-                if (selectedMedia) {
-                    formData.append('media', selectedMedia);
-                }
+
                 if (carData) {
                     formData.append('carData', JSON.stringify(carData));
                 }
@@ -144,26 +153,21 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     throw new Error(`Initial POST failed: ${initResponse.status} - ${errorText}`);
                 }
 
-                // *** Get initial response and add it to messages ***
                 const { sessionId, initialResponse } = await initResponse.json();
                 setSessionId(sessionId);
                 setMessages(prevMessages => [...prevMessages, { text: initialResponse, sender: 'received', segments: [], html: md.render(initialResponse) }]);
-                setLoadingResponse(false); // Turn off loading *after* initial response
+                setLoadingResponse(false);
 
-                setSelectedImage(null); // Clear image and media
-                setSelectedMedia(null);
+                setSelectedFile(null); // Clear the selected file
 
-                // --- Streaming (for subsequent messages) ---
                 let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}`;
-                // NO media data here.  It's already been sent.
 
-                //Append car data to the streamUrl
                 if (carData) {
                     streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
                 }
 
                 const eventSource = new EventSource(streamUrl);
-                setCurrentEventSource(eventSource); // Store the EventSource
+                setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
                     // console.log("SSE connection opened");
@@ -175,7 +179,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                         setMessages((prevMessages) => {
                           const lastMessage = prevMessages[prevMessages.length - 1];
                           if (lastMessage && lastMessage.sender === 'received') {
-                            // Append new chunk to the last message
                             const updatedMessage = {
                               ...lastMessage,
                               text: lastMessage.text + messageData.text,
@@ -184,7 +187,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                             };
                             return [...prevMessages.slice(0, -1), updatedMessage];
                           } else {
-                            // Add new message if no previous received message
                             return [...prevMessages, {
                                 text: messageData.text,
                                 sender: 'received',
@@ -199,8 +201,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
                 eventSource.onerror = (error) => {
                     console.error("SSE error:", error);
-                    setLoadingResponse(false); // Stop loading on error
-                    eventSource.close(); // Close on error
+                    setLoadingResponse(false);
+                    eventSource.close();
                 };
 
                  eventSource.onclose = () => {
@@ -250,7 +252,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     setMessages(prevMessages => [...prevMessages, { text: 'Failed to fetch recommendations. Please try again.', sender: 'received', segments: [], html: '<p>Failed to fetch recommendations. Please try again.</p>' }]);
                     setHasError(true);
                 } finally {
-                    setLoadingResponse(false); // Stop loading, even on error
+                    setLoadingResponse(false);
                 }
              }
 
@@ -260,7 +262,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [], html: '<p>Failed to connect to AI service.</p>' }]);
                 setHasError(true);
             }
-            setLoadingResponse(false); // Stop loading on error
+            setLoadingResponse(false);
             if (currentEventSource) {
                 currentEventSource.close();
                 setCurrentEventSource(null);
@@ -473,33 +475,23 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             })}
                 {loadingResponse && (
                 <div className="message received">
-                    <img src={loadingGif} alt="Loading..." style={{ width: '50px', height: '50px' }} /> {/* Use the imported GIF */}
+                    <img src={loadingGif} alt="Loading..." style={{ width: '50px', height: '50px' }} />
                 </div>
                 )}
             </div>
 
             <div className="input-area">
                 <div className="input-container">
+                {/* Single File Input */}
                 <input
                     type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    id="image-upload"
+                    accept="image/*, audio/*, video/*" // Accept all image, audio, and video types
+                    onChange={handleFileChange}
+                    id="combined-upload"
                     style={{ display: 'none' }}
                 />
-                <label htmlFor="image-upload" className="custom-button">
-                    Upload Image
-                </label>
-
-                <input
-                    type="file"
-                    accept="audio/*, video/*"
-                    onChange={handleMediaChange}
-                    id="media-upload"
-                    style={{ display: 'none' }}
-                />
-                <label htmlFor="media-upload" className="custom-button">
-                    Upload Media
+                <label htmlFor="combined-upload" className="custom-button">
+                    Upload Image/Media
                 </label>
                 <textarea
                     placeholder="Type your message here..."
