@@ -1,3 +1,4 @@
+
 .chat-box {
     position: absolute;
     bottom: 20px;
@@ -150,6 +151,7 @@
 
 .message-input {
     padding: 10px;
+    padding-left: 15px;
     border-radius: 20px;
     border: none;
     background-color: transparent;
@@ -204,14 +206,15 @@
     background-color: transparent;
     color: #f0f0f0;
     border-radius: inherit;
+    
 }
 
 .option-name {
     color: #bebebe;
     font-size: 1.1em;
-    margin-right: 25px;
     white-space: nowrap;
     font-weight: 600;
+    margin-right: 15px; /* Add margin to separate from icons */
 }
 
 .reset-chat {
@@ -221,7 +224,7 @@
     width: 33px;
     height: 33px;
     cursor: pointer;
-    margin-right: 15px;
+    margin-right: 15px; /* Keep spacing from other icons */
 }
 
 .reset-chat:hover {
@@ -242,15 +245,35 @@
     transition: opacity 0.2s ease-in-out;
 }
 
+/* Hover effect for ALL option icons (including upload) */
 .option-icon:hover {
     opacity: 1;
+     filter: drop-shadow(0 0 1px #bebebe); /* Consistent hover effect */
 }
 
+/* Style for selected icons */
 .option-icon.selected-icon {
     opacity: 1;
     filter: drop-shadow(0 0 8px #c81058);
     transform: scale(1.1);
 }
+
+/* Specific style for the upload icon */
+.upload-icon {
+  /*  fill: #c81058;  You might want to set a fill color */
+}
+
+.upload-button {
+    background-color: transparent; /* Remove default button background */
+    border: none;              /* Remove default button border */
+    cursor: pointer;           /* Change cursor on hover */
+    padding: 0;                /* Remove default padding */
+    display: flex;              /* Use flexbox for centering */
+    align-items: center;        /* Center vertically */
+    justify-content: center;    /* Center horizontally */
+    margin-left: auto;
+}
+
 
 .options-and-send {
     display: flex;

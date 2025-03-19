@@ -1,3 +1,4 @@
+// my-app/src/client/src/pages/AutoIntelligence.js
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AutoIntelligence.css';
 import autoMechanic from '../assets/SVG/mechanic.svg';
@@ -9,6 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import loadingGif from '../assets/loading.gif';
+import uploadIcon from '../assets/SVG/upload.svg'; // Import the upload SVG
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
     const [isChatVisible, setIsChatVisible] = useState(true);
@@ -482,17 +484,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
             <div className="input-area">
                 <div className="input-container">
-                {/* Single File Input */}
-                <input
-                    type="file"
-                    accept="image/*, audio/*, video/*" // Accept all image, audio, and video types
-                    onChange={handleFileChange}
-                    id="combined-upload"
-                    style={{ display: 'none' }}
-                />
-                <label htmlFor="combined-upload" className="custom-button">
-                    Upload Image/Media
-                </label>
                 <textarea
                     placeholder="Type your message here..."
                     value={inputMessage}
@@ -500,6 +491,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     onKeyPress={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }}
                     className="message-input"
                     />
+                
                     <div className="options-bar">
                         <button className='reset-chat' onClick={handleResetChat}><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g strokeWidth="0" /><g strokeLinecap="round" strokeLinejoin="round" /><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a" /></svg></button>
                         <span className="option-name">{selectedOption}</span>
@@ -522,8 +514,20 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                 className={`option-icon ${selectedIconType === 'aesthethics' ? 'selected-icon' : ''}`}
                                 onClick={() => handleOptionClick('Aesthethics', 'aesthethics')}
                             />
+                                             <input
+                            type="file"
+                            accept="image/*, audio/*, video/*"
+                            onChange={handleFileChange}
+                            id="combined-upload"
+                            style={{ display: 'none' }}
+                        />
+                        <label htmlFor="combined-upload" className="upload-button">
+                            <img src={uploadIcon} alt="Upload" className="upload-icon option-icon" />
+                        </label>
                         </div>
+                        
                     </div>
+                    
                 </div>
                 <button onClick={handleSendMessage} className="send-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send -mb-0.5 -ml-0.5 !size-5"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /><path d="m21.854 2.147-10.94 10.939" /></svg></button>
             </div>
