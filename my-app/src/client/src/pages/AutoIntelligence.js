@@ -725,7 +725,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
           <div className="options-bar">
             <div className="options-bar-group">
-              <button className="reset-chat" onClick={handleResetChat}>
+              <button title = "Clear Chat"className="reset-chat" onClick={handleResetChat}>
                 <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                   <g strokeWidth="0" />
                   <g strokeLinecap="round" strokeLinejoin="round" />
@@ -736,13 +736,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 </svg>
               </button>
               <span className="option-name">{selectedOption}</span>
-              <div className="option-icons">
+              <div className="option-icons" >
                 <img
                   src={autoMechanic}
                   alt="Auto Mechanic"
+                  title="Auto Mechanic: helps you figure issues with your car, how to fix them, and provides sources."
                   className={`option-icon ${
                     selectedIconType === "autoMechanic" ? "selected-icon" : ""
-                  }`}
+                   }`}
                   onClick={() =>
                     handleOptionClick("Auto Mechanic", "autoMechanic")
                   }
@@ -750,9 +751,10 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 <img
                   src={performanceTuner}
                   alt="Performance Tuner"
+                  title = "Performance Tuner: helps you provide specific performance upgrades for your car based on your needs"
                   className={`option-icon ${
                     selectedIconType === "performanceTuner" ? "selected-icon" : ""
-                  }`}
+                  }` }
                   onClick={() =>
                     handleOptionClick("Performance Tuner", "performanceTuner")
                   }
@@ -760,6 +762,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 <img
                   src={aesthethics}
                   alt="Aesthethics"
+                  title ="Aesthetics: helps you provide aesthetics upgrades for your car based on your needs"
                   className={`option-icon ${
                     selectedIconType === "aesthethics" ? "selected-icon" : ""
                   }`}
@@ -768,6 +771,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 <img
                   src={functional}
                   alt="Functional Tuner"
+                  title = "Functional Tuner: helps you provide functional upgrades for your car based on your needs"
                   className={`option-icon ${
                     selectedIconType === "functional" ? "selected-icon" : ""
                   }`}
@@ -787,13 +791,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 <img
                   src={uploadIcon}
                   alt="Upload"
+                  title= "Upload your video/photo"
                   className="upload-icon option-icon"
                 />
               </label>
           </div>
           </div>
         </div>
-        <button onClick={handleSendMessage} className="send-button">
+        <button onClick={handleSendMessage} title = "Send your query" className="send-button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"

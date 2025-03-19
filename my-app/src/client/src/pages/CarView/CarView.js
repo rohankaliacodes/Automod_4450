@@ -78,7 +78,7 @@ function CarView() {
             <Header />
             {/* Pass isChatPinned and the click handler to AutoIntelligence */}
             <AutoIntelligence isChatPinned={isChatPinned} onClick={handleChatBoxClick} />
-            <button onClick={(e) => addToGarage(carData)} className='add-button'>Add to Garage</button>
+            <button onClick={(e) => addToGarage(carData)} title = "Add the car modification to your garage"className='add-button'>Add to Garage</button>
             <p className='add-garage-message'>{message}</p>
             <div className="canvas-container">
                 <Canvas>
