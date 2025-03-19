@@ -221,6 +221,7 @@
     border-radius: 0;      /* Remove extra rounding */
     box-shadow: none;      /* Remove extra shadow */
     font-family: var(--font-family);
+    position: relative;
 
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -231,12 +232,15 @@
   }
   
   /* Header inside recommendations */
-  .recommendations-container .rec-header {
+  .rec-header {
+    top: 0;
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 16px;
     color: #fff; /* If your main container is dark, you can keep it white */
     text-align: left;
+    position: sticky;
+    z-index: 10;
   }
   
   /* The list container for recommended items */

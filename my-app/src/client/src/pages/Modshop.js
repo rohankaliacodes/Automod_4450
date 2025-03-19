@@ -34,11 +34,7 @@ export default function Modshop() {
   const [price, setPrice] = useState(0);
   const [isChanged, setIsChanged] = useState(false);
 
-  useEffect(() => {
-    if (make && model && year && trim && engine) {
-        fetchParts(new Event("click"));  // Simulate an event trigger
-    }
-}, [make, model, year, trim, engine]);
+
 
  // 🔹 If we have a category from Home and we have parts, sort them
  useEffect(() => {
@@ -62,7 +58,6 @@ useEffect(() => {
             fetchRecommendations(cars);
         }
     };
-    fetchAllParts();
     fetchGarageContents();
 }, []);
 
@@ -485,6 +480,9 @@ function sortPartsByPrice(val) {
           value={searchInput}
           onChange={(event) => setSearchInput(event.target.value)}
         />
+        <button className="search-button" title="Search for parts by name or SKU" onClick={searchParts}>
+          <span className="search-icon">🔍</span
+          ></button>
         <div className="dropdown-container">
           <select className="dropdown" value={make} onChange={handleMakeChange}>
             <option value="">Make</option>
@@ -516,7 +514,7 @@ function sortPartsByPrice(val) {
               <option key={engine} value={engine}>{engine}</option>
             ))}
           </select>
-          <button className="search-button" onClick={searchParts}>
+          <button className="search-button" title="Search for parts based on your car"onClick={fetchParts}>
           <span className="search-icon">🔍</span>
         </button>
         </div>
@@ -564,8 +562,9 @@ function sortPartsByPrice(val) {
         </div>
 
         {/* Recommendations UI - on the right side */}
-        <div className="recommendations-container">
+        <div className="recommendations">
           <h2 className="rec-header">Recommended Parts for You</h2>
+          <div className="recommendations-container">
           {recommendations.length > 0 ? (
             <div className="recommendations-list">
               {recommendations.map((data, index) => (
@@ -600,6 +599,7 @@ function sortPartsByPrice(val) {
         </div>
       </div>
     </div>
+  </div>
   );
 }
 
