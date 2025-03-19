@@ -3,7 +3,7 @@ import "../styles/AutoIntelligence.css";
 import autoMechanic from "../assets/SVG/mechanic.svg";
 import performanceTuner from "../assets/SVG/performance.svg";
 import aesthethics from "../assets/SVG/design.svg";
-import functional from "../assets/SVG/design.svg";
+import functional from "../assets/SVG/functional.svg";
 import MarkdownIt from "markdown-it";
 import { auth } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -644,7 +644,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                                   [{source.title}]
                                 </a>
                               ))}
-                            </div>
+                             </div>
                           )
                       )}
                     </div>
@@ -721,47 +721,58 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
           />
 
           <div className="options-bar">
-            <button className="reset-chat" onClick={handleResetChat}>
-              <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                <g strokeWidth="0" />
-                <g strokeLinecap="round" strokeLinejoin="round" />
-                <path
-                  d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0"
-                  fill="#85858a"
+            <div className="options-bar-group">
+              <button className="reset-chat" onClick={handleResetChat}>
+                <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                  <g strokeWidth="0" />
+                  <g strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0"
+                    fill="#85858a"
+                  />
+                </svg>
+              </button>
+              <span className="option-name">{selectedOption}</span>
+              <div className="option-icons">
+                <img
+                  src={autoMechanic}
+                  alt="Auto Mechanic"
+                  className={`option-icon ${
+                    selectedIconType === "autoMechanic" ? "selected-icon" : ""
+                  }`}
+                  onClick={() =>
+                    handleOptionClick("Auto Mechanic", "autoMechanic")
+                  }
                 />
-              </svg>
-            </button>
-            <span className="option-name">{selectedOption}</span>
-            <div className="option-icons">
-              <img
-                src={autoMechanic}
-                alt="Auto Mechanic"
-                className={`option-icon ${
-                  selectedIconType === "autoMechanic" ? "selected-icon" : ""
-                }`}
-                onClick={() =>
-                  handleOptionClick("Auto Mechanic", "autoMechanic")
-                }
-              />
-              <img
-                src={performanceTuner}
-                alt="Performance Tuner"
-                className={`option-icon ${
-                  selectedIconType === "performanceTuner" ? "selected-icon" : ""
-                }`}
-                onClick={() =>
-                  handleOptionClick("Performance Tuner", "performanceTuner")
-                }
-              />
-              <img
-                src={aesthethics}
-                alt="Aesthethics"
-                className={`option-icon ${
-                  selectedIconType === "aesthethics" ? "selected-icon" : ""
-                }`}
-                onClick={() => handleOptionClick("Aesthethics", "aesthethics")}
-              />
-
+                <img
+                  src={performanceTuner}
+                  alt="Performance Tuner"
+                  className={`option-icon ${
+                    selectedIconType === "performanceTuner" ? "selected-icon" : ""
+                  }`}
+                  onClick={() =>
+                    handleOptionClick("Performance Tuner", "performanceTuner")
+                  }
+                />
+                <img
+                  src={aesthethics}
+                  alt="Aesthethics"
+                  className={`option-icon ${
+                    selectedIconType === "aesthethics" ? "selected-icon" : ""
+                  }`}
+                  onClick={() => handleOptionClick("Aesthethics", "aesthethics")}
+                />
+                <img
+                  src={functional}
+                  alt="Functional Tuner"
+                  className={`option-icon ${
+                    selectedIconType === "functional" ? "selected-icon" : ""
+                  }`}
+                  onClick={() => handleOptionClick("Functional", "functional")}
+                />
+              </div>
+            </div>
+            <div className="upload-container">
               <input
                 type="file"
                 accept="image/*, audio/*, video/*"
@@ -776,16 +787,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                   className="upload-icon option-icon"
                 />
               </label>
-
-              <img
-                src={functional}
-                alt="Functional Tuner"
-                className={`option-icon ${
-                  selectedIconType === "functional" ? "selected-icon" : ""
-                }`}
-                onClick={() => handleOptionClick("Functional", "functional")}
-              />
-            </div>
+          </div>
           </div>
         </div>
         <button onClick={handleSendMessage} className="send-button">
