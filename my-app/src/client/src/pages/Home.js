@@ -141,9 +141,15 @@ export const Home = () => {
   return (
     <div className="background">
       <Header />
-      <p className="heading-find-your">Find The Perfect Part For Your Car</p>
+     
 
+      <p className="heading-find-your">Find The Perfect Part For Your Car</p>
+      
       <div className="form">
+      <button className="home-info-tooltip" data-tooltip-id="test-tooltip" data-tooltip-content="Welcome to AutoMod! Enter your vehicle's specs to get started, or browse parts by category.">
+?</button>
+<Tooltip id="test-tooltip" />
+
         <p className="heading-find-cars">Select Your Vehicle</p>
 
         <form onSubmit={handleSubmit}>
