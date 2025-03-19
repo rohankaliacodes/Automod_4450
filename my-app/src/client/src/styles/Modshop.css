@@ -33,16 +33,20 @@
   /* =========================
      SEARCH AREA
      ========================= */
-  .search-container {
-    width: 70%;
-    display: flex;
-    align-items: center;
-    background: var(--search-bg);
-    border-radius: var(--border-radius);
-    padding: 15px;
-    margin-top: 100px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+     .search-container {
+      width: 90%;
+      max-width: 1250px;
+      min-width: 300px;
+      display: flex;
+      align-items: center;
+      background: var(--search-bg);
+      border-radius: var(--border-radius);
+      padding: 10px;
+      margin-top: 100px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
   
   .search-input {
     flex: 1;
@@ -53,18 +57,78 @@
     font-family: var(--font-family);
     color: var(--text-color);
     background: transparent;
+    max-width: 300px;
   }
   
   .dropdown-container {
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-grow: 1;
+    justify-content: center;
   }
+
+  .price-label{
+    color: white;
+    left: 35%;
+    position: relative;
+  }
+
+
+  .price-slider{
+    margin-top: 20px;
+    color: #c81058;
+  }
+
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 5px;
+    outline: none;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #c81058;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #c81058;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  .slider::-ms-thumb {
+    width: 16px;
+    height: 16px;
+    background: #c81058; /* Change this to your desired color */
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  
+  
+  .range-slider{
+    color: white;
+    position: relative;
+    left: 35%;
+  }
+
   
   .dropdown {
     padding: 8px 12px;
     font-size: 16px;
     font-family: var(--font-family);
     border: none;
+    max-width: 150px;
     border-radius: 8px;
     background: #f0f0f0;
   }
@@ -117,9 +181,10 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 10px;
     gap: 20px;
     padding: 0 20px; /* Optional side padding */
+    overflow: auto;
   }
   
   /* =========================
@@ -128,13 +193,20 @@
   .cards-scroll-container {
     flex: 2; /* Takes more space than the recommendations on the right */
     max-height: 60vh;
-    overflow-y: auto; /* enables scrolling */
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 65px;
     width: 100%;
     font-family: var(--font-family);
+    overflow-y: hidden; /* Optional: hide scrollbar */
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .cards-scroll-container::-webkit-scrollbar {
+    display: none;
   }
   
   /* =========================
@@ -143,12 +215,19 @@
   .recommendations-container {
     flex: 1;               /* Takes less space than the parts section */
     max-height: 60vh;
-    overflow-y: auto;
+    overflow: auto;
     padding: 20px;
     background: none;      /* Remove dark background */
     border-radius: 0;      /* Remove extra rounding */
     box-shadow: none;      /* Remove extra shadow */
     font-family: var(--font-family);
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .recommendations-container::-webkit-scrollbar {
+    display: none;
   }
   
   /* Header inside recommendations */
@@ -329,4 +408,3 @@
     color: #757575;
     font-family: var(--font-family);
   }
-  

@@ -516,10 +516,11 @@ function sortPartsByPrice(val) {
               <option key={engine} value={engine}>{engine}</option>
             ))}
           </select>
-        </div>
-        <button className="search-button" onClick={searchParts}>
+          <button className="search-button" onClick={searchParts}>
           <span className="search-icon">🔍</span>
         </button>
+        </div>
+       
       </div>
 
       {/* Categories Section */}
@@ -533,8 +534,9 @@ function sortPartsByPrice(val) {
          {/* Only show price slider if user has submitted or searched */}
          {isSubmitted || searched ? (
         <div className="price-slider">
-          <label>Filter By Price</label>
+          <label className="price-label">Filter By Price</label>
           <input
+            className="slider"
             type="range"
             min="0"
             max="500"
@@ -548,7 +550,7 @@ function sortPartsByPrice(val) {
               sortPartsByPrice(val);
             }}
           />
-          {isChanged ? <label>${price} or less</label> : null}
+          {isChanged ? <label className="range-slider">${price} or less</label> : null}
         </div>
       ) : null}
 
