@@ -409,25 +409,32 @@ function formatRecommendationsToMarkdown(recommendations) {
         markdownString += `* **Category:** ${rec["Category"]}\n`;
         markdownString += `* **Effect on the Car:** ${rec["Effect on the Car"]}\n\n`;
 
+        // Dynamically handle different keys based on available data
         if (rec["Before Modification"]) {
             markdownString += "**Before Modification:**\n";
-            markdownString += `    * Horsepower: ${rec["Before Modification"]["Horsepower"]}\n`;
-            markdownString += `    * Torque (lb-ft): ${rec["Before Modification"]["Torque (lb-ft)"]}\n\n`;
+            for (const key in rec["Before Modification"]) {
+                markdownString += `    * ${key}: ${rec["Before Modification"][key]}\n`;
+            }
+            markdownString += "\n";
         }
 
         if (rec["After Modification"]) {
             markdownString += "**After Modification:**\n";
-            markdownString += `    * Horsepower: ${rec["After Modification"]["Horsepower"]}\n`;
-            markdownString += `    * Torque (lb-ft): ${rec["After Modification"]["Torque (lb-ft)"]}\n\n`;
+            for (const key in rec["After Modification"]) {
+                markdownString += `    * ${key}: ${rec["After Modification"][key]}\n`;
+            }
+            markdownString += "\n";
         }
 
         if (rec["Percentage Change"]) {
             markdownString += "**Percentage Change:**\n";
-            markdownString += `    * Horsepower: ${rec["Percentage Change"]["Horsepower"]}\n`;
-            markdownString += `    * Torque: ${rec["Percentage Change"]["Torque"]}\n\n`;
+            for (const key in rec["Percentage Change"]) {
+                markdownString += `    * ${key}: ${rec["Percentage Change"][key]}\n`;
+            }
+            markdownString += "\n";
         }
+        markdownString += "---\n"; // Horizontal rule separator
 
-        markdownString += "---\n";
     });
 
     return markdownString;
