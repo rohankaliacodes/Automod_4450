@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import Header from '../Header';
 import { auth, db } from '../../config/firebase';
 import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import  carGarage from '../../assets/SVG/garage.svg'; 
 
 function CarView() {
     const location = useLocation();
@@ -78,7 +79,9 @@ function CarView() {
             <Header />
             {/* Pass isChatPinned and the click handler to AutoIntelligence */}
             <AutoIntelligence isChatPinned={isChatPinned} onClick={handleChatBoxClick} />
-            <button onClick={(e) => addToGarage(carData)} title = "Add the car modification to your garage"className='add-button'>Add to Garage</button>
+            <button title="Add the car modification to your garage" onClick={(e) => addToGarage(carData)} className='add-button' >
+    <img src={carGarage} alt="Add to Garage" className="add-garage-icon" />
+</button>
             <p className='add-garage-message'>{message}</p>
             <div className="canvas-container">
                 <Canvas>

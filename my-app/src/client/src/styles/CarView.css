@@ -30,9 +30,9 @@
   right: 20px;
   padding: 8px 16px;
   bottom: 20px;
-  font-size: 14px;
+  font-size: 2px;
   font-weight: bold;
-  background-color: #c81058; 
+  background-color: rgba(20, 20, 20, 0.8); 
   color: white;
   border: none;
   border-radius: 5px;
@@ -41,9 +41,15 @@
   z-index: 1000; /* Ensure it's on top */
 }
 
+.add-garage-icon {
+  width: 24px; /* Adjust as needed */
+  height: 24px;
+  filter: brightness(0) invert(1); /* Makes it white on dark backgrounds */
+}
+
 .add-button:hover {
   background-color: #c81058;
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .add-garage-message {
