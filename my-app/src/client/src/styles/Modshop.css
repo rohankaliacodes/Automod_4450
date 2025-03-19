@@ -230,3 +230,103 @@
     transform: translateX(4px);
   }
   
+/***********************************
+  PRICE SLIDER UI (unique classes)
+************************************/
+.modshop-slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* center horizontally */
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px; /* space below category buttons */
+  }
+  
+  .modshop-slider-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 185px; /* same as the original slider example */
+  }
+  
+  .modshop-slider-label-left {
+    font-size: 16px;
+    color: white;
+    font-family: var(--font-family);
+  }
+  
+  .modshop-slider-output {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 40px; /* enough space for $$$ text */
+    justify-content: flex-end;
+  }
+  
+  .modshop-slider-label-right {
+    font-size: 14px;
+    color: white;
+    font-family: var(--font-family);
+  }
+  
+  .modshop-slider-value {
+    font-size: 14px;
+    color: #1e1e1e;
+    font-family: var(--font-family);
+    margin-left: 4px; /* small spacing if you want a dynamic number */
+  }
+  
+  /* The horizontal slider track container */
+  .modshop-slider-block-wrapper {
+    width: 185px; /* matches the row width */
+    display: flex;
+    align-items: center;
+  }
+  
+  /* The background track */
+  .modshop-slider-block {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    height: 8px;
+    background: #e6e6e6;
+    border-radius: 9999px;
+    position: relative;
+  }
+  
+  /* Left knob */
+  .modshop-slider-knob-start {
+    width: 16px;
+    height: 16px;
+    background: #c81058;
+    border-radius: 9999px;
+    position: relative;
+    z-index: 7;
+  }
+  
+  /* The fill portion between knobs */
+  .modshop-slider-track {
+    flex-grow: 1;
+    height: 6px;
+    background: none; /* We can color it if you want */
+    margin: 0 2px;
+    z-index: 8;
+  }
+  
+  /* Right knob */
+  .modshop-slider-knob-end {
+    width: 16px;
+    height: 16px;
+    background: #c81058;
+    border-radius: 9999px;
+    position: relative;
+    z-index: 7;
+  }
+  
+  /* Filter label below */
+  .modshop-slider-filter-label {
+    font-size: 16px;
+    color: #757575;
+    font-family: var(--font-family);
+  }
+  
