@@ -8,6 +8,7 @@ import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import loadingGif from '../assets/loading.gif'; // Import the loading GIF
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
     const [isChatVisible, setIsChatVisible] = useState(true);
@@ -96,9 +97,10 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             return;
         }
 
-        setLoadingResponse(true);
+        setLoadingResponse(true); // Start loading
         setHasError(false);
 
+        // Close any existing EventSource connection
         if (currentEventSource) {
             currentEventSource.close();
             setCurrentEventSource(null);
@@ -114,7 +116,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
             setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [], html: '<p>Error: Could not determine AI type.</p>' }]);
-            setLoadingResponse(false);
+            setLoadingResponse(false); // Stop loading
             return;
         }
 
@@ -248,7 +250,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     setMessages(prevMessages => [...prevMessages, { text: 'Failed to fetch recommendations. Please try again.', sender: 'received', segments: [], html: '<p>Failed to fetch recommendations. Please try again.</p>' }]);
                     setHasError(true);
                 } finally {
-                    setLoadingResponse(false);
+                    setLoadingResponse(false); // Stop loading, even on error
                 }
              }
 
@@ -258,7 +260,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 setMessages(prevMessages => [...prevMessages, { text: 'Failed to connect to AI service.', sender: 'received', segments: [], html: '<p>Failed to connect to AI service.</p>' }]);
                 setHasError(true);
             }
-            setLoadingResponse(false);
+            setLoadingResponse(false); // Stop loading on error
             if (currentEventSource) {
                 currentEventSource.close();
                 setCurrentEventSource(null);
@@ -469,6 +471,11 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 );
                 }
             })}
+                {loadingResponse && (
+                <div className="message received">
+                    <img src={loadingGif} alt="Loading..." style={{ width: '50px', height: '50px' }} /> {/* Use the imported GIF */}
+                </div>
+                )}
             </div>
 
             <div className="input-area">
