@@ -9,6 +9,8 @@ import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
@@ -32,6 +34,29 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         typographer: true,
         breaks: true
     });
+    
+const [selectedRecommendation, setSelectedRecommendation] = useState(null);
+
+const handleRecommendationClick = (recommendation) => {
+    setSelectedRecommendation(recommendation);
+};
+
+const formatDataForChart = (recommendation) => {
+    if (!recommendation) return [];
+
+    let data = [];
+    for (const key in recommendation["Before Modification"]) {
+        data.push({
+            attribute: key,
+            before: recommendation["Before Modification"][key],
+            after: recommendation["After Modification"][key],
+            percentageChange: recommendation["Percentage Change"][key] || "N/A"
+        });
+    }
+    return data;
+};
+
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -175,7 +200,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     if (response.data && response.data.recommendations) {
                       setRecommendations(response.data.recommendations);
                       let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
-                      setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
+                      setMessages(prevMessages => [...prevMessages, { 
+                        text: markdownOutput, 
+                        sender: 'received', 
+                        segments: [], 
+                        html: md.render(markdownOutput), 
+                        recommendations: response.data.recommendations 
+                    }]);
+                    
 
                     } else {
                       console.warn("Recommendations API returned an empty or malformed response.");
@@ -331,36 +363,67 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             onClick={onClick}
         >
             <div className="messages-area">
-                {messages.map((message, index) => (
-                    <div key={index} className={`message ${message.sender}`}>
-                        <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
+    {messages.map((message, index) => (
+        <div key={index} className={`message ${message.sender}`}>
+            <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
 
-                        {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
-                            <div className="message-sources">
-                                {message.segments.map((segment, segmentIndex) => (
-                                    segment.sources && segment.sources.length > 0 && (
-                                        <div key={segmentIndex} className="sources">
-                                            {segment.sources.map((source, sourceIndex) => (
-                                                <a
-                                                    key={sourceIndex}
-                                                    href={source.uri}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="source-link"
-                                                    title={source.uri}
-                                                >
-                                                    [{source.title}]
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )
+            {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
+                <div className="message-sources">
+                    {message.segments.map((segment, segmentIndex) => (
+                        segment.sources && segment.sources.length > 0 && (
+                            <div key={segmentIndex} className="sources">
+                                {segment.sources.map((source, sourceIndex) => (
+                                    <a
+                                        key={sourceIndex}
+                                        href={source.uri}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="source-link"
+                                        title={source.uri}
+                                    >
+                                        [{source.title}]
+                                    </a>
                                 ))}
                             </div>
-                        )}
-                    </div>
-                ))}
-                {loadingResponse && <div className="message received">Loading...</div>}
-            </div>
+                        )
+                    ))}
+                </div>
+            )}
+
+            {/* Add Recommendations List */}
+            {message.recommendations && (
+                <div className="recommendations-list">
+                    <h4>Click to visualize changes:</h4>
+                    {message.recommendations.map((rec, index) => (
+                        <button key={index} onClick={() => handleRecommendationClick(rec)}>
+                            {rec["Part Name"]}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    ))}
+    {loadingResponse && <div className="message received">Loading...</div>}
+</div>
+
+
+            {selectedRecommendation && (
+    <div className="graph-container">
+        <h3>Modification Impact Visualization</h3>
+        <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={formatDataForChart(selectedRecommendation)}>
+                <XAxis dataKey="attribute" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="before" fill="#8884d8" name="Before Modification" />
+                <Bar dataKey="after" fill="#82ca9d" name="After Modification" />
+            </BarChart>
+        </ResponsiveContainer>
+        <button onClick={() => setSelectedRecommendation(null)} className= 'close-button'> Close Graph</button>
+    </div>
+)}
+
 
             <div className="input-area">
                 <div className="input-container">
