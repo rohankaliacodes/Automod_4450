@@ -602,5 +602,3 @@ async function fetchRecommendations(cars){
     </div>
   );
 }
-
-
