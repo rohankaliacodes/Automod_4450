@@ -9,7 +9,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-
 const AutoIntelligence = ({ isChatPinned, onClick }) => {
     const [isChatVisible, setIsChatVisible] = useState(true);
     const [displayName, setDisplayName] = useState("User");
@@ -32,6 +31,13 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         breaks: true
     });
 
+    // --- New State Variables ---
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [audioChunks, setAudioChunks] = useState([]);
+    const mediaRecorderRef = useRef(null);
+
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -48,12 +54,73 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         return () => unsubscribe();
     }, [carData, displayName]);
 
-    const handleSendMessage = async () => {
-        if (!inputMessage.trim()) return;
+    // --- New Helper Functions ---
 
-        const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
-        setMessages(prevMessages => [...prevMessages, userMessage]);
-        setInputMessage('');
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedImage(file);
+            // Display the image preview (optional).
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    setAudioChunks((prevChunks) => [...prevChunks, event.data]);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                //  The chunks will be combined into a blob in handleSendMessage
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not access microphone.', sender: 'received', segments: [], html: '<p>Error: Could not access microphone.</p>' }]);
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // --- Modified handleSendMessage ---
+
+    const handleSendMessage = async () => {
+        // Combine audio chunks into a single Blob (if recording has stopped).
+        let audioBlob = null;
+        if (!isRecording && audioChunks.length > 0) {
+            audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // Or appropriate audio type.
+            setAudioChunks([]); // Clear chunks after sending
+        }
+
+        // Add user message to chat (if there's text).
+        if (inputMessage.trim()) {
+            const userMessage = { text: inputMessage, sender: 'sent', segments: [], html: md.render(inputMessage) };
+            setMessages(prevMessages => [...prevMessages, userMessage]);
+            setInputMessage(''); // Clear the input *after* adding to messages
+        }
+
+        if (!inputMessage.trim() && !selectedImage && !audioBlob) {
+            return;  // Nothing to send
+        }
+
         setLoadingResponse(true);
         setHasError(false);
 
@@ -69,6 +136,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
+
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
             setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [], html: '<p>Error: Could not determine AI type.</p>' }]);
@@ -76,16 +144,24 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             return;
         }
 
-        let eventSource;
-
         try {
-            if (selectedIconType === 'autoMechanic') {
+             if (selectedIconType === 'autoMechanic') {
+                const formData = new FormData();
+                formData.append('message', inputMessage);  // Append even if empty
+                if (selectedImage) {
+                    formData.append('image', selectedImage);
+                }
+                if (audioBlob) {
+                    formData.append('audio', audioBlob);
+                }
+                if (carData) {
+                   formData.append('carData', JSON.stringify(carData));
+                }
+
+                // Initial POST request (with image/audio if present)
                 const initResponse = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: inputMessage, carData: carData }),
+                    body: formData, // Send FormData
                 });
 
                 if (!initResponse.ok) {
@@ -95,16 +171,24 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
 
                 const { sessionId } = await initResponse.json();
                 setSessionId(sessionId);
+                setSelectedImage(null); // Clear image after sending
 
-                let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}&message=${encodeURIComponent(inputMessage)}`;
+                //  SSE Streaming (for subsequent text messages)
+                let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}`;
+
+                // Append message *only* if there's actual text.
+                if (inputMessage.trim()) {
+                    streamUrl += `&message=${encodeURIComponent(inputMessage)}`;
+                }
+
                 if (carData) {
                     streamUrl += `&carData=${encodeURIComponent(JSON.stringify(carData))}`;
                 }
-                eventSource = new EventSource(streamUrl);
-
+                const eventSource = new EventSource(streamUrl);
                 setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
+                    // console.log("SSE connection opened");
                 };
 
                 eventSource.onmessage = (event) => {
@@ -143,8 +227,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                         eventSource.close();
                     }
                 };
-
-            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
                 const inputData = {
                     "Make": carData.make,
                     "Model": carData.model,
@@ -170,14 +253,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                     setLoadingResponse(true);
                     const response = await axios.post(apiUrl, inputData);
                     if (response.data && response.data.recommendations) {
-                      setRecommendations(response.data.recommendations);
-                      let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
-                      setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
+                        setRecommendations(response.data.recommendations);
+                        let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
+                        setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
 
                     } else {
-                      console.warn("Recommendations API returned an empty or malformed response.");
-                      setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
-                      setHasError(true);
+                        console.warn("Recommendations API returned an empty or malformed response.");
+                        setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
+                        setHasError(true);
                     }
 
                 } catch (error) {
@@ -187,7 +270,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 } finally {
                     setLoadingResponse(false);
                 }
-            }
+             }
+
         } catch (error) {
             console.error('Error setting up SSE:', error);
             if (!hasError) {
@@ -195,8 +279,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 setHasError(true);
             }
             setLoadingResponse(false);
-            if (eventSource) {
-                eventSource.close();
+            if (currentEventSource) {
+                currentEventSource.close();
             }
         }
         return () => {
@@ -205,6 +289,8 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             }
         };
     };
+
+
     const processSegments = (text, supports, sources) => {
         if (!supports || supports.length === 0) {
             return [{ text: text, sources: [], html: md.render(text) }];
@@ -245,29 +331,27 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         setSelectedIconType(iconType);
     };
 
-     const handleMouseMove = (e) => {
-         if (isChatPinned) return;
+    const handleMouseMove = (e) => {
+        if (isChatPinned) return;
 
-         const triggerArea = {
-             width: 700,
-             height: 700,
-             x: 0,
-             y: window.innerHeight - 700,
-         };
+        const triggerArea = {
+            width: 700,
+            height: 700,
+            x: 0,
+            y: window.innerHeight - 700,
+        };
 
-         if (
-             e.clientX >= triggerArea.x &&
-             e.clientX <= triggerArea.x + triggerArea.width &&
-             e.clientY >= triggerArea.y &&
-             e.clientY <= triggerArea.y + triggerArea.height
-         ) {
-             setIsChatVisible(true);
-         } else {
-             setIsChatVisible(false);
-         }
-     };
-
-
+        if (
+            e.clientX >= triggerArea.x &&
+            e.clientX <= triggerArea.x + triggerArea.width &&
+            e.clientY >= triggerArea.y &&
+            e.clientY <= triggerArea.y + triggerArea.height
+        ) {
+            setIsChatVisible(true);
+        } else {
+            setIsChatVisible(false);
+        }
+    };
 
     const handleDocumentClick = (e) => {
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
@@ -328,45 +412,78 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             onClick={onClick}
         >
             <div className="messages-area">
-                {messages.map((message, index) => (
-                    <div key={index} className={`message ${message.sender}`}>
-                        <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
-
-                        {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
-                            <div className="message-sources">
-                                {message.segments.map((segment, segmentIndex) => (
-                                    segment.sources && segment.sources.length > 0 && (
-                                        <div key={segmentIndex} className="sources">
-                                            {segment.sources.map((source, sourceIndex) => (
-                                                <a
-                                                    key={sourceIndex}
-                                                    href={source.uri}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="source-link"
-                                                    title={source.uri}
-                                                >
-                                                    [{source.title}]
-                                                </a>
-                                            ))}
-                                        </div>
-                                    )
-                                ))}
+                {messages.map((message, index) => {
+                    if (message.type === 'image') {
+                        return (
+                            <div key={index} className={`message ${message.sender}`}>
+                                <img src={message.src} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '200px' }} />
                             </div>
-                        )}
-                    </div>
-                ))}
+                        );
+                    } else if (message.type === 'audio') {
+                        return (
+                          <div key={index} className={`message ${message.sender}`}>
+                            <audio controls src={message.src} />
+                          </div>
+                        );
+                    }
+                      else {
+                        return (
+                            <div key={index} className={`message ${message.sender}`}>
+                                <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
+
+                                {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
+                                    <div className="message-sources">
+                                        {message.segments.map((segment, segmentIndex) => (
+                                            segment.sources && segment.sources.length > 0 && (
+                                                <div key={segmentIndex} className="sources">
+                                                    {segment.sources.map((source, sourceIndex) => (
+                                                        <a
+                                                            key={sourceIndex}
+                                                            href={source.uri}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="source-link"
+                                                            title={source.uri}
+                                                        >
+                                                            [{source.title}]
+                                                        </a>
+                                                    ))}
+                                                </div>
+                                            )
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+                })}
                 {loadingResponse && <div className="message received">Loading...</div>}
             </div>
 
             <div className="input-area">
                 <div className="input-container">
-                    <input
-                        type="text"
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    id="image-upload"
+                    style={{ display: 'none' }}  // Hide the default input
+                />
+                <label htmlFor="image-upload" className="custom-button">
+                    Upload Image
+                </label>
+
+                <button
+                    className={`custom-button ${isRecording ? 'recording' : ''}`}
+                    onClick={isRecording ? stopRecording : startRecording}
+                >
+                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                </button>
+                <textarea
                         placeholder="Type your message here..."
                         value={inputMessage}
                         onChange={handleInputChange}
-                        onKeyPress={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSendMessage(); } }}
+                        onKeyPress={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }}
                         className="message-input"
                     />
                     <div className="options-bar">
