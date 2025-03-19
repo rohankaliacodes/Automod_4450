@@ -7,9 +7,12 @@
     --category-text: #ffffff;
     --border-radius: 50px;
     --font-family: "DM Sans", sans-serif;
-  }
-  
-  .main-container {
+    --card-bg: #1c1c1c;
+    --card-hover-bg: #292929;
+    --accent-color: #ff70a6;
+}
+
+.main-container {
     width: 100%;
     height: 100vh;
     background: var(--primary-bg);
@@ -19,15 +22,15 @@
     justify-content: flex-start;
     padding-top: 20px;
     overflow: hidden;
-  }
-  
-  .header {
+}
+
+.header {
     width: 100%;
     height: 100px;
     background: #000;
-  }
-  
-  .search-container {
+}
+
+.search-container {
     width: 70%;
     display: flex;
     align-items: center;
@@ -36,9 +39,9 @@
     padding: 15px;
     margin-top: 100px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .search-input {
+}
+
+.search-input {
     flex: 1;
     border: none;
     outline: none;
@@ -47,23 +50,23 @@
     font-family: var(--font-family);
     color: var(--text-color);
     background: transparent;
-  }
-  
-  .dropdown-container {
+}
+
+.dropdown-container {
     display: flex;
     gap: 15px;
-  }
-  
-  .dropdown {
+}
+
+.dropdown {
     padding: 8px 12px;
     font-size: 16px;
     font-family: var(--font-family);
     border: none;
     border-radius: 8px;
     background: #f0f0f0;
-  }
-  
-  .search-button {
+}
+
+.search-button {
     background: var(--search-button-bg);
     color: white;
     border: none;
@@ -72,102 +75,331 @@
     font-size: 16px;
     cursor: pointer;
     margin-left: 15px;
-  }
-  
-  .search-icon {
+    transition: background 0.3s;
+}
+
+.search-button:hover {
+    background: #a80e4c;
+}
+
+.search-icon {
     font-size: 18px;
-  }
-  
-  .category-container {
+}
+
+.category-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 12px;
     margin-top: 20px;
-  }
-  
-  .category {
+}
+
+.category {
     background: var(--category-bg);
     color: var(--category-text);
     font-size: 14px;
     font-family: var(--font-family);
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: 20px;
     cursor: pointer;
-  }
-  
-  .category.all {
-    font-weight: bold;
-  }
-  
+    transition: background 0.3s;
+}
 
+.category:hover {
+    background: #a80e4c;
+}
 
-/* Existing .cards-scroll-container can stay the same, or adjust if needed */
 .cards-scroll-container {
-    flex: 2; /* Takes more space than the recommendations on the right */
+    flex: 2;
     max-height: 60vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 0; /* If you want it aligned with recommendations */
-  }
-/* Wrap the parts + recommendations in a row flex container */
+    margin-top: 0;
+}
+
 .modshop-content {
     display: flex;
     flex-direction: row;
     width: 100%;
-    /* If you need a certain max-height, you can define it here. */
     margin-top: 20px;
-    gap: 20px; /* Space between parts and recommendations */
-    padding: 0 20px; /* Optional side padding */
-  }
-  /* New container for recommendations on the right */
-.recommendations-container {
-  flex: 1; /* Takes less space than the parts section */
-  max-height: 60vh; 
-  overflow-y: auto;
-  background: #1e1e14; /* Example darker background */
-  border-radius: 12px;
-  padding: 20px;
-  color: #fff;
-  font-family: var(--font-family);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    gap: 20px;
+    padding: 0 20px;
 }
 
-/* Title styling for the recommendation header */
+/* .recommendations-container {
+    flex: 1;
+    max-height: 60vh; 
+    overflow-y: auto;
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    color: #fff;
+    font-family: var(--font-family);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
 .recommendations-container .rec-header {
-  font-size: 1.4rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 10px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 5px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 6px;
 }
 
-/* The list container */
+.recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.recommendations-list .part-item {
+    background: var(--card-hover-bg);
+    padding: 12px;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.recommendations-list .part-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.recommendations-list .part-item a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.recommendations-list .part-item a:hover {
+    color: #ff467e;
+    text-decoration: underline;
+} */
+
+/* Modern Card Styling for Recommendations */
+
+/* Modern Card Styling for Recommendations with Horizontal Scrolling */
+
+.recommendations-container {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.rec-header {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #333;
+  text-align: left;
+}
+
+/* Convert to horizontal scrolling container */
 .recommendations-list {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 10px 0 30px 0; /* Add padding for scrollbar */
+  scroll-behavior: smooth; /* For smooth scrolling */
+  -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #c1c1c1 #f1f1f1; /* For Firefox */
 }
 
-/* Each recommended part item */
-.recommendations-list .part-item {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px;
+/* Scrollbar styling for Chrome, Edge, and Safari */
+.recommendations-list::-webkit-scrollbar {
+  height: 8px;
+}
+
+.recommendations-list::-webkit-scrollbar-track {
+  background:#c81058;
+  border-radius: 4px;
+}
+
+.recommendations-list::-webkit-scrollbar-thumb {
+  background: #c81058;
+  border-radius: 4px;
+}
+
+.recommendations-list::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.part-item {
+  background-color: white;
   border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 300px; /* Fixed width for each card */
+  max-width: 300px; /* Fixed width for each card */
+  height: 380px; /* Fixed height for consistency */
+  position: relative;
+  padding-bottom: 60px; /* Space for the button */
+  flex-shrink: 0; /* Prevent cards from shrinking */
 }
 
-/* Hover effect on each recommendation card */
-.recommendations-list .part-item:hover {
+.part-item:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-/* Link styling for 'Buy Now' */
-.recommendations-list .part-item a {
-  color: #ff70a6;
-  text-decoration: underline;
+/* Add a placeholder for the image */
+.part-item::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 160px;
+  background-color: #f5f5f5;
+  /* background-image: url('/placeholder.svg'); */
+  background-size: cover;
+  background-position: center;
+}
+
+.part-item p {
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.part-item p:first-of-type {
+  margin-top: 16px;
+  font-size: 16px;
+  color: #333;
+}
+
+.part-item p:nth-of-type(3) {
+  /* Category styling */
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #c81058;
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  z-index: 1;
+}
+
+.part-item p:nth-of-type(4) {
+  /* Price styling */
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.part-item p:nth-of-type(5) {
+  /* SKU styling */
+  font-size: 12px;
+  color: #888;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.part-item a {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #c81058;
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.part-item a:hover {
+  background-color: #c81058;;
+}
+
+/* Add arrow icon to Buy Now link */
+.part-item a::after {
+  content: "→";
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.part-item a:hover::after {
+  transform: translateX(4px);
+}
+
+/* Optional: Add scroll buttons for better UX */
+.recommendations-container {
+  position: relative;
+}
+
+/* Add these elements to your HTML if you want navigation buttons */
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.scroll-left {
+  left: 10px;
+}
+
+.scroll-right {
+  right: 10px;
+}
+
+.scroll-btn::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #666;
+  border-right: 2px solid #666;
+  display: inline-block;
+}
+
+.scroll-left::before {
+  transform: rotate(-135deg);
+}
+
+.scroll-right::before {
+  transform: rotate(45deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .part-item {
+    min-width: 250px;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .part-item {
+    min-width: 220px;
+    max-width: 220px;
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../styles/Modshop.css";
 import Header from "../pages/Header";
 import { useLocation } from "react-router-dom";
@@ -8,9 +8,12 @@ import { auth, db } from "../config/firebase";
 import { getDocs, collection } from "firebase/firestore";
 
 
+
+
 export default function Modshop() {
   const location = useLocation();
   const category = location.state?.category || "";
+  const recommendationsListRef = useRef(null);
 
   // State variables
   const [make, setMake] = useState("");
@@ -23,6 +26,32 @@ export default function Modshop() {
   const [partsArray, setPartsArray] = useState([]);
   const [completePartsArray, setCompletePartsArray] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const scrollLeftBtn = document.getElementById('scrollLeft');
+  const scrollRightBtn = document.getElementById('scrollRight');
+  const recommendationsList = document.querySelector('.recommendations-list');
+
+// Add this to your component's JavaScript
+ // Scroll functions using React refs
+//  const scrollLeft = () => {
+//     if (recommendationsList.current) {
+//       recommendationsList.current.scrollBy({ left: -300, behavior: "smooth" })
+//     }
+//   }
+const scrollLeft = () => {
+    if (recommendationsListRef.current) {
+      recommendationsListRef.current.scrollBy({ left: -300, behavior: "smooth" });
+    }
+  };
+//   const scrollRight = () => {
+//     if (recommendationsList.current) {
+//       recommendationsList.current.scrollBy({ left: 300, behavior: "smooth" })
+//     }
+//   }
+const scrollRight = () => {
+    if (recommendationsListRef.current) {
+      recommendationsListRef.current.scrollBy({ left: 300, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     if (make && model && year && trim && engine) {
@@ -504,11 +533,13 @@ async function fetchRecommendations(cars){
           <Cards partsArray={partsArray} />
         </div>
 
-        {/* Recommendations UI - on the right side */}
+        {/* Recommendations UI - on the right side
         <div className="recommendations-container">
           <h2 className="rec-header">Recommended Parts for You</h2>
+          <button className="scroll-btn scroll-left" onClick={scrollLeft}></button>
+          <button className="scroll-btn scroll-right" onClick={scrollRight}></button>
           {recommendations.length > 0 ? (
-            <div className="recommendations-list">
+            <div className="recommendations-list" ref={recommendationsListRef}>
               {recommendations.map((data, index) => (
                 <div key={index} className="part-item">
                   <p>
@@ -532,6 +563,34 @@ async function fetchRecommendations(cars){
                   <a href={data.part["Link"]} target="_blank" rel="noreferrer">
                     Buy Now
                   </a>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No recommendations found.</p> */}
+              {/* Recommendations UI - on the right side */}
+        <div className="recommendations-container">
+          <h2 className="rec-header">Recommended Parts for You</h2>
+          
+          {/* Scroll Buttons */}
+          <button className="scroll-btn scroll-left" onClick={scrollLeft}></button>
+          <button className="scroll-btn scroll-right" onClick={scrollRight}></button>
+          
+          {/* Recommendations List */}
+          {recommendations.length > 0 ? (
+            <div className="recommendations-list" ref={recommendationsListRef}>
+              {recommendations.map((data, index) => (
+                <div key={index} className="part-item">
+                  <p><strong>Part Name: {data.part["Part Name"]}</strong></p>
+                  <p>
+                    <strong>
+                      For: {data.car.year} {data.car.make} {data.car.model} {data.car.trim} {data.car.engine}
+                    </strong>
+                  </p>
+                  <p><strong>Category: {data.part["Category"]}</strong></p>
+                  <p><strong>Price: {data.part["Price"]}</strong></p>
+                  <p><strong>{data.part["SKU Number"]}</strong></p>
+                  <a href={data.part["Link"]} target="_blank" rel="noreferrer">Buy Now</a>
                 </div>
               ))}
             </div>
