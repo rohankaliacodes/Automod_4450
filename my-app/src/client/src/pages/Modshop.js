@@ -525,7 +525,7 @@ function sortPartsByPrice(val) {
       <div className="category-container">
         {["Heating/AC", "Belts/Hoses/Cooling", "Body/Cable/Misc", "Brake/Wheel Bearing", "Electrical",
           "Ignition/Filters", "Tires/Accessories", "Wipers/Lamps/Fuses", "Fuel/Emissions", "All"].map((cat) => (
-            <span key={cat} className="category" onClick={() => sortPartsByCategory(cat)}>{cat}</span>
+            <span key={cat} className="category" title={`Display parts in the ${cat} category`}onClick={() => sortPartsByCategory(cat)}>{cat}</span>
         ))}
       </div>
 
