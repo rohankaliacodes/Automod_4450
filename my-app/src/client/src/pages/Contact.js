@@ -109,7 +109,8 @@ export default function Contact() {
               </div>
             </div>
           </div>
-          <button type="submit" className="contact2-button-f">Send</button>
+          <button type="submit" className="contact2-button-f">
+            <span>Send</span></button>
         </form>
       </div>
     </div>
