@@ -31,11 +31,17 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         breaks: true
     });
 
-    // --- New State Variables ---
+    // --- State Variables ---
     const [selectedImage, setSelectedImage] = useState(null);
-    const [isRecording, setIsRecording] = useState(false);
-    const [audioChunks, setAudioChunks] = useState([]);
-    const mediaRecorderRef = useRef(null);
+    const [selectedMedia, setSelectedMedia] = useState(null); // For audio/video
+
+
+    // --- Removed MediaRecorder related state and functions ---
+    // const [isRecording, setIsRecording] = useState(false); REMOVED
+    // const [audioChunks, setAudioChunks] = useState([]); REMOVED
+    // const mediaRecorderRef = useRef(null); REMOVED
+    // const startRecording = async () => { ... }; REMOVED
+    // const stopRecording = () => { ... }; REMOVED
 
 
     useEffect(() => {
@@ -54,13 +60,14 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         return () => unsubscribe();
     }, [carData, displayName]);
 
-    // --- New Helper Functions ---
+    // --- Helper Functions ---
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedImage(file);
-            // Display the image preview (optional).
+            setSelectedMedia(null); // Clear any previous media
+            // Image preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setMessages(prevMessages => [...prevMessages, { type: 'image', sender: 'sent', src: reader.result }]);
@@ -69,46 +76,27 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         }
     };
 
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            mediaRecorderRef.current = mediaRecorder;
+    const handleMediaChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setSelectedMedia(file);
+          setSelectedImage(null);  // Clear any previous image
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    setAudioChunks((prevChunks) => [...prevChunks, event.data]);
-                }
-            };
+          if (file.type.startsWith('video/')) {
+            getVideoThumbnail(file).then(thumbnail => {
+              setMessages(prevMessages => [...prevMessages, { type: 'video', sender: 'sent', src: URL.createObjectURL(file), thumbnail: thumbnail }]);
+            });
+          } else if (file.type.startsWith('audio/')) {
+              setMessages(prevMessages => [...prevMessages, { type: 'audio', sender: 'sent', src: URL.createObjectURL(file) }]);
+            }
+          }
+      };
 
-            mediaRecorder.onstop = () => {
-                //  The chunks will be combined into a blob in handleSendMessage
-            };
 
-            mediaRecorder.start();
-            setIsRecording(true);
-        } catch (error) {
-            console.error("Error accessing microphone:", error);
-            setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not access microphone.', sender: 'received', segments: [], html: '<p>Error: Could not access microphone.</p>' }]);
-        }
-    };
-
-    const stopRecording = () => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-            mediaRecorderRef.current.stop();
-            setIsRecording(false);
-        }
-    };
 
     // --- Modified handleSendMessage ---
 
     const handleSendMessage = async () => {
-        // Combine audio chunks into a single Blob (if recording has stopped).
-        let audioBlob = null;
-        if (!isRecording && audioChunks.length > 0) {
-            audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // Or appropriate audio type.
-            setAudioChunks([]); // Clear chunks after sending
-        }
 
         // Add user message to chat (if there's text).
         if (inputMessage.trim()) {
@@ -117,7 +105,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             setInputMessage(''); // Clear the input *after* adding to messages
         }
 
-        if (!inputMessage.trim() && !selectedImage && !audioBlob) {
+        if (!inputMessage.trim() && !selectedImage && !selectedMedia) {
             return;  // Nothing to send
         }
 
@@ -136,7 +124,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             apiUrl = 'http://localhost:5001/api/recommendations/getRecommendations';
         }
 
-
         if (!apiUrl) {
             console.error("No API URL defined for selected option.");
             setMessages(prevMessages => [...prevMessages, { text: 'Error: Could not determine AI type.', sender: 'received', segments: [], html: '<p>Error: Could not determine AI type.</p>' }]);
@@ -145,18 +132,19 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         }
 
         try {
-             if (selectedIconType === 'autoMechanic') {
+            if (selectedIconType === 'autoMechanic') {
                 const formData = new FormData();
                 formData.append('message', inputMessage);  // Append even if empty
                 if (selectedImage) {
-                    formData.append('image', selectedImage);
+                    formData.append('image', selectedImage); // Separate image
                 }
-                if (audioBlob) {
-                    formData.append('audio', audioBlob);
+                if (selectedMedia) {
+                    formData.append('media', selectedMedia); // Separate media (audio/video)
                 }
                 if (carData) {
-                   formData.append('carData', JSON.stringify(carData));
+                    formData.append('carData', JSON.stringify(carData));
                 }
+
 
                 // Initial POST request (with image/audio if present)
                 const initResponse = await fetch(apiUrl, {
@@ -172,6 +160,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                 const { sessionId } = await initResponse.json();
                 setSessionId(sessionId);
                 setSelectedImage(null); // Clear image after sending
+                setSelectedMedia(null);  //Clear media after sending
 
                 //  SSE Streaming (for subsequent text messages)
                 let streamUrl = `http://localhost:5001/api/autoMechanic/chat/stream?sessionId=${sessionId}`;
@@ -227,7 +216,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
                         eventSource.close();
                     }
                 };
-             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
+            } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
                 const inputData = {
                     "Make": carData.make,
                     "Model": carData.model,
@@ -289,7 +278,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             }
         };
     };
-
 
     const processSegments = (text, supports, sources) => {
         if (!supports || supports.length === 0) {
@@ -404,6 +392,27 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         };
     }, [isChatPinned, currentEventSource]);
 
+    const getVideoThumbnail = (file) => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.currentTime = 1; // Capture frame at 1 second
+        video.addEventListener('loadeddata', () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth; // Use video dimensions
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const thumbnail = canvas.toDataURL('image/jpeg'); // Or 'image/png'
+          resolve(thumbnail);
+        });
+        video.addEventListener('error', (e) => {
+          console.error("Error loading video for thumbnail:", e);
+           reject(e);
+        });
+    });
+  };
+
 
     return (
         <div
@@ -412,79 +421,96 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
             onClick={onClick}
         >
             <div className="messages-area">
-                {messages.map((message, index) => {
-                    if (message.type === 'image') {
-                        return (
-                            <div key={index} className={`message ${message.sender}`}>
-                                <img src={message.src} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '200px' }} />
-                            </div>
-                        );
-                    } else if (message.type === 'audio') {
-                        return (
-                          <div key={index} className={`message ${message.sender}`}>
-                            <audio controls src={message.src} />
-                          </div>
-                        );
-                    }
-                      else {
-                        return (
-                            <div key={index} className={`message ${message.sender}`}>
-                                <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
+            {messages.map((message, index) => {
+                if (message.type === 'image') {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <img src={message.src} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '200px' }} />
+                    </div>
+                );
+                } else if (message.type === 'audio') {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <audio controls src={message.src} />
+                    </div>
+                );
+                } else if (message.type === 'video') {
+                  return (
+                    <div key={index} className={`message ${message.sender}`}>
+                      <video controls width="250">
+                        <source src={message.src} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                      {/* Display thumbnail */}
+                      {message.thumbnail && <img src={message.thumbnail} alt="Video Thumbnail" style={{ maxWidth: '100%', maxHeight: '100px' }} />}
+                    </div>
+                  );
+                }
+                else {
+                return (
+                    <div key={index} className={`message ${message.sender}`}>
+                    <div className="message-content" dangerouslySetInnerHTML={{ __html: message.html }} />
 
-                                {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
-                                    <div className="message-sources">
-                                        {message.segments.map((segment, segmentIndex) => (
-                                            segment.sources && segment.sources.length > 0 && (
-                                                <div key={segmentIndex} className="sources">
-                                                    {segment.sources.map((source, sourceIndex) => (
-                                                        <a
-                                                            key={sourceIndex}
-                                                            href={source.uri}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="source-link"
-                                                            title={source.uri}
-                                                        >
-                                                            [{source.title}]
-                                                        </a>
-                                                    ))}
-                                                </div>
-                                            )
-                                        ))}
-                                    </div>
-                                )}
+                    {message.segments && message.segments.some(segment => segment.sources && segment.sources.length > 0) && (
+                        <div className="message-sources">
+                        {message.segments.map((segment, segmentIndex) => (
+                            segment.sources && segment.sources.length > 0 && (
+                            <div key={segmentIndex} className="sources">
+                                {segment.sources.map((source, sourceIndex) => (
+                                <a
+                                    key={sourceIndex}
+                                    href={source.uri}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="source-link"
+                                    title={source.uri}
+                                >
+                                    [{source.title}]
+                                </a>
+                                ))}
                             </div>
-                        );
-                    }
-                })}
-                {loadingResponse && <div className="message received">Loading...</div>}
+                            )
+                        ))}
+                        </div>
+                    )}
+                    </div>
+                );
+                }
+            })}
+            {loadingResponse && <div className="message received">Loading...</div>}
             </div>
 
             <div className="input-area">
                 <div className="input-container">
+                 {/* Separate Image Upload */}
                 <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
                     id="image-upload"
-                    style={{ display: 'none' }}  // Hide the default input
+                    style={{ display: 'none' }}
                 />
                 <label htmlFor="image-upload" className="custom-button">
                     Upload Image
                 </label>
 
-                <button
-                    className={`custom-button ${isRecording ? 'recording' : ''}`}
-                    onClick={isRecording ? stopRecording : startRecording}
-                >
-                    {isRecording ? 'Stop Recording' : 'Start Recording'}
-                </button>
+                {/* Separate Media (Audio/Video) Upload */}
+                <input
+                    type="file"
+                    accept="audio/*, video/*"
+                    onChange={handleMediaChange}
+                    id="media-upload"
+                    style={{ display: 'none' }}
+                />
+                <label htmlFor="media-upload" className="custom-button">
+                    Upload Media
+                </label>
                 <textarea
-                        placeholder="Type your message here..."
-                        value={inputMessage}
-                        onChange={handleInputChange}
-                        onKeyPress={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }}
-                        className="message-input"
+                    placeholder="Type your message here..."
+                    value={inputMessage}
+                    onChange={handleInputChange}
+                    onKeyPress={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); handleSendMessage(); } }}
+                    className="message-input"
                     />
                     <div className="options-bar">
                         <button className='reset-chat' onClick={handleResetChat}><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><g strokeWidth="0" /><g strokeLinecap="round" strokeLinejoin="round" /><path d="M3 1C1.355 1 0 2.355 0 4v6c0 1.645 1.355 3 3 3h1v3l3-3v-1c0-.55-.45-1-1-1H3c-.57 0-1-.43-1-1V4c0-.555.445-1 1-1h10c.555 0 1 .445 1 1v4c0 .55.45 1 1-1V4c0-1.645-1.355-3-3-3zm8 7v3H8v2h3v3h2v-3h3v-2h-3V8zm0 0" fill="#85858a" /></svg></button>
@@ -516,6 +542,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => {
         </div>
     );
 };
+
 
 function formatRecommendationsToMarkdown(recommendations) {
     let markdownString = "## Recommendations:\n\n";
