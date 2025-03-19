@@ -1,0 +1,11 @@
+Model Information:
+* title:	Custom Honda Civic Type-R (2024)
+* source:	https://sketchfab.com/3d-models/custom-honda-civic-type-r-2024-c36abddc783445fbb00f72356c576fca
+* author:	Jumping Jax (https://sketchfab.com/JumpingJax)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Custom Honda Civic Type-R (2024)" (https://sketchfab.com/3d-models/custom-honda-civic-type-r-2024-c36abddc783445fbb00f72356c576fca) by Jumping Jax (https://sketchfab.com/JumpingJax) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
