@@ -26,6 +26,14 @@ export default function Modshop() {
   const [recommendations, setRecommendations] = useState([]);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
 
+   // ----- States to track user actions (same as Market.js) -----
+
+   const [searched, setSearched] = useState(false);       // user clicked search
+ 
+
+  const [price, setPrice] = useState(0);
+  const [isChanged, setIsChanged] = useState(false);
+
   useEffect(() => {
     if (make && model && year && trim && engine) {
         fetchParts(new Event("click"));  // Simulate an event trigger
@@ -111,6 +119,7 @@ async function fetchRecommendations(cars){
         setPartsArray(data.data);
         setCompletePartsArray(data.data);
         console.log("Filtered parts:", data.data);
+        setIsSubmitted(true);
       } else {
         setMessage("No vehicle specified");
       }
@@ -134,6 +143,7 @@ async function fetchRecommendations(cars){
         setPartsArray(data.data);
         setCompletePartsArray(data.data);
         console.log("Search results:", data.data);
+        setSearched(true);
       } else {
         setMessage("No parts found that match your query");
       }
@@ -151,6 +161,18 @@ async function fetchRecommendations(cars){
       const sortedParts = completePartsArray.filter((part) => part["Category"] === category);
       setPartsArray(sortedParts);
       setMessage(sortedParts.length === 0 ? "No parts found in this category" : "");
+    }
+  }
+
+// Real-time filter by price
+function sortPartsByPrice(val) {
+    const sortedParts = completePartsArray.filter((part) => {
+      const numericPrice = parseFloat(part["Price"].replace("$", ""));
+      return numericPrice <= val;
+    });
+    setPartsArray(sortedParts);
+    if (sortedParts.length === 0) {
+      setMessage("No parts found in this price range");
     }
   }
 
@@ -507,6 +529,30 @@ async function fetchRecommendations(cars){
             <span key={cat} className="category" onClick={() => sortPartsByCategory(cat)}>{cat}</span>
         ))}
       </div>
+
+         {/* Only show price slider if user has submitted or searched */}
+         {isSubmitted || searched ? (
+        <div className="price-slider">
+          <label>Filter By Price</label>
+          <input
+            type="range"
+            min="0"
+            max="500"
+            step="1"
+            value={price} // Keep the slider controlled
+            onChange={(event) => {
+              const val = event.target.value;
+              setPrice(val);
+              setIsChanged(true);
+              // Filter in real time:
+              sortPartsByPrice(val);
+            }}
+          />
+          {isChanged ? <label>${price} or less</label> : null}
+        </div>
+      ) : null}
+
+
 
       {/* Main Content: Parts + Recommendations side-by-side */}
       <div className="modshop-content">
