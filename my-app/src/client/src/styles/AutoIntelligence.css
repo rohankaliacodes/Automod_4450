@@ -711,3 +711,51 @@
     margin-right: 60px;
    
 }
+.graph-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px; /* Add some spacing between header and chart */
+}
+
+.graph-header h3 {
+    margin: 0; /* Remove default h3 margins */
+}
+
+.graph-close-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.2s ease; /* Smooth transition for opacity */
+}
+
+/* Hover effect for the close button */
+.graph-close-button:hover {
+    opacity: 0.7; /* Reduce opacity on hover */
+    /* Optional: Add a slight scale transform for a "pop" effect */
+    transform: scale(1.1);
+}
+
+/* Style the image within the button (optional, but good for consistency) */
+.graph-close-button img {
+    width: 24px;
+    height: 24px;
+    transition: filter 0.2s ease; /* Add transition for filter */
+}
+
+/* Hover effect for the image inside the button */
+.graph-close-button:hover img {
+    filter: drop-shadow(0 0 2px #ffffff); /* Add a glow effect */
+}
+
+
+/* Ensure graph container is relatively positioned */
+.graph-container {
+    position: relative; /* Important for absolute positioning if ever needed */
+    background-color: rgba(30, 30, 30, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: center;
+}
