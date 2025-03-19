@@ -7,6 +7,7 @@ import MarkdownIt from 'markdown-it';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
+import axios from 'axios'; // Import axios
 
 
 const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinned and onClick
@@ -23,7 +24,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
     const location = useLocation();
     const carData = location.state;
     const [messages, setMessages] = useState([]);
-
+    const [recommendations, setRecommendations] = useState([]); // added for recommendation
     // Initialize markdown-it
     const md = new MarkdownIt({
         html: true,
@@ -149,7 +150,47 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                 };
 
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-                // ... recommendation API call (unchanged) ...
+                const inputData = {
+                    "Make": carData.make,
+                    "Model": carData.model,
+                    "Year": carData.year,
+                    "Trim": carData.trim,
+                    "Engine": carData.engine,
+                    "Modification Type": (() => {  
+                        switch (selectedIconType) {
+                            case 'performanceTuner':
+                                return 'Performance';
+                            case 'aesthethics':
+                                return 'Aesthetics';
+                            default:
+                                return 'Performance'; 
+                        }
+                    })(),
+                    "User Goal": inputMessage,
+                };
+
+                console.log(inputData)
+
+                try {
+                    setLoadingResponse(true);
+                    const response = await axios.post(apiUrl, inputData);
+                    if (response.data && response.data.recommendations) {
+                      setRecommendations(response.data.recommendations);
+                      // Display the recommendations in message
+                      setMessages(prevMessages => [...prevMessages, { text: `Recommendations:  ${JSON.stringify(response.data.recommendations)}`, sender: 'received', segments: [], html: md.render(`Recommendations:  ${JSON.stringify(response.data.recommendations)}`) }]);
+                    } else {
+                      console.warn("Recommendations API returned an empty or malformed response.");
+                      setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
+                      setHasError(true);
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching recommendations:", error);
+                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to fetch recommendations. Please try again.', sender: 'received', segments: [], html: '<p>Failed to fetch recommendations. Please try again.</p>' }]);
+                    setHasError(true);
+                } finally {
+                    setLoadingResponse(false);
+                }
             }
         } catch (error) {
             console.error('Error setting up SSE:', error);
@@ -209,27 +250,27 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
     };
 
      const handleMouseMove = (e) => {
-        if (isChatPinned) return;
+         if (isChatPinned) return;
 
-        // Larger trigger area in the bottom-left corner
-        const triggerArea = {
-            width: 700,  
-            height: 700,
-            x: 0,       // Starts at the left edge
-            y: window.innerHeight - 700, // Starts 300px from the bottom
-        };
+         // Larger trigger area in the bottom-left corner
+         const triggerArea = {
+             width: 700,
+             height: 700,
+             x: 0,       // Starts at the left edge
+             y: window.innerHeight - 700, // Starts 300px from the bottom
+         };
 
-        if (
-            e.clientX >= triggerArea.x &&
-            e.clientX <= triggerArea.x + triggerArea.width &&
-            e.clientY >= triggerArea.y &&
-            e.clientY <= triggerArea.y + triggerArea.height
-        ) {
-            setIsChatVisible(true);
-        } else {
-            setIsChatVisible(false);
-        }
-    };
+         if (
+             e.clientX >= triggerArea.x &&
+             e.clientX <= triggerArea.x + triggerArea.width &&
+             e.clientY >= triggerArea.y &&
+             e.clientY <= triggerArea.y + triggerArea.height
+         ) {
+             setIsChatVisible(true);
+         } else {
+             setIsChatVisible(false);
+         }
+     };
 
 
 
