@@ -7,10 +7,11 @@ import MarkdownIt from 'markdown-it';
 import { auth } from '../config/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 
-const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinned and onClick
-    const [isChatVisible, setIsChatVisible] = useState(true); //  Keep local visibility state
+const AutoIntelligence = ({ isChatPinned, onClick }) => {
+    const [isChatVisible, setIsChatVisible] = useState(true);
     const [displayName, setDisplayName] = useState("User");
     const [inputMessage, setInputMessage] = useState('');
     const [selectedOption, setSelectedOption] = useState('Auto Mechanic');
@@ -23,8 +24,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
     const location = useLocation();
     const carData = location.state;
     const [messages, setMessages] = useState([]);
-
-    // Initialize markdown-it
+    const [recommendations, setRecommendations] = useState([]);
     const md = new MarkdownIt({
         html: true,
         linkify: true,
@@ -32,22 +32,20 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         breaks: true
     });
 
-    // useEffect for setting the initial message and user authentication
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                setDisplayName(user.displayName || "User"); // Use displayName if available
+                setDisplayName(user.displayName || "User");
             } else {
                 setDisplayName("User");
             }
         });
-        // Construct the initial message based on carData and displayName
         let initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready.`;
         if (carData) {
             initialMessageText = `Welcome back, ${displayName}! Auto Intelligence is ready. How can I help with your ${carData.make} ${carData.model} today?`;
         }
         setMessages([{ text: initialMessageText, sender: 'received', segments: [], html: md.render(initialMessageText) }]);
-        return () => unsubscribe(); // Cleanup the auth listener
+        return () => unsubscribe();
     }, [carData, displayName]);
 
     const handleSendMessage = async () => {
@@ -59,7 +57,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         setLoadingResponse(true);
         setHasError(false);
 
-        // Close any existing EventSource connection
         if (currentEventSource) {
             currentEventSource.close();
             setCurrentEventSource(null);
@@ -108,7 +105,6 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                 setCurrentEventSource(eventSource);
 
                 eventSource.onopen = () => {
-                    // No "Loading..." message here
                 };
 
                 eventSource.onmessage = (event) => {
@@ -149,7 +145,48 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
                 };
 
             } else if (selectedIconType === 'performanceTuner' || selectedIconType === 'aesthethics') {
-                // ... recommendation API call (unchanged) ...
+                const inputData = {
+                    "Make": carData.make,
+                    "Model": carData.model,
+                    "Year": carData.year,
+                    "Trim": carData.trim,
+                    "Engine": carData.engine,
+                    "Modification Type": (() => {
+                        switch (selectedIconType) {
+                            case 'performanceTuner':
+                                return 'Performance';
+                            case 'aesthethics':
+                                return 'Aesthetics';
+                            default:
+                                return 'Performance';
+                        }
+                    })(),
+                    "User Goal": inputMessage,
+                };
+
+                console.log(inputData)
+
+                try {
+                    setLoadingResponse(true);
+                    const response = await axios.post(apiUrl, inputData);
+                    if (response.data && response.data.recommendations) {
+                      setRecommendations(response.data.recommendations);
+                      let markdownOutput = formatRecommendationsToMarkdown(response.data.recommendations);
+                      setMessages(prevMessages => [...prevMessages, { text: markdownOutput, sender: 'received', segments: [], html: md.render(markdownOutput) }]);
+
+                    } else {
+                      console.warn("Recommendations API returned an empty or malformed response.");
+                      setMessages(prevMessages => [...prevMessages, { text: 'Recommendations API returned an empty or malformed response.', sender: 'received', segments: [], html: '<p>Recommendations API returned an empty or malformed response.</p>' }]);
+                      setHasError(true);
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching recommendations:", error);
+                    setMessages(prevMessages => [...prevMessages, { text: 'Failed to fetch recommendations. Please try again.', sender: 'received', segments: [], html: '<p>Failed to fetch recommendations. Please try again.</p>' }]);
+                    setHasError(true);
+                } finally {
+                    setLoadingResponse(false);
+                }
             }
         } catch (error) {
             console.error('Error setting up SSE:', error);
@@ -209,38 +246,35 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
     };
 
      const handleMouseMove = (e) => {
-        if (isChatPinned) return;
+         if (isChatPinned) return;
 
-        // Larger trigger area in the bottom-left corner
-        const triggerArea = {
-            width: 700,  
-            height: 700,
-            x: 0,       // Starts at the left edge
-            y: window.innerHeight - 700, // Starts 300px from the bottom
-        };
+         const triggerArea = {
+             width: 700,
+             height: 700,
+             x: 0,
+             y: window.innerHeight - 700,
+         };
 
-        if (
-            e.clientX >= triggerArea.x &&
-            e.clientX <= triggerArea.x + triggerArea.width &&
-            e.clientY >= triggerArea.y &&
-            e.clientY <= triggerArea.y + triggerArea.height
-        ) {
-            setIsChatVisible(true);
-        } else {
-            setIsChatVisible(false);
-        }
-    };
+         if (
+             e.clientX >= triggerArea.x &&
+             e.clientX <= triggerArea.x + triggerArea.width &&
+             e.clientY >= triggerArea.y &&
+             e.clientY <= triggerArea.y + triggerArea.height
+         ) {
+             setIsChatVisible(true);
+         } else {
+             setIsChatVisible(false);
+         }
+     };
 
 
 
     const handleDocumentClick = (e) => {
-        // Hide only if NOT pinned, and click is outside chatBoxRef
         if (!isChatPinned && chatBoxRef.current && !chatBoxRef.current.contains(e.target)) {
             setIsChatVisible(false);
         }
     };
 
-    // --- Reset Chat Handler ---
     const handleResetChat = async () => {
         if (currentEventSource) {
             currentEventSource.close();
@@ -291,7 +325,7 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         <div
             className={`chat-box ${isChatVisible ? 'visible' : ''} ${isChatPinned ? 'pinned' : ''}`}
             ref={chatBoxRef}
-            onClick={onClick} // Use the passed onClick prop
+            onClick={onClick}
         >
             <div className="messages-area">
                 {messages.map((message, index) => (
@@ -365,5 +399,45 @@ const AutoIntelligence = ({ isChatPinned, onClick }) => { // Receive isChatPinne
         </div>
     );
 };
+
+function formatRecommendationsToMarkdown(recommendations) {
+    let markdownString = "## Recommendations:\n\n";
+
+    recommendations.forEach((rec, index) => {
+        markdownString += `### ${index + 1}. ${rec["Part Name"]}\n\n`;
+        markdownString += `* **Estimated Price:** ${rec["Estimated Price"]}\n`;
+        markdownString += `* **Category:** ${rec["Category"]}\n`;
+        markdownString += `* **Effect on the Car:** ${rec["Effect on the Car"]}\n\n`;
+
+        // Dynamically handle different keys based on available data
+        if (rec["Before Modification"]) {
+            markdownString += "**Before Modification:**\n";
+            for (const key in rec["Before Modification"]) {
+                markdownString += `    * ${key}: ${rec["Before Modification"][key]}\n`;
+            }
+            markdownString += "\n";
+        }
+
+        if (rec["After Modification"]) {
+            markdownString += "**After Modification:**\n";
+            for (const key in rec["After Modification"]) {
+                markdownString += `    * ${key}: ${rec["After Modification"][key]}\n`;
+            }
+            markdownString += "\n";
+        }
+
+        if (rec["Percentage Change"]) {
+            markdownString += "**Percentage Change:**\n";
+            for (const key in rec["Percentage Change"]) {
+                markdownString += `    * ${key}: ${rec["Percentage Change"][key]}\n`;
+            }
+            markdownString += "\n";
+        }
+        markdownString += "---\n"; // Horizontal rule separator
+
+    });
+
+    return markdownString;
+}
 
 export default AutoIntelligence;
