@@ -1,4 +1,3 @@
-import button from "../assets/search-button.png";
 import "../styles/Home.css";
 import Header from "../pages/Header";
 import React, { useState } from "react";
