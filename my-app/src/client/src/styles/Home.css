@@ -222,7 +222,7 @@
 }
 
 .custom-button {
-    background-color: #c81058; /* Highlight color for button */
+    background-color: black; /* Highlight color for button */
     color: white; /* Text color */
     padding: 8px 16px; /* Smaller padding for a more compact button */
     font-size: 14px; /* Smaller font size */
@@ -240,7 +240,7 @@
 }
 
 .custom-button:hover {
-    background-color: #ff70a6; /* Lighter shade for hover effect */
+    background-color: #c81056; /* Lighter shade for hover effect */
 }
 
 .custom-button:disabled {
