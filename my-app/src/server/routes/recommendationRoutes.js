@@ -260,7 +260,8 @@ const supportedCombinations = [
         "model": "335i",
         "year": "2007",
         "trim": "Base",
-        "engine": "N54B30"
+        "engine": "N54B30", 
+
      }
 ];
 
@@ -698,12 +699,14 @@ Supported Combinations for Make, Model, Year, Trim, Engine:
 "User Goal" : ""
 },
   {
-        "make": "BMW",
-        "model": "335i",
-        "year": "2007",
-        "trim": "Base",
-        "engine": "N54B30"
-     }
+  "make": "BMW",
+  "model": "335i",
+  "year": "2007",
+  "trim": "Base",
+  "engine": "N54B30", 
+  "Modification Type": "",
+  "User Goal" : ""
+  }
 ]
 
 Supported Modification Types:
