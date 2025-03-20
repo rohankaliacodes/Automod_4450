@@ -34,6 +34,12 @@ export default function Modshop() {
   const [price, setPrice] = useState(0);
   const [isChanged, setIsChanged] = useState(false);
 
+  useEffect(() => {
+    if(category){
+        fetchAllParts();
+    }
+  }, [category]);
+
 
 
  // 🔹 If we have a category from Home and we have parts, sort them
