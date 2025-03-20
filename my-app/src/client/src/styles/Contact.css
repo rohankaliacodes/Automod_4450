@@ -42,7 +42,7 @@
     width: 50% !important;
     height: 100% !important;
     overflow: hidden !important;
-    background: url("https://static.codia.ai/image/2025-03-11/4edb0ce5-0dff-470b-8075-8314fc862850.png") no-repeat center !important;
+    background: url("../assets/contact.jpg") no-repeat center !important;
     background-size: cover !important; 
     display: block !important;
   }
