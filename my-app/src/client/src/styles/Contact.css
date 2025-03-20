@@ -31,9 +31,12 @@
   .contact2-main-container .header-container *{
 
     color: black !important;
-
   }
-  
+
+  .nav-item:hover {
+    color: #c81058 !important;
+  }
+
   
   /* Left half - image */
   .contact2-image {
