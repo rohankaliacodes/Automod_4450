@@ -243,7 +243,7 @@ export const Home = () => {
         <div className="categories">
           {categories.map((category, index) => (
             <button key={index} className="category-button" onClick={() => navigate("/modshop", { state: { category } })}>
-              {category}
+              <span>{category}</span>
             </button>
           ))}
         </div>

@@ -70,12 +70,41 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* Pseudo-element overlay (pink) starts below the button */
+.category-button::before {
+    color: white;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #c81056; /* Pinkish overlay color */
+    border-radius: 20px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: -1;              /* Keep it behind the button text */
+  }
+
+.category-button:hover::before{
+    transform: translateY(0);
 }
 
 .category-button:hover {
-    background-color: #c81058;
+
     transform: scale(1.05);
 }
+
+/* Keep the button text above the overlay */
+.category-button span {
+    position: relative;
+    z-index: 2;
+  }
 
 /* Responsive Categories */
 @media (max-width: 768px) {
