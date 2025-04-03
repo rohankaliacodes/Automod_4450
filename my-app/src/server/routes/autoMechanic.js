@@ -19,7 +19,7 @@ const apiKey = process.env.GEMINI_API_KEY;
 console.log("API Key from env:", apiKey ? "Present" : "Missing!");
 
 const genAI = new GoogleGenerativeAI(apiKey);
-console.log("genAI object:", genAI);
+console.log("genAI object:"/*, genAI*/);
 
 const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-pro-exp',
@@ -30,7 +30,7 @@ const model = genAI.getGenerativeModel({
     ],
 }, { apiVersion: "v1beta" });
 
-console.log("Initialized Gemini model:", model);
+console.log("Initialized Gemini model:"/*, model*/);
 
 const generationConfig = {
     temperature: 0.6,
